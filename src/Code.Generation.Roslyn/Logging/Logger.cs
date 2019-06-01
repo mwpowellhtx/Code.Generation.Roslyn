@@ -23,17 +23,22 @@ namespace Code.Generation.Roslyn.Logging
         /// <summary>
         /// 0
         /// </summary>
-        private const int InformationLevel = 0;
+        internal const int InformationLevel = 0;
 
         /// <summary>
         /// 1
         /// </summary>
-        private const int WarningLevel = 1;
+        internal const int WarningLevel = 1;
 
         /// <summary>
         /// 2
         /// </summary>
-        private const int ErrorLevel = 2;
+        internal const int ErrorLevel = 2;
+
+        /// <summary>
+        /// 3
+        /// </summary>
+        internal const int CriticalLevel = 3;
 
         private TextWriter OutputWriter { get; }
 
@@ -53,6 +58,7 @@ namespace Code.Generation.Roslyn.Logging
             , DefaultInformationalLoggerCallback
             , DefaultWarningOrErrorLoggerCallback
             , DefaultWarningOrErrorLoggerCallback
+            , DefaultWarningOrErrorLoggerCallback
         )
         {
         }
@@ -69,17 +75,25 @@ namespace Code.Generation.Roslyn.Logging
         private Logger(TextWriter outputWriter
             , LoggerCallback onInformationCallback
             , LoggerCallback onWarningCallback
-            , LoggerCallback onErrorCallback)
+            , LoggerCallback onErrorCallback
+            , LoggerCallback onCriticalCallback)
         {
             OutputWriter = outputWriter;
 
             var callbackLevel = 0;
 
-            LoggerCallbacks = GetRange(onInformationCallback, onWarningCallback, onErrorCallback)
+            LoggerCallbacks = GetRange(onInformationCallback, onWarningCallback, onErrorCallback, onCriticalCallback)
                 .ToDictionary(_ => callbackLevel++, x => x);
         }
 
         private IDictionary<int, LoggerCallback> LoggerCallbacks { get; }
+
+        /// <summary>
+        /// Log message to build output with <see cref="CriticalLevel"/>. Will fail build.
+        /// </summary>
+        /// <param name="message">Message to log. May be Line Feed or Carriage Return Line Feed delimited.</param>
+        /// <param name="diagnosticCode">Prepends logger message with the diagnostic code.</param>
+        public void Critical(string message, string diagnosticCode = null) => Log(OutputWriter, CriticalLevel, message, diagnosticCode);
 
         /// <summary>
         /// Log message to build output with <see cref="ErrorLevel"/>. Will fail build.
