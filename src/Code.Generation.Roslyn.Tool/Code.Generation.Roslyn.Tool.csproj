@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageType>DotnetCliTool</PackageType>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <!-- ReSharper disable once UnknownProperty -->
+    <AssemblyName>$(CodeGenerationToolName)</AssemblyName>
+    <Version>1.0.0.4398</Version>
+    <AssemblyVersion>1.0.0.4398</AssemblyVersion>
+    <FileVersion>1.0.0.4398</FileVersion>
+    <PackageVersion>1.0.0.4398</PackageVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!--  So as not to collide with https://www.nuget.org/packages/dotnet-codegen/ -->
+    <PackageId>dotnet-code.gen</PackageId>
+    <Description>The dotnet code generation CLI tool that works with the Code.Generation.Roslyn NuGet package.</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
+    <DocumentationFile>bin\$(Configuration)\netcoreapp2.1\dotnet-codegen.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Tells the dotnet cli to allow the tool being run even if the run-time version does not match the target version. -->
+    <Content Include="prefercliruntime" Pack="true" PackagePath="" />
+    <Compile Update="Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Update="Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Code.Generation.Roslyn.Engine\Code.Generation.Roslyn.Engine.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NConsole.Options.Extensions" Version="1.4.7.23428" />
+    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+  </ItemGroup>
+
+</Project>
