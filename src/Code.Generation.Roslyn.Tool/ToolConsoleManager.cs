@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace Code.Generation.Roslyn
 {
+    using Logging;
     using Microsoft.CodeAnalysis;
     using NConsole.Options;
     using static String;
@@ -129,7 +130,7 @@ namespace Code.Generation.Roslyn
             }
             catch (Exception ex)
             {
-                TryReportErrorLevel(errorLevel = 3);
+                TryReportErrorLevel(errorLevel = Logger.CriticalLevel);
                 return;
             }
 
