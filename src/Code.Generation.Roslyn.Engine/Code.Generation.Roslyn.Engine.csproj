@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>The Engine of Source Code Generation used by the `dotnet-codegen` tool.</Description>
+    <Version>1.0.0.4410</Version>
+    <AssemblyVersion>1.0.0.4410</AssemblyVersion>
+    <FileVersion>1.0.0.4410</FileVersion>
+    <PackageVersion>1.0.0.4410</PackageVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Code.Generation.Roslyn.Engine.csproj.DotSettings" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Code.Generation.Roslyn\Code.Generation.Roslyn.csproj" />
+  </ItemGroup>
+
+  <!-- ReSharper disable UnknownProperty -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharp)" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+    <PackageReference Include="Validation" Version="$(ValidationVersion)" />
+  </ItemGroup>
+  <!-- ReSharper restore UnknownProperty -->
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>$(CodeGenerationToolName)</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>
