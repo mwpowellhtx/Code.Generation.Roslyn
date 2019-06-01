@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -8,10 +8,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Code.Generation.Roslyn facilitates code generation driven by fit for purpose custom attributes.</Description>
-    <Version>1.0.0.4389</Version>
-    <AssemblyVersion>1.0.0.4389</AssemblyVersion>
-    <FileVersion>1.0.0.4389</FileVersion>
-    <PackageVersion>1.0.0.4389</PackageVersion>
+    <Version>1.0.0.4397</Version>
+    <AssemblyVersion>1.0.0.4397</AssemblyVersion>
+    <FileVersion>1.0.0.4397</FileVersion>
+    <PackageVersion>1.0.0.4397</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
@@ -42,6 +42,9 @@
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>$(MSBuildProjectName).Engine</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>$(CodeGenerationToolName)</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
 
