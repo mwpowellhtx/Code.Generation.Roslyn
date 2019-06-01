@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Code.Generation.Roslyn.BuildTime</PackageId>
+    <Description>The build-time development dependency that generates code for projects consuming Code Generation attributes.</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- TODO: TBD: potentially: netstandard1.0;net40;net20;portable-net40+win8+wpa81;portable-net45+win8+wpa81+wp8 -->
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <Version>1.0.0.4393</Version>
+    <AssemblyVersion>1.0.0.4393</AssemblyVersion>
+    <FileVersion>1.0.0.4393</FileVersion>
+    <PackageVersion>1.0.0.4393</PackageVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="build\$(PackageId).*">
+      <Pack>true</Pack>
+      <PackagePath>build</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>
