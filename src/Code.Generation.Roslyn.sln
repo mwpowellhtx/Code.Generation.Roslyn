@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{9A
 	ProjectSection(SolutionItems) = preProject
 		..\CONTRIBUTION.md = ..\CONTRIBUTION.md
 		Directory.Build.props = Directory.Build.props
+		..\LICENSE = ..\LICENSE
 		NuGet.Config = NuGet.Config
 	EndProjectSection
 EndProject
