@@ -118,14 +118,7 @@ namespace Code.Generation.Roslyn
             {
                 ProjectDirectory = ProjectDirectory,
                 SourcePathsToCompile = Sanitize(SourcePathList).ToArray(),
-                //// TODO: TBD: bits that got refactored to AssemblyReferenceService
-                //// TODO: TBD: ... or DocumentTransformation ...
-                //AssemblyReferencePath = Sanitize(ReferencePathList).ToArray(),
                 PreprocessorSymbols = PreprocessorSymbolsList.ToArray()
-                //GeneratorAssemblySearchPaths = Sanitize(GeneratorSearchPathList).ToArray(),
-                //IntermediateOutputDirectory = OutputDirectory,
-                //IntermediateAssembliesRegistryFileName = IntermediateAssembliesRegistryFileName,
-                //IntermediateGeneratedRegistryFileName = IntermediateGeneratedRegistryFileName
             };
 
             var progress = new Progress<Diagnostic>(d => Writer.WriteLine($"{d}"));
