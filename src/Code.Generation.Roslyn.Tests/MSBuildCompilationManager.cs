@@ -38,6 +38,13 @@ namespace Code.Generation.Roslyn
 
         protected MSBuildCompilationManager(IDictionary<string, string> workspaceProperties)
         {
+
+#if DEBUG
+            Configuration = "Debug";
+#else // DEBUG
+            Configuration = "Release";
+#endif // DEBUG
+
             Initialize(workspaceProperties);
 
             LazyWorkspace = new Lazy<MSBuildWorkspace>(() => MSBuildWorkspace.Create(WorkspaceProperties));
@@ -50,8 +57,31 @@ namespace Code.Generation.Roslyn
             // TODO: TBD: then what to do about "sources", never mind "solution", "projects", etc...
         }
 
+        /// <inheritdoc />
+        protected override IEnumerable<string> PreprocessorSymbols
+        {
+            get
+            {
+
+#if DEBUG // Which keeps our #if/#else/#endif triplets better organized in a single place.
+                yield return "DEBUG";
+#else // DEBUG
+                yield break;
+#endif // DEBUG
+
+            }
+        }
+
+        /// <summary>
+        /// Confers the Configuration based on the Host Project Build Configuration.
+        /// </summary>
+        public string Configuration { get; }
+
         private void Initialize(IDictionary<string, string> workspaceProperties)
         {
+            // Always Build in this Configuration, regardless.
+            workspaceProperties[nameof(Configuration)] = Configuration;
+
             foreach (var wp in workspaceProperties)
             {
                 WorkspaceProperties.Add(wp);
