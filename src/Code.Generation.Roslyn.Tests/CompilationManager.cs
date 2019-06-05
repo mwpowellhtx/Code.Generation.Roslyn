@@ -13,25 +13,16 @@ namespace Code.Generation.Roslyn
     using static String;
     using static OutputKind;
 
-    // TODO: TBD: may have a look at my `Kingdom.CodeAnalysis.Verifiers.Diagnostics' project from the Kingdom.Collections work space...
-    // TODO: TBD: in particular leveraging methods such as GetMetadataReferenceFromType, GetTypeAssembly, etc...
-    // TODO: TBD: could potentially be refactored, and further abstracted out at the same time, i.e. to not be as fit for purpose, i.e. concerning metadata references, etc.
-    // TODO: TBD: additionally, strictly speaking, we do not necessarily need to connect such a package offering with the Xunit test framework. Strictly speaking.
-    /// <summary>
-    /// Establishes a basic CompilationManager for Roslyn based compilation services. We
-    /// intentionally steer clear of introducing any in the way of things like test framework
-    /// dependencies as these are really beyond the immediate purview of the compilation manager
-    /// itself. We will allow sensible extensibility for this purpose if test framework level
-    /// verification is so desired apart from the exposed <see cref="ResolveMetadataReferences"/>
-    /// and <see cref="EvaluateCompilation"/> events themselves.
-    /// </summary>
-    /// <inheritdoc />
     public abstract class CompilationManager : IDisposable
     {
-        // TODO: TBD: do I need to save project(s)/solution from being "adhoc" in order for this to play nicely with CG?
-        // TODO: TBD: conversely, how might it be possible to CG using an in-memory Roslyn compilation?
-        // TODO: TBD: because dotnet-codegen tooling runs in a process apart from the actual compilation...
-        // TODO: TBD: I'm not sure that a compilation such as this would be able discover that output, not without help...
+        /// <summary>
+        /// Returns a New <see cref="Guid"/> basis for the Asset Name. In this case,
+        /// &quot;Asset&quot; may be a <see cref="Project"/> name, <see cref="Document"/> name,
+        /// even <see cref="Solution"/> name, etc.
+        /// </summary>
+        /// <returns></returns>
+        protected static string GetNewAssetName() => $"{Guid.NewGuid():D}";
+
         /// <summary>
         /// Gets the <see cref="Compilation"/> Language. Default is <see cref="CSharp"/>.
         /// </summary>
@@ -46,33 +37,6 @@ namespace Code.Generation.Roslyn
         protected virtual string LanguageDocumentExtension => ".cs";
 
         /// <summary>
-        /// Gets the <see cref="Lazy{T}"/> <see cref="Workspace"/> instance.
-        /// </summary>
-        private Lazy<Workspace> LazyWorkspace { get; } = new Lazy<Workspace>(() => new AdhocWorkspace());
-
-        /// <summary>
-        /// Gets the Workspace involved during the Manager lifecycle.
-        /// </summary>
-        public virtual Workspace Workspace => LazyWorkspace.Value;
-
-        /// <summary>
-        /// Solution backing field.
-        /// </summary>
-        private Solution _solution;
-
-        /// <summary>
-        /// Gets the Solution involved during the Manager lifecycle. Starts from, or resets
-        /// to, the <see cref="Microsoft.CodeAnalysis.Workspace.CurrentSolution"/>, depending
-        /// on usage.
-        /// </summary>
-        /// <remarks>Privately Sets the Solution, especially during mutating operations.</remarks>
-        public virtual Solution Solution
-        {
-            get => _solution ?? (_solution = Workspace.CurrentSolution);
-            private set => _solution = value;
-        }
-
-        /// <summary>
         /// Gets the <see cref="Microsoft.CodeAnalysis.CompilationOptions.OutputKind"/>.
         /// Defaults to <see cref="DynamicallyLinkedLibrary"/>.
         /// </summary>
@@ -82,7 +46,8 @@ namespace Code.Generation.Roslyn
         /// <summary>
         /// Gets the CompilationOptions.
         /// </summary>
-        protected virtual CompilationOptions CompilationOptions => new CSharpCompilationOptions(CompilationOptionsOutputKind);
+        protected virtual CompilationOptions CompilationOptions =>
+            new CSharpCompilationOptions(CompilationOptionsOutputKind);
 
         // TODO: TBD: ditto CompilationOptions re: derivatives... i.e. CSharpParseOptions.
         /// <summary>
@@ -100,6 +65,116 @@ namespace Code.Generation.Roslyn
         protected virtual IEnumerable<string> PreprocessorSymbols
         {
             get { yield break; }
+        }
+
+        /// <summary>
+        /// EvaluateCompilation event.
+        /// </summary>
+        public virtual event EventHandler<CompilationDiagnosticEventArgs> EvaluateCompilation;
+
+        // TODO: TBD: may furnish Generic type derived from Compilation...
+        // TODO: TBD: i.e. CSharpCompilation, but this must also align with the Language, etc...
+        /// <summary>
+        /// Event handler occurs when <see cref="EvaluateCompilation"/> is requested.
+        /// </summary>
+        /// <param name="compilation"></param>
+        /// <param name="cancellationToken"></param>
+        protected virtual void OnEvaluateCompilation(Compilation compilation,
+            CancellationToken cancellationToken = default)
+        {
+            var e = new CompilationDiagnosticEventArgs(compilation, cancellationToken);
+            EvaluateCompilation?.Invoke(this, e);
+        }
+
+        /// <summary>
+        /// Resolves the <see cref="Compilation"/> given <paramref name="project"/>, the ensuing
+        /// <paramref name="compiling"/>, as well as constituent elements that informed the
+        /// request.
+        /// </summary>
+        /// <param name="projectName"></param>
+        /// <param name="sources"></param>
+        /// <param name="project"></param>
+        /// <param name="compiling"></param>
+        /// <param name="cancellationToken"></param>
+        protected virtual void ResolveCompilation(string projectName, IReadOnlyList<string> sources, Project project,
+            Task<Compilation> compiling, CancellationToken cancellationToken = default)
+        {
+            var compilation = project.GetCompilationAsync(cancellationToken).Result;
+            OnEvaluateCompilation(compilation, cancellationToken);
+        }
+
+        /// <summary>
+        /// Disposes the Object.
+        /// </summary>
+        /// <param name="disposing"></param>
+        /// <see cref="Workspace"/>
+        protected virtual void Dispose(bool disposing)
+        {
+        }
+
+        /// <summary>
+        /// Gets whether the Fixture IsDisposed.
+        /// </summary>
+        protected bool IsDisposed { get; private set; }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            Dispose(true);
+            IsDisposed = true;
+        }
+    }
+
+    // TODO: TBD: may have a look at my `Kingdom.CodeAnalysis.Verifiers.Diagnostics' project from the Kingdom.Collections work space...
+    // TODO: TBD: in particular leveraging methods such as GetMetadataReferenceFromType, GetTypeAssembly, etc...
+    // TODO: TBD: could potentially be refactored, and further abstracted out at the same time, i.e. to not be as fit for purpose, i.e. concerning metadata references, etc.
+    // TODO: TBD: additionally, strictly speaking, we do not necessarily need to connect such a package offering with the Xunit test framework. Strictly speaking.
+    /// <summary>
+    /// Establishes a basic CompilationManager for Roslyn based compilation services. We
+    /// intentionally steer clear of introducing any in the way of things like test framework
+    /// dependencies as these are really beyond the immediate purview of the compilation manager
+    /// itself. We will allow sensible extensibility for this purpose if test framework level
+    /// verification is so desired apart from the exposed <see cref="ResolveMetadataReferences"/>
+    /// and <see cref="CompilationManager.EvaluateCompilation"/> events themselves.
+    /// </summary>
+    /// <inheritdoc />
+    public abstract class CompilationManager<TWorkspace> : CompilationManager
+        where TWorkspace : Workspace
+    {
+        // TODO: TBD: do I need to save project(s)/solution from being "adhoc" in order for this to play nicely with CG?
+        // TODO: TBD: conversely, how might it be possible to CG using an in-memory Roslyn compilation?
+        // TODO: TBD: because dotnet-codegen tooling runs in a process apart from the actual compilation...
+        // TODO: TBD: I'm not sure that a compilation such as this would be able discover that output, not without help...
+
+        /// <summary>
+        /// Override in order to provide the <typeparamref name="TWorkspace"/> Factory.
+        /// </summary>
+        protected abstract Lazy<TWorkspace> LazyWorkspace { get; }
+
+        /// <summary>
+        /// Gets the Workspace involved during the Manager lifecycle.
+        /// </summary>
+        public virtual TWorkspace Workspace => LazyWorkspace.Value;
+
+        /// <summary>
+        /// Solution backing field.
+        /// </summary>
+        private Solution _solution;
+
+        /// <summary>
+        /// Gets the Solution involved during the Manager lifecycle. Starts from, or resets
+        /// to, the <see cref="Microsoft.CodeAnalysis.Workspace.CurrentSolution"/>, depending
+        /// on usage.
+        /// </summary>
+        /// <remarks>Privately Sets the Solution, especially during mutating operations.
+        /// Which also prohibits us from being able to abstractly declare Solution at
+        /// the base class level, as this would require the setter to be Protected,
+        /// which we do not need to unnecessarily expose it to the rest of the class
+        /// hierarchy.</remarks>
+        public virtual Solution Solution
+        {
+            get => _solution ?? (_solution = Workspace.CurrentSolution);
+            private set => _solution = value;
         }
 
         /// <summary>
@@ -122,32 +197,6 @@ namespace Code.Generation.Roslyn
             // TODO: TBD: may report those references unable to add...
             return solution.MergeAssets(e.MetadataReferences.ToArray()
                 , (g, x) => g.AddMetadataReferences(project.Id, x), x => x.Any());
-        }
-
-        /// <summary>
-        /// Returns a New <see cref="Guid"/> basis for the Asset Name. In this case,
-        /// &quot;Asset&quot; may be a <see cref="Project"/> name, <see cref="Document"/> name,
-        /// even <see cref="Solution"/> name, etc.
-        /// </summary>
-        /// <returns></returns>
-        protected static string GetNewAssetName() => $"{Guid.NewGuid():D}";
-
-        /// <summary>
-        /// EvaluateCompilation event.
-        /// </summary>
-        public virtual event EventHandler<CompilationDiagnosticEventArgs> EvaluateCompilation;
-
-        // TODO: TBD: may furnish Generic type derived from Compilation...
-        // TODO: TBD: i.e. CSharpCompilation, but this must also align with the Language, etc...
-        /// <summary>
-        /// Event handler occurs when <see cref="EvaluateCompilation"/> is requested.
-        /// </summary>
-        /// <param name="compilation"></param>
-        /// <param name="cancellationToken"></param>
-        protected virtual void OnEvaluateCompilation(Compilation compilation, CancellationToken cancellationToken = default)
-        {
-            var e = new CompilationDiagnosticEventArgs(compilation, cancellationToken);
-            EvaluateCompilation?.Invoke(this, e);
         }
 
         /// <summary>
@@ -179,26 +228,11 @@ namespace Code.Generation.Roslyn
                 var assetName = GetNewAssetName();
                 var assetFileName = $"{assetName}{LanguageDocumentExtension}";
                 // Adds the Document Connected with the Project to the Solution. Also about inside-out in my opinion.
-                Solution = Solution.AddDocument(DocumentId.CreateNewId(project.Id), assetFileName, SourceText.From(src));
+                Solution = Solution.AddDocument(DocumentId.CreateNewId(project.Id), assetFileName,
+                    SourceText.From(src));
             });
 
             return project;
-        }
-
-        /// <summary>
-        /// Resolves the <see cref="Compilation"/> given <paramref name="project"/>, the ensuing
-        /// <paramref name="compiling"/>, as well as constituent elements that informed the
-        /// request.
-        /// </summary>
-        /// <param name="projectName"></param>
-        /// <param name="sources"></param>
-        /// <param name="project"></param>
-        /// <param name="compiling"></param>
-        /// <param name="cancellationToken"></param>
-        protected virtual void ResolveCompilation(string projectName, IReadOnlyList<string> sources, Project project, Task<Compilation> compiling, CancellationToken cancellationToken = default)
-        {
-            var compilation = project.GetCompilationAsync(cancellationToken).Result;
-            OnEvaluateCompilation(compilation, cancellationToken);
         }
 
         /// <summary>
@@ -215,12 +249,12 @@ namespace Code.Generation.Roslyn
         }
 
         /// <summary>
-        /// Disposes the Object.
-        /// In this instance we have a <see cref="Workspace"/> to Dispose.
+        /// Disposes the Object. In this instance we have a <see cref="Workspace"/> to Dispose.
         /// </summary>
         /// <param name="disposing"></param>
         /// <see cref="Workspace"/>
-        protected virtual void Dispose(bool disposing)
+        /// <inheritdoc />
+        protected override void Dispose(bool disposing)
         {
             if (IsDisposed || !disposing)
             {
@@ -228,18 +262,10 @@ namespace Code.Generation.Roslyn
             }
 
             Workspace?.Dispose();
-        }
 
-        /// <summary>
-        /// Gets whether the Fixture IsDisposed.
-        /// </summary>
-        protected bool IsDisposed { get; private set; }
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            Dispose(true);
-            IsDisposed = true;
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            // True, while always True, makes it clearer, Follow the Chain.
+            base.Dispose(disposing);
         }
     }
 }

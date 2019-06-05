@@ -2,11 +2,20 @@
 
 namespace Code.Generation.Roslyn
 {
+    using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
     using Xunit.Abstractions;
 
-    public abstract class CompilationCodeGenerationTestFixtureBase<TCompilationManager> : TestFixtureBase
-        where TCompilationManager : CompilationManager, new()
+    /// <summary>
+    /// The <see cref="Compilation"/> is the thing for which this Manager is driving. Everything
+    /// here prepares for and initiates a Compilation then furnishes the <see cref="Diagnostic"/>
+    /// results following said Compilation.
+    /// </summary>
+    /// <typeparam name="TWorkspace"></typeparam>
+    /// <typeparam name="TCompilationManager"></typeparam>
+    public abstract class CompilationCodeGenerationTestFixtureBase<TWorkspace, TCompilationManager> : TestFixtureBase
+        where TWorkspace : Workspace
+        where TCompilationManager : CompilationManager<TWorkspace>, new()
     {
         protected TCompilationManager CompilationManager { get; }
 
