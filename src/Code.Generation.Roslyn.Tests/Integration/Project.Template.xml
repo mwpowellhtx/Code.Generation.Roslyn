@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Code.Generation.Roslyn.Generators\Code.Generation.Roslyn.Generators.csproj" />
+    <ProjectReference Include="..\Code.Generation.Roslyn.Tasks\Code.Generation.Roslyn.Tasks.csproj" />
+    <ProjectReference Include="..\Code.Generation.Roslyn.Tool\Code.Generation.Roslyn.Tool.csproj" />
+  </ItemGroup>
+
+  <!-- ReSharper disable UnknownProperty -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(MicrosoftCodeAnalysisCSharpVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(MicrosoftCodeAnalysisCSharpVersion)" />
+  </ItemGroup>
+  <!-- ReSharper restore UnknownProperty -->
+
+  <ItemGroup>
+    <Reference Include="xunit.runner.reporters.netcoreapp10">
+      <HintPath>bin\Debug\netcoreapp2.1\xunit.runner.reporters.netcoreapp10.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <Version>1.0.0.4454</Version>
+    <AssemblyVersion>1.0.0.4454</AssemblyVersion>
+    <FileVersion>1.0.0.4454</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Handle some legitimate removals. -->
+    <None Remove="Code.Generation.Roslyn.Tests.csproj.DotSettings" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Redirect the focus here towards Integration, included as Embedded Resources, and NOT for local Build. -->
+    <Compile Remove="Integration\*.cs" />
+    <None Remove="Integration\*.xml" />
+    <EmbeddedResource Include="Integration\*.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Integration\Cases\IntegrationTestCaseBundle.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Code.Generation.Roslyn.Generators\Code.Generation.Roslyn.Generators.csproj" />
+    <ProjectReference Include="..\Code.Generation.Roslyn.Tasks\Code.Generation.Roslyn.Tasks.csproj" />
+    <ProjectReference Include="..\Code.Generation.Roslyn.Tool\Code.Generation.Roslyn.Tool.csproj" />
+  </ItemGroup>
+
+  <!-- ReSharper disable UnknownProperty -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildVersion)" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(MicrosoftCodeAnalysisCSharpVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(MicrosoftCodeAnalysisCSharpVersion)" />
+    <PackageReference Include="xunit" Version="$(XunitVersion)" />
+    <PackageReference Include="xunit.runner.console" Version="$(XunitVersion)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <!-- ReSharper restore UnknownProperty -->
+
+</Project>
