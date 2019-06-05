@@ -19,8 +19,10 @@
 
   <PropertyGroup>
     <RootNamespace>Code.Generation.Roslyn</RootNamespace>
-    <MicrosoftCodeAnalysisCSharp>2.10.0</MicrosoftCodeAnalysisCSharp>
+    <MicrosoftBuildVersion>[15.9.20,16)</MicrosoftBuildVersion>
+    <MicrosoftCodeAnalysisCSharpVersion>[2.10,3)</MicrosoftCodeAnalysisCSharpVersion>
     <ValidationVersion>2.4.22</ValidationVersion>
+    <XunitVersion>2.4.1</XunitVersion>
   </PropertyGroup>
 
   <PropertyGroup>
