@@ -69,10 +69,10 @@ namespace Code.Generation.Roslyn
 
                     foreach (var generator in generators)
                     {
-                        var context = new TransformationContext(documentNode, inputSemanticModel
-                            , compilation, projectDirectory, inputCompilationUnit);
+                        var context = new TransformationContext(documentNode, inputSemanticModel, compilation
+                            , projectDirectory, inputCompilationUnit);
 
-                        generator.GenerateAsync(context, progress, cancellationToken);
+                        generator.GenerateAsync(context, progress, cancellationToken).Wait(cancellationToken);
 
                         foreach (var descriptor in generator)
                         {
