@@ -8,9 +8,21 @@ namespace Code.Generation.Roslyn
 
     internal static class AssertExtensionMethods
     {
+        public static T AssertNotNull<T>(this T @object)
+        {
+            Assert.NotNull(@object);
+            return @object;
+        }
+
         public static T AssertEqual<T>(this T actual, T expected)
         {
             Assert.Equal(expected, actual);
+            return actual;
+        }
+
+        public static T AssertEqual<T>(this T actual, T expected, IEqualityComparer<T> comparer)
+        {
+            Assert.Equal(expected, actual, comparer);
             return actual;
         }
 
