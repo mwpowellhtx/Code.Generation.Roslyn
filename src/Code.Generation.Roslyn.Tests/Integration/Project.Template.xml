@@ -4,23 +4,27 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Code.Generation.Roslyn.Generators\Code.Generation.Roslyn.Generators.csproj" />
-    <ProjectReference Include="..\Code.Generation.Roslyn.Tasks\Code.Generation.Roslyn.Tasks.csproj" />
-    <ProjectReference Include="..\Code.Generation.Roslyn.Tool\Code.Generation.Roslyn.Tool.csproj" />
-  </ItemGroup>
-
-  <!-- ReSharper disable UnknownProperty -->
-  <ItemGroup>
+  <!-- ReSharper disable MarkupAttributeTypo, MarkupTextTypo, CommentTypo -->
+  <!--<ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(MicrosoftCodeAnalysisCSharpVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(MicrosoftCodeAnalysisCSharpVersion)" />
-  </ItemGroup>
+  </ItemGroup>-->
   <!-- ReSharper restore UnknownProperty -->
 
+  <!-- Instead of packages, we reference the dependencies via direct DLL. -->
   <ItemGroup>
-    <Reference Include="xunit.runner.reporters.netcoreapp10">
-      <HintPath>bin\Debug\netcoreapp2.1\xunit.runner.reporters.netcoreapp10.dll</HintPath>
+    <Reference Include="Code.Generation.Roslyn.Generators">
+      <HintPath>..\Code.Generation.Roslyn.Generators.dll</HintPath>
     </Reference>
   </ItemGroup>
+
+  <PropertyGroup>
+    <!-- Override the Tool path for test purposes. -->
+    <DotnetCodeGenerationToolPath>..\dotnet-codegen.dll</DotnetCodeGenerationToolPath>
+  </PropertyGroup>
+
+  <!-- Remember, this is up one directory to the parent output directory, then into the Build output conferred by the Tasks project dependency. -->
+  <Import Project="..\build\Code.Generation.Roslyn.BuildTime.targets" />
+  <!-- ReSharper restore MarkupAttributeTypo, MarkupTextTypo, CommentTypo -->
 
 </Project>
