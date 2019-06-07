@@ -13,6 +13,11 @@ namespace Code.Generation.Roslyn.Tests.Generators
 
     public class DuplicateInOtherNamespaceCodeGenerator : CodeGeneratorBase
     {
+        public DuplicateInOtherNamespaceCodeGenerator(AttributeData attributeData)
+            : base(attributeData)
+        {
+        }
+
         public override Task GenerateAsync(TransformationContext context, IProgress<Diagnostic> progress
             , CancellationToken cancellationToken)
         {

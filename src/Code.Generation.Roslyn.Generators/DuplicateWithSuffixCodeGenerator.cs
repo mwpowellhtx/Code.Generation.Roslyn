@@ -2,7 +2,8 @@
 // Licensed under the GPLv3 license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,25 +12,39 @@ namespace Code.Generation.Roslyn
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
-    using Validation;
 
     public class DuplicateWithSuffixCodeGenerator : CodeGeneratorBase
     {
-        private AttributeData AttributeData { get; }
-
-        private ImmutableDictionary<string, TypedConstant> Data { get; }
-
         private string Suffix { get; }
 
         public DuplicateWithSuffixCodeGenerator(AttributeData attributeData)
+            : base(attributeData)
         {
-            Requires.NotNull(attributeData, nameof(attributeData));
-
-            AttributeData = attributeData;
-
             Suffix = (string) attributeData.ConstructorArguments[0].Value;
+        }
 
-            Data = AttributeData.NamedArguments.ToImmutableDictionary(pair => pair.Key, pair => pair.Value);
+        // TODO: TBD: if we do refactor, sans this element... or provide as a Generators assembly extension method based upon SyntaxNode ?
+        /// <summary>
+        /// Finds the most recent <see cref="NamespaceDeclarationSyntax"/>.
+        /// Such Declarations may be Nested. It is up to the Caller to discern
+        /// what this means to the Code Generator.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        protected static IEnumerable<NamespaceDeclarationSyntax> FindNamespaceDeclarations(SyntaxNode node)
+        {
+            IEnumerable<T> SelectWhile<T>(T x, Func<T, bool> predicate, Func<T, T> transform)
+            {
+                bool mayContinue;
+                do
+                {
+                    yield return x;
+                    mayContinue = predicate(x);
+                    x = transform(x);
+                } while (mayContinue);
+            }
+
+            return SelectWhile(node, x => x.Parent != null, x => x.Parent).Reverse().OfType<NamespaceDeclarationSyntax>();
         }
 
         public override Task GenerateAsync(TransformationContext context, IProgress<Diagnostic> progress, CancellationToken cancellationToken)
