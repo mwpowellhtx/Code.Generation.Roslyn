@@ -40,7 +40,7 @@ namespace Code.Generation.Roslyn
         /// Gets or Sets the desired <see cref="CompilationUnitSyntax"/> instances.
         /// This is the linchpin in the whole process.
         /// </summary>
-        public IEnumerable<CompilationUnitSyntax> CompilationUnits { get; set; }
+        public ICollection<CompilationUnitSyntax> CompilationUnits { get; set; } = new List<CompilationUnitSyntax>();
 
         /// <summary>
         /// Gets or Sets whether to IncludeEndingNewLine.
