@@ -11,10 +11,17 @@ namespace Code.Generation.Roslyn
     using static Resources;
     using static String;
 
+    /// <summary>
+    /// Service Manager base class.
+    /// </summary>
     public abstract class ServiceManager
     {
-        protected static bool IsNotNullOrEmpty(string s) => !IsNullOrEmpty(s);
-
+        /// <summary>
+        /// Returns the <see cref="VerifyOperationMustBeSetMessage"/> pattern with the
+        /// <paramref name="s"/> argument.
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
         protected static string FormatVerifyOperationMessage(string s) => Format(VerifyOperationMustBeSetMessage, s);
     }
 

@@ -14,6 +14,9 @@ namespace Code.Generation.Roslyn
     using static Directory;
     using static Path;
     using static Resources;
+    using static Strings;
+    using static SearchOption;
+    using static StringComparison;
     using StringBinaryPredicate = BinaryPredicate<string>;
 
     // TODO: TBD: might even call it Manager of the underlying Descriptor Set...
@@ -83,20 +86,6 @@ namespace Code.Generation.Roslyn
             loadContext.Resolving += ResolveAssembly;
         }
 
-        //// TODO: TBD: was this...
-        //// TODO: TBD: "file exists" would be the opportunity to shake the tree from loaded assemblies?
-        //private static DateTime GetLastModifiedAssemblyTime(string assemblyListPath)
-        //{
-        //    if (!File.Exists(assemblyListPath))
-        //    {
-        //        return DateTime.MinValue;
-        //    }
-        //    var timestamps = (from path in File.ReadAllLines(assemblyListPath)
-        //        where File.Exists(path)
-        //        select File.GetLastWriteTime(path)).ToList();
-        //    return timestamps.Any() ? timestamps.Max() : DateTime.MinValue;
-        //}
-
         /// <summary>
         /// Gets the Last Written Timestamp when the Assemblies were updated.
         /// </summary>
@@ -117,12 +106,17 @@ namespace Code.Generation.Roslyn
             return this;
         }
 
+        /// <summary>
+        /// Loads the <see cref="Assembly"/> associated with the <paramref name="assemblyName"/>.
+        /// </summary>
+        /// <param name="assemblyName"></param>
+        /// <returns></returns>
         internal Assembly LoadAssembly(AssemblyName assemblyName)
         {
             IEnumerable<string> GetAllMatchingAssemblyReferencePaths(
                 IEnumerable<string> referencePaths, IEnumerable<string> searchPaths)
             {
-                const StringComparison comparison = StringComparison.OrdinalIgnoreCase;
+                const StringComparison comparison = OrdinalIgnoreCase;
 
                 foreach (var y in referencePaths.Select(GetFileNameWithoutExtension)
                     .Where(x => x.Equals(assemblyName.Name, comparison)))
@@ -131,7 +125,7 @@ namespace Code.Generation.Roslyn
                 }
 
                 var searchPattern = $"{assemblyName.Name}{AllowedAssemblyExtensionDll}";
-                const SearchOption option = SearchOption.TopDirectoryOnly;
+                const SearchOption option = TopDirectoryOnly;
 
                 foreach (var y in searchPaths
                     .SelectMany(x => EnumerateFiles(x, searchPattern, option), (_, x) => new { _, x })
@@ -193,7 +187,13 @@ namespace Code.Generation.Roslyn
                 .Select(context.LoadFromAssemblyPath).FirstOrDefault();
         }
 
-        private static bool DoesNameEqual(string a, string b) => string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
+        /// <summary>
+        /// Returns whether <paramref name="a"/> Does Equals <paramref name="b"/>.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        private static bool DoesNameEqual(string a, string b) => string.Equals(a, b, OrdinalIgnoreCase);
 
         private static TLibrary FindMatchingLibrary<TLibrary>(IEnumerable<TLibrary> libraries, AssemblyName name, StringBinaryPredicate predicate)
             where TLibrary : Library
@@ -205,10 +205,13 @@ namespace Code.Generation.Roslyn
                     return l;
                 }
 
-                // If the Package Name does not exactly match the Predicate, then we verify whether the Assembly File Name is a match.
+                /* If the Package Name does not exactly match the Predicate,
+                 * then we verify whether the Assembly File Name is a match. */
+
                 if (l is RuntimeLibrary rl
-                    && rl.RuntimeAssemblyGroups.Any(g =>
-                        g.AssetPaths.Select(GetFileNameWithoutExtension).Any(x => predicate(x, name.Name))
+                    && rl.RuntimeAssemblyGroups.Any(
+                        g => g.AssetPaths.Select(GetFileNameWithoutExtension)
+                            .Any(x => predicate(x, name.Name))
                     )
                 )
                 {
@@ -219,6 +222,11 @@ namespace Code.Generation.Roslyn
             return null;
         }
 
+        /// <summary>
+        /// Loads the <see cref="Assembly"/> corresponding with the <paramref name="path"/>.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         private Assembly LoadAssembly(string path)
         {
             Assembly LoadAssemblyFromTypeLoadContext()
