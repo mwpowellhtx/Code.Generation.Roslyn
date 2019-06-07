@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Code.Generation.Roslyn
 {
     using Integration;
     using Xunit;
     using Xunit.Abstractions;
+    using static Constants;
     using static Integration.ModuleKind;
+    using AttributeRenderingOptionDictionary = Dictionary<string, object>;
+    using IAttributeRenderingOptionDictionary = IDictionary<string, object>;
 
     public class TestCaseBundleTests : TestFixtureBase
     {
@@ -55,48 +59,68 @@ namespace Code.Generation.Roslyn
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="module"></param>
+        /// <param name="shorthand"></param>
+        /// <param name="fullName"></param>
         [Theory
-         , InlineData(Bar)
-         , InlineData(Baz)]
-        public void Can_RemoveClassAttribute(ModuleKind module)
+         , InlineData(Bar, true, true)
+         , InlineData(Bar, true, false)
+         , InlineData(Bar, false, true)
+         , InlineData(Bar, false, false)]
+        public void Can_AddClassAttribute(ModuleKind module, bool shorthand, bool fullName)
         {
             Bundle.Extrapolate(Bar | Baz | Biz | AssemblyInfo);
 
-            Bundle.RemoveClassAnnotation(module);
+            var options = GetAttributeRenderingOptions(shorthand, fullName);
 
-            Bundle.GetFilePath(module).AssertFileDoesNotContain($"[{nameof(Attribute)}]");
+            Bundle.AddClassAnnotation<ObsoleteAttribute>(module, options);
+            Bundle.AddInnerTypeNamespaceUsingStatement<ObsoleteAttribute>(module);
+
+            var moduleFilePath = Bundle.GetFilePath(module);
+
+            moduleFilePath.AssertFileContains(this.RenderAttributeNotation<ObsoleteAttribute>(options));
+            moduleFilePath.AssertFileContains($"{Using} {typeof(ObsoleteAttribute).Namespace}{SemiColon}");
         }
 
         [Theory
-         , InlineData(Bar)
-         , InlineData(Baz)]
-        public void Can_RemoveClassAttribute_By_Generic(ModuleKind module)
+         , InlineData(Biz, true, true)
+         , InlineData(Biz, true, false)
+         , InlineData(Biz, false, true)
+         , InlineData(Biz, false, false)]
+        public void Can_AddInterfaceAttribute(ModuleKind module, bool shorthand, bool fullName)
         {
             Bundle.Extrapolate(Bar | Baz | Biz | AssemblyInfo);
 
-            Bundle.RemoveClassAnnotation<Attribute>(module);
+            var options = GetAttributeRenderingOptions(shorthand, fullName);
 
-            Bundle.GetFilePath(module).AssertFileDoesNotContain($"[{nameof(Attribute)}]");
+            Bundle.AddInterfaceAnnotation<ObsoleteAttribute>(module, options);
+            Bundle.AddOuterTypeNamespaceUsingStatement<ObsoleteAttribute>(module);
+
+            var moduleFilePath = Bundle.GetFilePath(module);
+
+            moduleFilePath.AssertFileContains(this.RenderAttributeNotation<ObsoleteAttribute>(options));
+            moduleFilePath.AssertFileContains($"{Using} {typeof(ObsoleteAttribute).Namespace}{SemiColon}");
         }
 
-        [Theory, InlineData(Biz)]
-        public void Can_RemoveInterfaceAttribute(ModuleKind module)
+        [Theory
+         , InlineData(AssemblyInfo, true, true)
+         , InlineData(AssemblyInfo, true, false)
+         , InlineData(AssemblyInfo, false, true)
+         , InlineData(AssemblyInfo, false, false)]
+        public void Can_AddAssemblyAttribute(ModuleKind module, bool shorthand, bool fullName)
         {
             Bundle.Extrapolate(Bar | Baz | Biz | AssemblyInfo);
 
-            Bundle.RemoveInterfaceAnnotation(module);
+            var options = GetAttributeRenderingOptions(shorthand, fullName);
 
-            Bundle.GetFilePath(module).AssertFileDoesNotContain($"[{nameof(Attribute)}]");
-        }
+            Bundle.AddAssemblyAnnotation<ObsoleteAttribute>(module, options);
 
-        [Theory, InlineData(Biz)]
-        public void Can_RemoveInterfaceAttribute_By_Generic(ModuleKind module)
-        {
-            Bundle.Extrapolate(Bar | Baz | Biz | AssemblyInfo);
+            var expected = this.RenderAttributeNotation<ObsoleteAttribute>(options);
 
-            Bundle.RemoveInterfaceAnnotation<Attribute>(module);
-
-            Bundle.GetFilePath(module).AssertFileDoesNotContain($"[{nameof(Attribute)}]");
+            Bundle.GetFilePath(module).AssertFileContains(expected);
         }
 
         protected override void Dispose(bool disposing)
