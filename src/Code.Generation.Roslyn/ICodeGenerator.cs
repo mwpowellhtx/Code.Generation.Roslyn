@@ -14,6 +14,8 @@ namespace Code.Generation.Roslyn
 
     /// <summary>
     /// At its root Code Generation relay an enumeration of <see cref="CodeGeneratorDescriptor"/>.
+    /// It is recommended to derive your Generators based on the <see cref="CodeGeneratorBase"/>
+    /// base class.
     /// </summary>
     /// <inheritdoc />
     public interface ICodeGenerator : IEnumerable<CodeGeneratorDescriptor>
