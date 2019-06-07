@@ -3,10 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>The Engine of Source Code Generation used by the `dotnet-codegen` tool.</Description>
-    <Version>1.0.0.4417</Version>
-    <AssemblyVersion>1.0.0.4417</AssemblyVersion>
-    <FileVersion>1.0.0.4417</FileVersion>
-    <PackageVersion>1.0.0.4417</PackageVersion>
+    <Version>1.0.0.4443</Version>
+    <AssemblyVersion>1.0.0.4443</AssemblyVersion>
+    <FileVersion>1.0.0.4443</FileVersion>
+    <PackageVersion>1.0.0.4443</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +30,9 @@
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>$(CodeGenerationToolName)</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>Code.Generation.Roslyn.Tests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
 

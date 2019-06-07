@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.0.0.4416</Version>
-    <AssemblyVersion>1.0.0.4416</AssemblyVersion>
-    <FileVersion>1.0.0.4416</FileVersion>
+    <Version>1.0.0.4429</Version>
+    <AssemblyVersion>1.0.0.4429</AssemblyVersion>
+    <FileVersion>1.0.0.4429</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Code.Generation.Roslyn.Attributes\Code.Generation.Roslyn.Attributes.csproj" />
     <ProjectReference Include="..\Code.Generation.Roslyn\Code.Generation.Roslyn.csproj" />
   </ItemGroup>
 
