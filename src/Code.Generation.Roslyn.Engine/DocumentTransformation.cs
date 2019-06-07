@@ -47,6 +47,10 @@ namespace Code.Generation.Roslyn
             Requires.NotNull(inputDocument, nameof(inputDocument));
             Requires.NotNull(ReferenceServiceManager, nameof(ReferenceServiceManager));
 
+            Assumes.True(inputDocument.HasCompilationUnitRoot, "Input document expected to include a Compilation Unit.");
+
+            var crLf = CarriageReturnLineFeed;
+
             IEnumerable<CompilationUnitSyntax> GetTransformations()
             {
                 // TODO: TBD: at this level I think it is because we have identified the Document in which the annotation did occur...
@@ -54,23 +58,17 @@ namespace Code.Generation.Roslyn
                 var inputSemanticModel = compilation.GetSemanticModel(inputDocument);
                 var inputCompilationUnit = inputDocument.GetCompilationUnitRoot();
 
-                // TODO: TBD: will have to keep an eye on this part... especially in terms of what all can be decorated for code gen.
-                // TODO: TBD: i.e. Class, Struct, Interface, Enum, Module (CompilationUnitSyntax?), Assembly (?) ...
-                // Because Namespace and Type Declarations are both a kind of Member Declaration.
-                var documentNodes = inputDocument
-                    .GetRoot()
-                    .DescendantNodesAndSelf(n => n is CompilationUnitSyntax || n is MemberDeclarationSyntax) // ?
-                    .OfType<CSharpSyntaxNode>();
-
-                foreach (var documentNode in documentNodes)
+                // TODO: TBD: supporting C# today...
+                // TODO: TBD: possible for other types of SyntaxNode in the future?
+                foreach (var documentNode in new[] {inputDocument.GetRoot() as CSharpSyntaxNode})
                 {
+                    // TODO: TBD: possibly this gets refactored outside the `foreach´ loop...
                     var attributeData = compilation.GetAttributeData(inputSemanticModel, documentNode);
-                    var generators = attributeData.FindCodeGenerators(ReferenceServiceManager.LoadAssembly);
+                    var generators = attributeData.LoadCodeGenerators(ReferenceServiceManager.LoadAssembly).ToArray();
 
                     foreach (var generator in generators)
                     {
-                        var context = new TransformationContext(documentNode, inputSemanticModel, compilation
-                            , projectDirectory, inputCompilationUnit);
+                        var context = new TransformationContext(documentNode, inputSemanticModel, compilation, projectDirectory, inputCompilationUnit);
 
                         generator.GenerateAsync(context, progress, cancellationToken).Wait(cancellationToken);
 
@@ -78,18 +76,18 @@ namespace Code.Generation.Roslyn
                         {
                             foreach (var compilationUnit in descriptor.CompilationUnits)
                             {
-                                // Should preserve any `whitespace' that occurs thereafter.
+                                // Should preserve any `whitespace´ that occurs thereafter.
                                 var innerCompilationUnit = compilationUnit.NormalizeWhitespace();
 
-                                innerCompilationUnit = innerCompilationUnit.WithLeadingTrivia(
-                                    Comment(descriptor.PreambleCommentText)
-                                );
+                                // Mind the whitespace, that is critical.
+                                if (descriptor.PreambleCommentText.Any())
+                                {
+                                    innerCompilationUnit = innerCompilationUnit.WithLeadingTrivia(Comment(descriptor.PreambleCommentText.Trim()), crLf);
+                                }
 
                                 if (descriptor.IncludeEndingNewLine)
                                 {
-                                    innerCompilationUnit = innerCompilationUnit.WithTrailingTrivia(
-                                        CarriageReturnLineFeed
-                                    );
+                                    innerCompilationUnit = innerCompilationUnit.WithTrailingTrivia(crLf);
                                 }
 
                                 yield return innerCompilationUnit;
