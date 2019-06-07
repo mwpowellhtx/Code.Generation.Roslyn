@@ -4,13 +4,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Code.Generation.Roslyn
 {
-    using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.Text;
     using static LanguageNames;
     using static String;
+    using static LanguageVersion;
     using static OutputKind;
 
     public abstract class CompilationManager : IDisposable
@@ -49,12 +50,17 @@ namespace Code.Generation.Roslyn
         protected virtual CompilationOptions CompilationOptions =>
             new CSharpCompilationOptions(CompilationOptionsOutputKind);
 
+        /// <summary>
+        /// Gets the SpecificLanguageVersion. Defaults to <see cref="Default"/>.
+        /// </summary>
+        protected virtual LanguageVersion SpecificLanguageVersion => Default;
+
         // TODO: TBD: ditto CompilationOptions re: derivatives... i.e. CSharpParseOptions.
         /// <summary>
         /// Gets the ParseOptions.
         /// </summary>
         protected virtual ParseOptions ParseOptions
-            => new CSharpParseOptions()
+            => new CSharpParseOptions(SpecificLanguageVersion)
                 .MergeAssets(PreprocessorSymbols.ToArray()
                     , (o, x) => o.WithPreprocessorSymbols(x), x => x.Any());
 
@@ -77,12 +83,12 @@ namespace Code.Generation.Roslyn
         /// <summary>
         /// Event handler occurs when <see cref="EvaluateCompilation"/> is requested.
         /// </summary>
+        /// <param name="project"></param>
         /// <param name="compilation"></param>
         /// <param name="cancellationToken"></param>
-        protected virtual void OnEvaluateCompilation(Compilation compilation,
-            CancellationToken cancellationToken = default)
+        protected virtual void OnEvaluateCompilation(Project project, Compilation compilation, CancellationToken cancellationToken = default)
         {
-            var e = new CompilationDiagnosticEventArgs(compilation, cancellationToken);
+            var e = new CompilationDiagnosticEventArgs(project, compilation, cancellationToken);
             EvaluateCompilation?.Invoke(this, e);
         }
 
@@ -96,12 +102,9 @@ namespace Code.Generation.Roslyn
         /// <param name="project"></param>
         /// <param name="compiling"></param>
         /// <param name="cancellationToken"></param>
-        protected virtual void ResolveCompilation(string projectName, IReadOnlyList<string> sources, Project project,
-            Task<Compilation> compiling, CancellationToken cancellationToken = default)
-        {
-            var compilation = project.GetCompilationAsync(cancellationToken).Result;
-            OnEvaluateCompilation(compilation, cancellationToken);
-        }
+        protected virtual void ResolveCompilation(string projectName, IReadOnlyList<string> sources, Project project
+            , Task<Compilation> compiling, CancellationToken cancellationToken = default)
+            => OnEvaluateCompilation(project, compiling.Result, cancellationToken);
 
         /// <summary>
         /// Disposes the Object.
@@ -216,9 +219,7 @@ namespace Code.Generation.Roslyn
             Solution = Solution.AddProject(projectId, projectName, projectName, Language);
 
             // The flow is a bit inside-out, we need to have Added the Project first, which modifies the Solution.
-            var project = Solution.GetProject(projectId);
-
-            Solution = OnResolveMetadataReferences(Solution, project)
+            Solution = OnResolveMetadataReferences(Solution, Solution.GetProject(projectId))
                     .WithProjectCompilationOptions(projectId, CompilationOptions)
                     .WithProjectParseOptions(projectId, ParseOptions)
                 ;
@@ -228,11 +229,12 @@ namespace Code.Generation.Roslyn
                 var assetName = GetNewAssetName();
                 var assetFileName = $"{assetName}{LanguageDocumentExtension}";
                 // Adds the Document Connected with the Project to the Solution. Also about inside-out in my opinion.
-                Solution = Solution.AddDocument(DocumentId.CreateNewId(project.Id), assetFileName,
+                Solution = Solution.AddDocument(DocumentId.CreateNewId(projectId), assetFileName,
                     SourceText.From(src));
             });
 
-            return project;
+            // Hold off getting the project because we need the most up to date state.
+            return Solution.GetProject(projectId);
         }
 
         /// <summary>

@@ -15,6 +15,11 @@ namespace Code.Generation.Roslyn
     public class CompilationDiagnosticEventArgs : EventArgs
     {
         /// <summary>
+        /// Gets the Project.
+        /// </summary>
+        public Project Project { get; }
+
+        /// <summary>
         /// Gets the Compilation.
         /// </summary>
         public Compilation Compilation { get; }
@@ -25,15 +30,23 @@ namespace Code.Generation.Roslyn
         public IEnumerable<Diagnostic> Diagnostics { get; }
 
         /// <summary>
+        /// Gets the CancellationToken.
+        /// </summary>
+        public CancellationToken CancellationToken { get; }
+
+        /// <summary>
         /// Internal Constructor.
         /// </summary>
+        /// <param name="project"></param>
         /// <param name="compilation"></param>
         /// <param name="cancellationToken"></param>
         /// <inheritdoc />
-        internal CompilationDiagnosticEventArgs(Compilation compilation, CancellationToken cancellationToken = default)
+        internal CompilationDiagnosticEventArgs(Project project, Compilation compilation, CancellationToken cancellationToken = default)
         {
+            Project = project;
             Compilation = compilation;
-            Diagnostics = compilation.GetDiagnostics(cancellationToken).ToArray();
+            CancellationToken = cancellationToken;
+            Diagnostics = compilation.GetDiagnostics(CancellationToken).ToArray();
         }
     }
 }
