@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace Code.Generation.Roslyn
 {
@@ -27,6 +28,8 @@ namespace Code.Generation.Roslyn
         // TODO: TBD: or even establish a handful of different fit for purpose test fixtures...
         protected virtual void CompilationManager_OnResolveMetadataReferences(object sender, ResolveMetadataReferencesEventArgs e)
         {
+            var trusted = ((string) AppContext.GetData($"TRUSTED_PLATFORM_ASSEMBLIES")).Split(';');
+
             // TODO: TBD: refactored these references from the compilation manager as a next step...
             // TODO: TBD: I expect that we may refactor these even further from here, but this seems like the logical next step...
             var references = GetRange(
@@ -38,11 +41,12 @@ namespace Code.Generation.Roslyn
             ).ToArray();
 
             // TODO: TBD: if NETCOREAPP? "System.Private.CoreLib.dll"
-            e.AddTypeAssemblyLocationBasedReferences<object>(references)
-                .AddReferenceToTypeAssembly<CSharpCompilation>()
-                .AddReferenceToTypeAssembly<CodeGenerationAttributeAttribute>()
-                .AddReferenceToTypeAssembly<TestAttributeBase>()
-                ;
+            // TODO: TBD: this needs to be loaded regardless whether this is a NETCOREAPP ...
+            e.AddReferenceToTypeAssembly<object>();
+            e.AddTypeAssemblyLocationBasedReferences<object>(references);
+            e.AddReferenceToTypeAssembly<CSharpCompilation>();
+            e.AddReferenceToTypeAssembly<CodeGenerationAttributeAttribute>();
+            e.AddReferenceToTypeAssembly<TestAttributeBase>();
         }
 
         protected CompilationCodeGenerationTestFixtureBase(ITestOutputHelper outputHelper)
