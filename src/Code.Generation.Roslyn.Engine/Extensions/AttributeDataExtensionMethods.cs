@@ -22,26 +22,47 @@ namespace Code.Generation.Roslyn
         /// </summary>
         private const char Dot = '.';
 
-        public static IEnumerable<ICodeGenerator> FindCodeGenerators(
-            this ImmutableArray<AttributeData> attributeData
-            , AttributeAssemblyLoaderCallback loader
-        )
+        private class GeneratorTuple : Tuple<Type, AttributeData>
         {
-            Requires.NotNull(loader, nameof(loader));
+            internal static GeneratorTuple Create(Type generatorType, AttributeData datum) => new GeneratorTuple(generatorType, datum);
 
-            foreach (var generatorType in attributeData.Select(x => x.AttributeClass
-                .GetCodeGeneratorTypeForAttribute(loader)).Where(x => x != null))
+            internal Type GeneratorType => Item1;
+
+            internal AttributeData Datum => Item2;
+
+            private GeneratorTuple(Type generatorType, AttributeData datum)
+                : base(generatorType, datum)
             {
-                var generatorObj = Activator.CreateInstance(generatorType, attributeData);
-                Requires.NotNull(generatorObj, nameof(generatorObj));
-                // TODO: TBD: might be better if .Is<T> actually returned T...
-                Assumes.Is<ICodeGenerator>(generatorObj);
-                yield return (ICodeGenerator) generatorObj;
+            }
+
+            internal void Deconstruct(out Type generatorType, out AttributeData datum)
+            {
+                generatorType = GeneratorType;
+                datum = Datum;
             }
         }
 
-        private static Type GetCodeGeneratorTypeForAttribute<TSymbol>(
-            this TSymbol attributeType, AttributeAssemblyLoaderCallback loader)
+        public static IEnumerable<ICodeGenerator> LoadCodeGenerators(this ImmutableArray<AttributeData> attributeData, LoadAssemblyCallback loader)
+        {
+            Requires.NotNull(loader, nameof(loader));
+
+            ICodeGenerator CreateCodeGenerator(GeneratorTuple tuple)
+            {
+                var (generatorType, datum) = tuple;
+                var generator = Activator.CreateInstance(generatorType, datum);
+                Requires.NotNull(generator, nameof(generator));
+                // TODO: TBD: might be better if .Is<T> actually returned T... i.e. could simple `return Assumes.Is<ICodeGenerator>(generator);´
+                Assumes.Is<ICodeGenerator>(generator);
+                return (ICodeGenerator) generator;
+            }
+
+            return attributeData
+                .Select(x => GeneratorTuple.Create(x.AttributeClass.GetCodeGeneratorTypeForAttribute(loader), x))
+                .Where(tuple => tuple.GeneratorType != null).Select(CreateCodeGenerator);
+        }
+
+        //private static Type GetCodeGeneratorTypeForAttribute(this INamedTypeSymbol attributeType, AttributeAssemblyLoaderCallback loader)
+        private static Type GetCodeGeneratorTypeForAttribute<TSymbol>(this TSymbol attributeType, LoadAssemblyCallback loader)
             where TSymbol : ISymbol
         {
             Requires.NotNull(loader, nameof(loader));
@@ -54,7 +75,7 @@ namespace Code.Generation.Roslyn
 
                 if (generatorType == null)
                 {
-                    Verify.FailOperation($"Unable to find code generator `{fullTypeName}' in `{assemblyName}'.");
+                    Verify.FailOperation($"Unable to find code generator `{fullTypeName}´ in `{assemblyName}´.");
                 }
 
                 return generatorType;
