@@ -52,7 +52,9 @@ namespace Code.Generation.Roslyn
         /// <param name="attributeData"></param>
         protected CodeGeneratorBase(AttributeData attributeData)
         {
-            Requires.NotNull(attributeData, nameof(attributeData));
+            //// TODO: TBD: do not know if this necessarily justifies a dependency on Validation ...
+            //// TODO: TBD: it could prove a useful dependency, but will need to discuss it further...
+            //Requires.NotNull(attributeData, nameof(attributeData));
 
             AttributeData = attributeData;
 
