@@ -1,10 +1,10 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Code.Generation.Roslyn
 {
     using Microsoft.CodeAnalysis;
-    using Microsoft.CodeAnalysis.CSharp.Syntax;
     using Validation;
 
     internal static class CompilationExtensionMethods
@@ -17,16 +17,11 @@ namespace Code.Generation.Roslyn
             Requires.NotNull(document, nameof(document));
             Requires.NotNull(syntaxNode, nameof(syntaxNode));
 
-            switch (syntaxNode)
-            {
-                case CompilationUnitSyntax syntax:
-                    return compilation.Assembly.GetAttributes()
-                        .Where(x => x.ApplicationSyntaxReference.SyntaxTree == syntax.SyntaxTree)
-                        .ToImmutableArray();
+            IEnumerable<AttributeData> MineForAttributeData() => syntaxNode.DescendantNodesAndSelf()
+                .SelectMany(node => document.GetDeclaredSymbol(node)?.GetAttributes()
+                                    ?? ImmutableArray<AttributeData>.Empty);
 
-                default:
-                    return document.GetDeclaredSymbol(syntaxNode)?.GetAttributes() ?? ImmutableArray<AttributeData>.Empty;
-            }
+            return MineForAttributeData().ToImmutableArray();
         }
     }
 }
