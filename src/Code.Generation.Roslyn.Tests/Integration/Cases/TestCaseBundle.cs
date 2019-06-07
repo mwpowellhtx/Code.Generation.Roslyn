@@ -1,26 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace Code.Generation.Roslyn.Integration
 {
-    using static Resources;
-    using static ModuleKind;
+    using static Constants;
+    using static Domain;
+    using static Enums;
+    using static String;
+    using static Strings;
+    using AttributeRenderingOptionDictionary = Dictionary<string, object>;
+    using IAttributeRenderingOptionDictionary = IDictionary<string, object>;
 
-    public class TestCaseBundle : IDisposable
+    public class TestCaseBundle : TestCaseFixtureBase
     {
-        protected Type BundleType { get; }
-
         public Guid Id { get; } = Guid.NewGuid();
 
         internal string ProjectName => $"{Id:D}";
 
         internal string ProjectFileName => $@"{ProjectName}\{ProjectName}.csproj";
-
-        public TestCaseBundle()
-        {
-            BundleType = GetType();
-        }
 
         protected bool TryEnsureDirectoryExists(string projectName)
         {
@@ -39,7 +38,7 @@ namespace Code.Generation.Roslyn.Integration
                 => (actualCount = reader.Read(buffer, 0, buffer.Length)) > 0;
 
             // TODO: TBD: or we could "pipe" bytes from the stream if memory blocks are an issue...
-            using (var rs = BundleType.Assembly.GetManifestResourceStream(resourcePath))
+            using (var rs = FixtureType.Assembly.GetManifestResourceStream(resourcePath))
             {
                 using (var reader = new BinaryReader(rs))
                 {
@@ -62,8 +61,6 @@ namespace Code.Generation.Roslyn.Integration
             return true;
         }
 
-        public delegate string AttributeAnnotationCallback(string s);
-
         protected bool TryInfluenceAttributeAnnotation(string fileName, AttributeAnnotationCallback callback)
         {
             var filePath = Path.Combine(ProjectName, fileName);
@@ -75,7 +72,6 @@ namespace Code.Generation.Roslyn.Integration
                 using (var reader = new StreamReader(fs))
                 {
                     s = reader.ReadToEnd();
-                    callback(s);
                 }
             }
 
@@ -106,90 +102,91 @@ namespace Code.Generation.Roslyn.Integration
             return s != x;
         }
 
-        public void RemoveClassAnnotation<TAttribute>(ModuleKind module)
-            where TAttribute : Attribute
-        {
-            var fileName = GetFileName(module);
-
-            if (string.IsNullOrEmpty(fileName))
-            {
-                return;
-            }
-
-            // TODO: TBD: arguably, could we furnish a code analyzer/fixer around this issue?
-            const string carriageReturnLineFeed = "\r\n";
-            const string publicPartialClass = "    public partial class";
-
-            // TODO: TBD: I dare say we might even be able to leverage regular expressions here...
-            TryInfluenceAttributeAnnotation(fileName, s => s.Replace(
-                $"[{nameof(Attribute)}]{carriageReturnLineFeed}{publicPartialClass}"
-                , publicPartialClass.Trim())
-            );
-        }
-
-        public void RemoveClassAnnotation(ModuleKind module) => RemoveClassAnnotation<Attribute>(module);
-
-        public void RemoveInterfaceAnnotation<TAttribute>(ModuleKind module)
-            where TAttribute : Attribute
-        {
-            var fileName = GetFileName(module);
-
-            if (string.IsNullOrEmpty(fileName))
-            {
-                return;
-            }
-
-            // TODO: TBD: arguably, could we furnish a code analyzer/fixer around this issue?
-            const string carriageReturnLineFeed = "\r\n";
-            const string publicPartialInterface = "    public partial interface";
-
-            // TODO: TBD: I dare say we might even be able to leverage regular expressions here...
-            TryInfluenceAttributeAnnotation(fileName, s => s.Replace(
-                $"[{nameof(Attribute)}]{carriageReturnLineFeed}{publicPartialInterface}"
-                , publicPartialInterface.Trim())
-            );
-        }
-
-        public void RemoveInterfaceAnnotation(ModuleKind module) => RemoveInterfaceAnnotation<Attribute>(module);
-
-        public void RemoveAssemblyAnnotation<TAttribute>(ModuleKind module)
-            where TAttribute : Attribute
-        {
-            var fileName = GetFileName(module);
-
-            if (string.IsNullOrEmpty(fileName))
-            {
-                return;
-            }
-
-            // TODO: TBD: I dare say we might even be able to leverage regular expressions here...
-            TryInfluenceAttributeAnnotation(fileName, s => s.Replace($"[assembly: {nameof(Attribute)}]", ""));
-        }
-
-        public void RemoveAssemblyAnnotation(ModuleKind module) => RemoveAssemblyAnnotation<Attribute>(module);
-
-        protected string GetFileName(ModuleKind module)
-        {
-            // ReSharper disable once SwitchStatementMissingSomeCases
-            switch (module)
-            {
-                case Bar:
-                case Baz:
-                case AssemblyInfo:
-                    return $"{module}.cs";
-
-                case Biz:
-                    return $"I{module}.cs";
-            }
-
-            return null;
-        }
-
         internal string GetFilePath(string fileName) => $@"{ProjectName}\{fileName}";
 
         internal string GetFilePath(ModuleKind module) => GetFilePath(GetFileName(module));
 
-        protected string GetBundledResourcePath(string resourceName) => Combine(BundleType.Namespace, resourceName);
+        public virtual void AddClassAnnotation<TAttribute>(ModuleKind module, IAttributeRenderingOptionDictionary options = null)
+            where TAttribute : Attribute
+        {
+            var fileName = GetFileName(module);
+
+            if (IsNullOrEmpty(fileName))
+            {
+                return;
+            }
+
+            // TODO: TBD: I dare say we might even be able to leverage regular expressions here...
+            TryInfluenceAttributeAnnotation(fileName, s => s.Replace(PublicPartialClass
+                , $"{this.RenderAttributeNotation<TAttribute>(options)}{CarriageReturnLineFeed}    {PublicPartialClass}"));
+        }
+
+        public virtual void AddInterfaceAnnotation<TAttribute>(ModuleKind module, IAttributeRenderingOptionDictionary options = null)
+            where TAttribute : Attribute
+        {
+            var fileName = GetFileName(module);
+
+            if (IsNullOrEmpty(fileName))
+            {
+                return;
+            }
+
+            // TODO: TBD: I dare say we might even be able to leverage regular expressions here...
+            TryInfluenceAttributeAnnotation(fileName, s => s.Replace(PublicPartialInterface
+                , $"{this.RenderAttributeNotation<TAttribute>(options)}{CarriageReturnLineFeed}    {PublicPartialInterface}"));
+        }
+
+        public virtual void AddOuterTypeNamespaceUsingStatement<T>(ModuleKind module)
+        {
+            var fileName = GetFileName(module);
+
+            if (IsNullOrEmpty(fileName))
+            {
+                return;
+            }
+
+            var pattern = FooNamespace;
+
+            TryInfluenceAttributeAnnotation(fileName, s => s.Replace(pattern
+                , Join($"{CarriageReturnLineFeed}{CarriageReturnLineFeed}"
+                    , $"{Using} {typeof(T).Namespace}{SemiColon}", pattern)));
+        }
+
+        public virtual void AddInnerTypeNamespaceUsingStatement<T>(ModuleKind module)
+        {
+            var fileName = GetFileName(module);
+
+            if (IsNullOrEmpty(fileName))
+            {
+                return;
+            }
+
+            var pattern = $"{FooNamespace}{CarriageReturnLineFeed}{OpenCurlyBrace}";
+
+            TryInfluenceAttributeAnnotation(fileName, s => s.Replace(pattern
+                , Join("    ", $"{pattern}{CarriageReturnLineFeed}"
+                    , $"{Using} {typeof(T).Namespace}{SemiColon}{CarriageReturnLineFeed}{CarriageReturnLineFeed}")));
+        }
+
+        public virtual void AddAssemblyAnnotation<TAttribute>(ModuleKind module, IAttributeRenderingOptionDictionary options = null)
+            where TAttribute : Attribute
+        {
+            var fileName = GetFileName(module);
+
+            if (IsNullOrEmpty(fileName))
+            {
+                return;
+            }
+
+            // ReSharper disable once RedundantEmptyObjectOrCollectionInitializer
+            options = options ?? new AttributeRenderingOptionDictionary { };
+
+            // Ensures that Rendering occurs WithAssemblyAttribute or rather AsAssemblyAttribute.
+            options[assembly] = true;
+
+            TryInfluenceAttributeAnnotation(fileName
+                , s => $"{s}{this.RenderAttributeNotation<TAttribute>(options)}{CarriageReturnLineFeed}");
+        }
 
         // TODO: TBD: we call this 'Extrapolate' because there may be additional work we want to do on the files/text themselves...
         // TODO: TBD: i.e. getting setup for the code generation unit tests... introducing Using statements, attribute annotations, etc
@@ -205,23 +202,10 @@ namespace Code.Generation.Roslyn.Integration
 
             TryEnsureFileExists(GetBundledResourcePath("Project.Template.xml"), ProjectFileName);
 
-            // TODO: TBD: extending a ToArray, etc, from Array might be interesting...
-            foreach (var module in Enum.GetValues(typeof(ModuleKind)).ToArray<ModuleKind>())
+            bool ModulesDoesContain(ModuleKind module) => modules.Contains(module);
+
+            foreach (var resourceName in GetValues<ModuleKind>().Where(ModulesDoesContain).Select(GetFileName).Where(IsNotNullOrEmpty))
             {
-                if (!modules.Contains(module))
-                {
-                    continue;
-                }
-
-                var resourceName = GetFileName(module);
-
-                // TODO: TBD: we SHOULD have a value here...
-                // TODO: TBD: anything less or other than that is stronger than continuing I think, possibly even an exception...
-                if (string.IsNullOrEmpty(resourceName))
-                {
-                    continue;
-                }
-
                 TryEnsureFileExists(GetBundledResourcePath($"{resourceName}"), $@"{projectName}\{resourceName}");
             }
         }
@@ -236,22 +220,14 @@ namespace Code.Generation.Roslyn.Integration
             Directory.Delete(projectName, true);
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
-            if (!disposing || IsDisposed)
+            if (disposing && !IsDisposed)
             {
-                return;
+                TearDown(ProjectName);
             }
 
-            TearDown(ProjectName);
-        }
-
-        protected bool IsDisposed { get; private set; }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            IsDisposed = true;
+            base.Dispose(disposing);
         }
     }
 }
