@@ -25,12 +25,8 @@ namespace Code.Generation.Roslyn
         /// corresponding to the <paramref name="compilation"/>.</param>
         /// <param name="sourceCompilationUnit">The Source <see cref="CompilationUnitSyntax"/>
         /// at which point Code Generation was triggered.</param>
-        public TransformationContext(
-            CSharpSyntaxNode processingNode
-            , SemanticModel semanticModel
-            , CSharpCompilation compilation
-            , string projectDirectory
-            , CompilationUnitSyntax sourceCompilationUnit
+        internal TransformationContext(CSharpSyntaxNode processingNode, SemanticModel semanticModel
+            , CSharpCompilation compilation, string projectDirectory, CompilationUnitSyntax sourceCompilationUnit
         )
         {
             ProcessingNode = processingNode;
