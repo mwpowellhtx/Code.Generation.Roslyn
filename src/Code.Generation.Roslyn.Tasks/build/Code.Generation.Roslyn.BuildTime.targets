@@ -33,8 +33,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- Which the `tool' build needs to yield literally, `dotnet-codegen' for its assembly output. -->
-    <GenerateCodeFromAttributesToolPathOverride Condition="'$(GenerateCodeFromAttributesToolPathOverride)' == ''">codegen</GenerateCodeFromAttributesToolPathOverride>
+    <!-- Which the `tool´ build needs to yield literally, `dotnet-codegen´ for its assembly output. -->
+    <DotnetCodeGenerationToolPath Condition="'$(DotnetCodeGenerationToolPath)' == ''">codegen</DotnetCodeGenerationToolPath>
   </PropertyGroup>
 
   <Target Name="GenerateCodeFromAttributes" DependsOnTargets="$(GenerateCodeFromAttributesDependsOn)" BeforeTargets="CoreCompile;PrepareResources"/>
@@ -71,7 +71,7 @@ $(CodeGenToolAssemblyReferenceRegistryFileName)
     <!-- TODO: TBD: if anything, maybe we also respond to 'Clean' target requests in order to do this bit... -->
     <!--<Delete Condition="Exists('$(CodeGenToolCompilationRegistryPath)')" Files="$(CodeGenToolCompilationRegistryPath)" ContinueOnError="true"/>-->
     <!-- Verify and report the tool version. -->
-    <Exec Command="dotnet $(GenerateCodeFromAttributesToolPathOverride) --version" ConsoleToMSBuild="true" StandardOutputImportance="normal" ContinueOnError="true">
+    <Exec Command="dotnet $(DotnetCodeGenerationToolPath) --version" ConsoleToMSBuild="true" StandardOutputImportance="normal" ContinueOnError="true">
       <Output TaskParameter="ConsoleOutput" PropertyName="_GenerateCodeToolVersion"/>
     </Exec>
     <Message Text="Running $(CodeGenerationToolFullName) v$(_GenerateCodeToolVersion) ..." Importance="normal" />
@@ -83,7 +83,7 @@ $(CodeGenToolAssemblyReferenceRegistryFileName)
       <_CodeGenToolWarningText>$(CodeGenerationToolingFullName): Failed to yield code generation artifacts, please check https://github.com/mwpowellhtx/Code.Generation.Roslyn for usage instructions.</_CodeGenToolWarningText>
     </PropertyGroup>
     <!-- Run the tool and evaluate the expected outcome. -->
-    <Exec Command="dotnet $(GenerateCodeFromAttributesToolPathOverride) &quot;%40$(CodeGenToolResponsePath)&quot;" StandardOutputImportance="normal"  ContinueOnError="true"/>
+    <Exec Command="dotnet $(DotnetCodeGenerationToolPath) &quot;%40$(CodeGenToolResponsePath)&quot;" StandardOutputImportance="normal"  ContinueOnError="true"/>
     <Warning Code="$(_CodeGenWarning)" Text="$(_CodeGenToolWarningText)" Condition="!(Exists('$(CodeGenToolCompilationRegistryPath)') And Exists('$(CodeGenToolCompilationResponsePath)') And Exists('$(CodeGenToolAssemblyReferenceRegistryPath))'))"/>
   </Target>
 
