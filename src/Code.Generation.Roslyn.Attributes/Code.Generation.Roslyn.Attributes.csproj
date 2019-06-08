@@ -9,10 +9,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Provides the attributed hooks for purposes of invoking Code Generation.</Description>
-    <Version>1.0.0.4401</Version>
-    <AssemblyVersion>1.0.0.4401</AssemblyVersion>
-    <FileVersion>1.0.0.4401</FileVersion>
-    <PackageVersion>1.0.0.4401</PackageVersion>
+    <Version>1.0.0.4403</Version>
+    <AssemblyVersion>1.0.0.4403</AssemblyVersion>
+    <FileVersion>1.0.0.4403</FileVersion>
+    <PackageVersion>1.0.0.4403</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
