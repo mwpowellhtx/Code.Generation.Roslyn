@@ -84,12 +84,16 @@ namespace Code.Generation.Roslyn
         /// Event handler occurs when <see cref="EvaluateCompilation"/> is requested.
         /// </summary>
         /// <param name="project"></param>
-        /// <param name="compilation"></param>
-        /// <param name="cancellationToken"></param>
-        protected virtual void OnEvaluateCompilation(Project project, Compilation compilation, CancellationToken cancellationToken = default)
+        /// <param name="diagnosticFilter"></param>
+        protected virtual void OnEvaluateCompilation(Project project, ICompilationDiagnosticFilter diagnosticFilter)
         {
-            var e = new CompilationDiagnosticEventArgs(project, compilation, cancellationToken);
+            var e = new CompilationDiagnosticEventArgs(project, diagnosticFilter);
             EvaluateCompilation?.Invoke(this, e);
+        }
+
+        protected virtual ICompilationDiagnosticFilter CreateDiagnosticFilter(Compilation compilation)
+        {
+            return new BasicCompilationDiagnosticFilter(compilation);
         }
 
         /// <summary>
@@ -104,7 +108,10 @@ namespace Code.Generation.Roslyn
         /// <param name="cancellationToken"></param>
         protected virtual void ResolveCompilation(string projectName, IReadOnlyList<string> sources, Project project
             , Task<Compilation> compiling, CancellationToken cancellationToken = default)
-            => OnEvaluateCompilation(project, compiling.Result, cancellationToken);
+        {
+            // TODO: TBD: may need to reconsider Task<Compilation> in cases where Analyzers are involved, i.e. Task<CompilationWithAnalyzers> (?)
+            OnEvaluateCompilation(project, CreateDiagnosticFilter(compiling.Result));
+        }
 
         /// <summary>
         /// Disposes the Object.
