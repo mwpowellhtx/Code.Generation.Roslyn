@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 
 namespace Code.Generation.Roslyn
 {
     using Microsoft.CodeAnalysis;
 
     /// <summary>
-    /// Event arguments provided for purposes of Evaluating the <see cref="Compilation"/>
-    /// for better or for worse.
+    /// Signals when Compilation Diagnostics may be evaluated.
     /// </summary>
     /// <inheritdoc />
-    public class CompilationDiagnosticEventArgs : EventArgs
+    public sealed class CompilationDiagnosticEventArgs : EventArgs
     {
         /// <summary>
         /// Gets the Project.
@@ -20,33 +17,41 @@ namespace Code.Generation.Roslyn
         public Project Project { get; }
 
         /// <summary>
-        /// Gets the Compilation.
+        /// Gets the DiagnosticFilter.
         /// </summary>
-        public Compilation Compilation { get; }
+        private ICompilationDiagnosticFilter DiagnosticFilter { get; }
 
         /// <summary>
-        /// Gets the Diagnostics associated with the Compilation.
+        /// Gets the Compilation. We must weakly type the <see cref="object"/> this way because
+        /// we cannot know the precise type of <see cref="Compilation"/>, especially when things
+        /// such as Analyzers are involved.
         /// </summary>
-        public IEnumerable<Diagnostic> Diagnostics { get; }
+        public object Compilation => DiagnosticFilter.Compilation;
 
         /// <summary>
-        /// Gets the CancellationToken.
+        /// Gets the strongly typed <typeparamref name="T"/> <see cref="Compilation"/>.
+        /// This is the tradeoff we must make when we want to use the correct strongly typed
+        /// <typeparamref name="T"/> Compilation.
         /// </summary>
-        public CancellationToken CancellationToken { get; }
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T GetCompilation<T>() where T : class => (T) Compilation;
 
         /// <summary>
-        /// Internal Constructor.
+        /// Gets the Diagnostics associated with the <see cref="DiagnosticFilter"/>.
+        /// </summary>
+        public IEnumerable<Diagnostic> Diagnostics => DiagnosticFilter;
+
+        /// <summary>
+        /// Protected Constructor.
         /// </summary>
         /// <param name="project"></param>
-        /// <param name="compilation"></param>
-        /// <param name="cancellationToken"></param>
+        /// <param name="diagnosticFilter"></param>
         /// <inheritdoc />
-        internal CompilationDiagnosticEventArgs(Project project, Compilation compilation, CancellationToken cancellationToken = default)
+        internal CompilationDiagnosticEventArgs(Project project, ICompilationDiagnosticFilter diagnosticFilter)
         {
             Project = project;
-            Compilation = compilation;
-            CancellationToken = cancellationToken;
-            Diagnostics = compilation.GetDiagnostics(CancellationToken).ToArray();
+            DiagnosticFilter = diagnosticFilter;
         }
     }
 }
