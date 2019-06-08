@@ -20,6 +20,23 @@
         public const string CarriageReturnLineFeed = CarriageReturn + LineFeed;
 
         /// <summary>
+        /// The pair of Open- and Close-Paren, literally &quot;()&quot;
+        /// </summary>
+        public const string Parens = "()";
+
+        /// <summary>
+        /// Gets the OpenParen, literally &apos;(&apos;.
+        /// </summary>
+        /// <see cref="Parens"/>
+        public static char OpenParen => Parens[0];
+
+        /// <summary>
+        /// Gets the CloseParen, literally &apos;)&apos;.
+        /// </summary>
+        /// <see cref="Parens"/>
+        public static char CloseParen => Parens[1];
+
+        /// <summary>
         /// The pair of Open- and Close-CurlyBraces, literally &quot;{}&quot;
         /// </summary>
         public const string CurlyBraces = "{}";
@@ -52,6 +69,11 @@
         /// </summary>
         /// <see cref="SquareBrackets"/>
         public static char CloseSquareBracket => SquareBrackets[1];
+
+        /// <summary>
+        /// &apos;,&apos;
+        /// </summary>
+        public const char Comma = ',';
 
         /// <summary>
         /// &apos;:&apos;
