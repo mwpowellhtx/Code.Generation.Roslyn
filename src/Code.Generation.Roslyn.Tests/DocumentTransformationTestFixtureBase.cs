@@ -36,9 +36,10 @@ namespace Code.Generation.Roslyn
 
         private IEnumerable<string> TransformedSources { get; set; } = GetRange<string>().ToArray();
 
-        protected override void CompilationManager_OnEvaluateCompilation(object sender,
-            CompilationDiagnosticEventArgs e)
+        protected override void CompilationManager_OnEvaluateCompilation(object sender, CompilationDiagnosticEventArgs e)
         {
+            base.CompilationManager_OnEvaluateCompilation(sender, e);
+
             //// TODO: TBD: may in fact make the base abstract...
             //base.CompilationManager_OnEvaluateCompilation(sender, e);
 
@@ -51,31 +52,33 @@ namespace Code.Generation.Roslyn
             // TODO: TBD: ditto GeneratorSearchPathList ... ?
             var generatorSearchPath = GetRange<string>();
 
-            AssemblyReferenceServiceManager CreateReferenceService()
-                => new AssemblyReferenceServiceManager(TransformationName, IntermediateGeneratedRegistryFileName
-                    , referencePath.ToArray(), generatorSearchPath.ToArray()).AssertNotNull();
+            AssemblyReferenceServiceManager CreateReferenceService() => new AssemblyReferenceServiceManager(
+                TransformationName, IntermediateGeneratedRegistryFileName
+                , referencePath.ToArray(), generatorSearchPath.ToArray()).AssertNotNull();
 
-            DocumentTransformation CreateDocumentTransformation() =>
-                new DocumentTransformation(CreateReferenceService().AssertNotNull());
+            DocumentTransformation CreateDocumentTransformation() => new DocumentTransformation(
+                CreateReferenceService().AssertNotNull());
 
             var transformation = CreateDocumentTransformation().AssertNotNull();
 
+            var docs = e.Project.Documents;
+
             // TODO: TBD: this approach is loosely informed by the original project:
             // https://github.com/AArnott/CodeGeneration.Roslyn/blob/master/src/CodeGeneration.Roslyn.Tests/Helpers/CompilationTestsBase.cs#L75
-            e.Project.Documents.Any().AssertTrue();
+
+            // ReSharper disable PossibleMultipleEnumeration
+            docs.Any().AssertTrue();
             // TODO: TBD: "1" (or however many... may want to capture "sources" as a property which we can use to verify...)
-            e.Project.Documents.Count().AssertEqual(1);
+            docs.Count().AssertEqual(1);
 
             // TODO: TBD: may better leverage the tree(s) in the actual e.Compilation instead...
-            e.Project.Documents.First().TryGetSyntaxTree(out var tree).AssertTrue();
+            docs.First().TryGetSyntaxTree(out var tree).AssertTrue();
+            // ReSharper restore PossibleMultipleEnumeration
 
             var compilation = e.Compilation as CSharpCompilation;
 
-            var diagnostics = e.Diagnostics.AssertNotNull().ToArray();
-
             // TODO: TBD: may want to convey task cancellation from other sources than `default´.
-            var results = transformation.TransformAsync(compilation, tree
-                , TransformationName, Progress, default).Result;
+            var results = transformation.TransformAsync(compilation, tree, TransformationName, Progress, default).Result;
 
             TransformedSources = results.Select(x => $"{x.GetText()}").ToArray();
         }
