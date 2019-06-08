@@ -121,5 +121,53 @@ namespace Code.Generation.Roslyn
             return values;
             // ReSharper restore PossibleMultipleEnumeration
         }
+
+        /// <summary>
+        /// Asserts whether <paramref name="object"/> <see cref="Assert.IsType{T}"/>
+        /// Returns the strongly typed <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="object"></param>
+        /// <returns></returns>
+        public static T AssertIsType<T>(this object @object) => Assert.IsType<T>(@object);
+
+        /// <summary>
+        /// Asserts whether <paramref name="object"/> <see cref="Assert.IsAssignableFrom{T}"/>
+        /// Returns the weakly typed Object IsAssignableFrom <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="object"></param>
+        /// <returns></returns>
+        public static T AssertIsAssignableFrom<T>(this object @object) => Assert.IsAssignableFrom<T>(@object);
+
+        /// <summary>
+        /// Returns whether the strongly typed <paramref name="value"/> is the Same as the
+        /// <paramref name="expected"/> instance.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="value"></param>
+        /// <param name="expected"></param>
+        /// <returns></returns>
+        public static T AssertSame<T>(this T value, object expected)
+        {
+            object actual = value;
+            Assert.Same(expected, actual);
+            return value;
+        }
+
+        /// <summary>
+        /// Returns whether the strongly typed <paramref name="value"/> is the Not Same as the
+        /// <paramref name="expected"/> instance.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="value"></param>
+        /// <param name="expected"></param>
+        /// <returns></returns>
+        public static T AssertNotSame<T>(this T value, object expected)
+        {
+            object actual = value;
+            Assert.NotSame(expected, actual);
+            return value;
+        }
     }
 }
