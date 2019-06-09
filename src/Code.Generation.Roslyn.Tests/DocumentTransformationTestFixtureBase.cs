@@ -16,7 +16,7 @@ namespace Code.Generation.Roslyn
 
         private string TransformationName => $"{TransformationId:D}";
 
-        private string IntermediateGeneratedRegistryFileName => $"{TransformationName}.g.json";
+        private string IntermediateAssemblyReferenceRegistryFileName => $"{TransformationName}.a.json";
 
         protected DocumentTransformationTestFixtureBase(ITestOutputHelper outputHelper)
             : base(outputHelper)
@@ -53,7 +53,7 @@ namespace Code.Generation.Roslyn
             var generatorSearchPath = GetRange<string>();
 
             AssemblyReferenceServiceManager CreateReferenceService() => new AssemblyReferenceServiceManager(
-                TransformationName, IntermediateGeneratedRegistryFileName
+                TransformationName, IntermediateAssemblyReferenceRegistryFileName
                 , referencePath.ToArray(), generatorSearchPath.ToArray()).AssertNotNull();
 
             DocumentTransformation CreateDocumentTransformation() => new DocumentTransformation(
