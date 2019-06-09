@@ -147,5 +147,15 @@ namespace Code.Generation.Roslyn
 
             ResolveDocumentTransformation(source, expectedSource);
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && !IsDisposed)
+            {
+                Fixture.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
     }
 }
