@@ -124,5 +124,28 @@ namespace Code.Generation.Roslyn
 
             ResolveDocumentTransformation(source, expectedSource);
         }
+
+        [Theory
+         , InlineData(true, true)
+         , InlineData(true, false)
+         , InlineData(false, true)
+         , InlineData(false, false)]
+        public void CG_Uses_Custom_Preamble_Correctly(bool shorthand, bool fullName)
+        {
+            Fixture.TryExtrapolate(Bar, out string source).AssertTrue();
+
+            var options = GetAttributeRenderingOptions(shorthand, fullName);
+
+            Fixture.TryAddClassAnnotation<WithCustomPreambleAttribute>(source, out source, options).AssertTrue();
+
+            if (!fullName)
+            {
+                Fixture.TryAddOuterTypeNamespaceUsingStatement<WithCustomPreambleAttribute>(source, out source).AssertTrue();
+            }
+
+            var expectedSource = $@"{WithCustomPreambleGenerator.CustomPreambleText}{CarriageReturnLineFeed}{source}";
+
+            ResolveDocumentTransformation(source, expectedSource);
+        }
     }
 }
