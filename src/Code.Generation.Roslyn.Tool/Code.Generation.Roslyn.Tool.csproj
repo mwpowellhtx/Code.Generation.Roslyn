@@ -6,10 +6,10 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <!-- ReSharper disable once UnknownProperty -->
     <AssemblyName>$(CodeGenerationToolName)</AssemblyName>
-    <Version>1.0.0.4433</Version>
-    <AssemblyVersion>1.0.0.4433</AssemblyVersion>
-    <FileVersion>1.0.0.4433</FileVersion>
-    <PackageVersion>1.0.0.4433</PackageVersion>
+    <Version>1.0.0.4437</Version>
+    <AssemblyVersion>1.0.0.4437</AssemblyVersion>
+    <FileVersion>1.0.0.4437</FileVersion>
+    <PackageVersion>1.0.0.4437</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -26,14 +26,14 @@
   <ItemGroup>
     <!-- Tells the dotnet cli to allow the tool being run even if the run-time version does not match the target version. -->
     <Content Include="prefercliruntime" Pack="true" PackagePath="" />
-    <Compile Update="Strings.Designer.cs">
+    <Compile Update="StringLiterals.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Strings.resx</DependentUpon>
+      <DependentUpon>StringLiterals.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Update="Strings.resx">
+    <EmbeddedResource Update="StringLiterals.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+      <LastGenOutput>StringLiterals.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 
@@ -44,6 +44,12 @@
   <ItemGroup>
     <PackageReference Include="NConsole.Options.Extensions" Version="1.4.7.23428" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>Code.Generation.Roslyn.Tests</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
 
 </Project>
