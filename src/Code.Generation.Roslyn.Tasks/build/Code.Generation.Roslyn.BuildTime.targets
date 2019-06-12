@@ -37,14 +37,15 @@
     <DotnetCodeGenerationToolPath Condition="'$(DotnetCodeGenerationToolPath)' == ''">codegen</DotnetCodeGenerationToolPath>
   </PropertyGroup>
 
-  <Target Name="GenerateCodeFromAttributes" DependsOnTargets="$(GenerateCodeFromAttributesDependsOn)" BeforeTargets="CoreCompile;PrepareResources"/>
+  <Target Name="GenerateCodeFromAttributes" DependsOnTargets="$(GenerateCodeFromAttributesDependsOn)" BeforeTargets="CoreCompile;PrepareResources" />
 
   <!-- ReSharper disable once UnknownTarget -->
   <Target Name="PrepareToGenerateCodeFromAttributes" DependsOnTargets="ResolveReferences">
+    <Message Text="Preparing to run code generation using intermediate directory `$(CodeGenToolIntermediateOutputDirectory)´..." Importance="normal" />
     <ItemGroup>
       <!-- ReSharper disable once UnknownProperty -->
-      <CodeGenCompilationDefineConstants Include="$(DefineConstants)"/>
-      <CodeGenCompilationInputsFromAttributes Include="@(Compile)" Condition="'%(Compile.Generator)' == 'MSBuild:GenerateCodeFromAttributes'"/>
+      <CodeGenCompilationDefineConstants Include="$(DefineConstants)" />
+      <CodeGenCompilationInputsFromAttributes Include="@(Compile)" Condition="'%(Compile.Generator)' == 'MSBuild:GenerateCodeFromAttributes'" />
     </ItemGroup>
     <PropertyGroup>
       <!-- TODO: TBD: perhaps we do not need to quote-enclose the arguments? -->
@@ -65,14 +66,16 @@ $(CodeGenToolAssemblyReferenceRegistryFileName)
       </_CodeGenToolResponseFileContent>
       <_GenerateCodeToolVersion>(n/a)</_GenerateCodeToolVersion>
     </PropertyGroup>
+    <!-- Must make the Intermediate Output Directory because the invoking context may not have output directory comprehension. -->
+    <MakeDir Directories="$(CodeGenToolIntermediateOutputDirectory)" Condition="!Exists('$(CodeGenToolIntermediateOutputDirectory)')" />
     <!-- Write the response file with arguments for dotnet-codegen. -->
     <WriteLinesToFile File="$(CodeGenToolResponsePath)" Lines="$(_CodeGenToolResponseFileContent)" Overwrite="true" />
     <!-- TODO: TBD: for now, do not delete the Compilation Registry... This helps preclude unnecessarily regenerating code... -->
     <!-- TODO: TBD: if anything, maybe we also respond to 'Clean' target requests in order to do this bit... -->
-    <!--<Delete Condition="Exists('$(CodeGenToolCompilationRegistryPath)')" Files="$(CodeGenToolCompilationRegistryPath)" ContinueOnError="true"/>-->
+    <!--<Delete Condition="Exists('$(CodeGenToolCompilationRegistryPath)')" Files="$(CodeGenToolCompilationRegistryPath)" ContinueOnError="true" />-->
     <!-- Verify and report the tool version. -->
     <Exec Command="dotnet $(DotnetCodeGenerationToolPath) --version" ConsoleToMSBuild="true" StandardOutputImportance="normal" ContinueOnError="true">
-      <Output TaskParameter="ConsoleOutput" PropertyName="_GenerateCodeToolVersion"/>
+      <Output TaskParameter="ConsoleOutput" PropertyName="_GenerateCodeToolVersion" />
     </Exec>
     <Message Text="Running $(CodeGenerationToolFullName) v$(_GenerateCodeToolVersion) ..." Importance="normal" />
   </Target>
@@ -83,20 +86,20 @@ $(CodeGenToolAssemblyReferenceRegistryFileName)
       <_CodeGenToolWarningText>$(CodeGenerationToolingFullName): Failed to yield code generation artifacts, please check https://github.com/mwpowellhtx/Code.Generation.Roslyn for usage instructions.</_CodeGenToolWarningText>
     </PropertyGroup>
     <!-- Run the tool and evaluate the expected outcome. -->
-    <Exec Command="dotnet $(DotnetCodeGenerationToolPath) &quot;%40$(CodeGenToolResponsePath)&quot;" StandardOutputImportance="normal"  ContinueOnError="true"/>
-    <Warning Code="$(_CodeGenWarning)" Text="$(_CodeGenToolWarningText)" Condition="!(Exists('$(CodeGenToolCompilationRegistryPath)') And Exists('$(CodeGenToolCompilationResponsePath)') And Exists('$(CodeGenToolAssemblyReferenceRegistryPath))'))"/>
+    <Exec Command="dotnet $(DotnetCodeGenerationToolPath) &quot;%40$(CodeGenToolResponsePath)&quot;" StandardOutputImportance="normal"  ContinueOnError="true" />
+    <Warning Code="$(_CodeGenWarning)" Text="$(_CodeGenToolWarningText)" Condition="!(Exists('$(CodeGenToolCompilationRegistryPath)') And Exists('$(CodeGenToolCompilationResponsePath)') And Exists('$(CodeGenToolAssemblyReferenceRegistryPath))'))" />
   </Target>
 
   <Target Name="CompileCodeGenerationGeneratedCode" DependsOnTargets="InvokeCodeGenerationFromAttributes" Condition="Exists('$(CodeGenToolCompilationResponsePath)')">
     <ReadLinesFromFile File="$(CodeGenToolCompilationResponsePath)">
-      <Output TaskParameter="Lines" ItemName="_CodeGenToolCompilationGeneratedInputFiles"/>
+      <Output TaskParameter="Lines" ItemName="_CodeGenToolCompilationGeneratedInputFiles" />
     </ReadLinesFromFile>
     <ReadLinesFromFile File="$(CodeGenToolCompilationResponsePath)">
-      <Output TaskParameter="Lines" ItemName="FileWrites"/>
+      <Output TaskParameter="Lines" ItemName="FileWrites" />
     </ReadLinesFromFile>
     <ItemGroup>
-      <Compile Include="@(_CodeGenToolCompilationGeneratedInputFiles)"/>
-      <FileWrites Include="$(CodeGenToolCompilationResponsePath)"/>
+      <Compile Include="@(_CodeGenToolCompilationGeneratedInputFiles)" />
+      <FileWrites Include="$(CodeGenToolCompilationResponsePath)" />
     </ItemGroup>
   </Target>
 
