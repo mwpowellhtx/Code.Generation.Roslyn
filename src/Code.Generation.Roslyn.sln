@@ -16,6 +16,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{9A
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{C5C48C55-7BCB-4DB0-8B51-FE6EC7C2C98C}"
+	ProjectSection(SolutionItems) = preProject
+		Code.Generation.Roslyn.Generators\WithCustomPreambleAttribute.cs = Code.Generation.Roslyn.Generators\WithCustomPreambleAttribute.cs
+		Code.Generation.Roslyn.Generators\WithCustomPreambleGenerator.cs = Code.Generation.Roslyn.Generators\WithCustomPreambleGenerator.cs
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Code.Generation.Roslyn", "Code.Generation.Roslyn\Code.Generation.Roslyn.csproj", "{1B2E9674-9AFF-4AEB-B97A-2E34C98C3A81}"
 EndProject
@@ -27,9 +31,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Code.Generation.Roslyn.Tool
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Code.Generation.Roslyn.Tasks", "Code.Generation.Roslyn.Tasks\Code.Generation.Roslyn.Tasks.csproj", "{0FBB4AB2-721B-4C3F-AE5F-8C4DDD02F542}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Code.Generation.Roslyn.Generators", "Code.Generation.Roslyn.Generators\Code.Generation.Roslyn.Generators.csproj", "{0AF22A86-0D5C-47A9-B493-BF73B9F39C20}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Code.Generation.Roslyn.Generators", "Code.Generation.Roslyn.Generators\Code.Generation.Roslyn.Generators.csproj", "{0AF22A86-0D5C-47A9-B493-BF73B9F39C20}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Code.Generation.Roslyn.Tests", "Code.Generation.Roslyn.Tests\Code.Generation.Roslyn.Tests.csproj", "{26C7C18E-CB17-4F46-92DA-1FC62ADECCE4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Code.Generation.Roslyn.Tests", "Code.Generation.Roslyn.Tests\Code.Generation.Roslyn.Tests.csproj", "{26C7C18E-CB17-4F46-92DA-1FC62ADECCE4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
