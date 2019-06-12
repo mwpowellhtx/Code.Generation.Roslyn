@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace Code.Generation.Roslyn
 {
+    using Generators.Integration;
     using Integration;
     using Xunit;
     using Xunit.Abstractions;
-    using static Constants;
-    using static Integration.ModuleKind;
+    using static Generators.Integration.ModuleKind;
     using AttributeRenderingOptionDictionary = Dictionary<string, object>;
     using IAttributeRenderingOptionDictionary = IDictionary<string, object>;
 
@@ -82,7 +82,7 @@ namespace Code.Generation.Roslyn
             var moduleFilePath = Bundle.GetFilePath(module);
 
             moduleFilePath.AssertFileContains(this.RenderAttributeNotation<ObsoleteAttribute>(options));
-            moduleFilePath.AssertFileContains($"{Using} {typeof(ObsoleteAttribute).Namespace}{SemiColon}");
+            moduleFilePath.AssertFileContains(this.RenderUsingTypeNameSpace<ObsoleteAttribute>());
         }
 
         [Theory
@@ -102,7 +102,7 @@ namespace Code.Generation.Roslyn
             var moduleFilePath = Bundle.GetFilePath(module);
 
             moduleFilePath.AssertFileContains(this.RenderAttributeNotation<ObsoleteAttribute>(options));
-            moduleFilePath.AssertFileContains($"{Using} {typeof(ObsoleteAttribute).Namespace}{SemiColon}");
+            moduleFilePath.AssertFileContains(this.RenderUsingTypeNameSpace<ObsoleteAttribute>());
         }
 
         [Theory
@@ -127,7 +127,7 @@ namespace Code.Generation.Roslyn
         {
             if (disposing && !IsDisposed)
             {
-                Bundle?.Dispose();
+                Bundle.Dispose();
             }
 
             base.Dispose(disposing);
