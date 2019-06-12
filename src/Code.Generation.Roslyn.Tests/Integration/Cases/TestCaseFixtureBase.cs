@@ -2,9 +2,10 @@
 
 namespace Code.Generation.Roslyn.Integration
 {
+    using Generators.Integration;
     using static Constants;
     using static Resources;
-    using static ModuleKind;
+    using static Generators.Integration.ModuleKind;
 
     public abstract class TestCaseFixtureBase : IDisposable
     {
@@ -45,6 +46,7 @@ namespace Code.Generation.Roslyn.Integration
                     return $"{module}.cs";
 
                 case Biz:
+                case Buz:
                     return $"I{module}.cs";
             }
 

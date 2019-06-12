@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace Code.Generation.Roslyn.Integration
 {
+    using Generators.Integration;
     using static Constants;
     using static Domain;
     using static Enums;
