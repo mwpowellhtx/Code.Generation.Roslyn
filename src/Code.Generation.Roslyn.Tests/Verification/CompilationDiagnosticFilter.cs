@@ -4,11 +4,13 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Code.Generation.Roslyn
 {
+    using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.Diagnostics;
+    using Microsoft.CodeAnalysis.Emit;
+
     // TODO: TBD: we are pretty confident this focuses solely on the Diagnostic issue...
     // TODO: TBD: how ever we arrived at the compilation itself, when we want diagnostics to occur, we can filter them...
     /// <summary>
@@ -58,6 +60,9 @@ namespace Code.Generation.Roslyn
             Predicate = DefaultPredicate;
         }
 
+        /// <inheritdoc />
+        public virtual EmitResult Result { get; set; }
+
         /// <summary>
         /// Gets or Sets the Predicate. Default yields <value>true</value>, we allow All
         /// <see cref="Diagnostic"/> instances to pass through. In some instances, you may want
@@ -69,7 +74,11 @@ namespace Code.Generation.Roslyn
 
         // TODO: TBD: may want to capture them apart from such a dynamic set of diagnostics...
         /// <inheritdoc />
-        public virtual IEnumerator<Diagnostic> GetEnumerator() => DiagnosticsAsync.Result.Where(Predicate.Invoke).GetEnumerator();
+        public virtual IEnumerator<Diagnostic> GetEnumerator()
+        {
+            ImmutableArray<Diagnostic> GetResultDiagnostics() => Result?.Diagnostics ?? ImmutableArray<Diagnostic>.Empty;
+            return DiagnosticsAsync.Result.Concat(GetResultDiagnostics()).Where(Predicate.Invoke).GetEnumerator();
+        }
 
         /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

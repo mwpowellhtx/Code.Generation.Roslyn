@@ -4,6 +4,7 @@ namespace Code.Generation.Roslyn
 {
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.Diagnostics;
+    using Microsoft.CodeAnalysis.Emit;
 
     /// <summary>
     /// Represents a <see cref="Diagnostic"/> oriented Compilation Filter. The only thing
@@ -33,6 +34,11 @@ namespace Code.Generation.Roslyn
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         T GetCompilation<T>() where T : class;
+
+        /// <summary>
+        /// Gets or Sets the Result.
+        /// </summary>
+        EmitResult Result { get; set; }
 
         /// <summary>
         /// Gets or Sets the Predicate used to Filter the <see cref="Diagnostic"/> set.
