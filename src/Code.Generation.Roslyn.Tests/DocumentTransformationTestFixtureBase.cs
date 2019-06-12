@@ -54,7 +54,7 @@ namespace Code.Generation.Roslyn
 
             AssemblyReferenceServiceManager CreateReferenceService() => new AssemblyReferenceServiceManager(
                 TransformationName, IntermediateAssemblyReferenceRegistryFileName
-                , referencePath.ToArray(), generatorSearchPath.ToArray()).AssertNotNull();
+                , referencePath.ToArray(), generatorSearchPath.ToArray());
 
             DocumentTransformation CreateDocumentTransformation() => new DocumentTransformation(
                 CreateReferenceService().AssertNotNull());
