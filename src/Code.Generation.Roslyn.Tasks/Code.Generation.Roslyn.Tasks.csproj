@@ -11,10 +11,10 @@
   <PropertyGroup>
     <!-- TODO: TBD: potentially: netstandard1.0;net40;net20;portable-net40+win8+wpa81;portable-net45+win8+wpa81+wp8 -->
     <TargetFrameworks>netstandard1.0;netstandard2.0;net20</TargetFrameworks>
-    <Version>1.0.0.4435</Version>
-    <AssemblyVersion>1.0.0.4435</AssemblyVersion>
-    <FileVersion>1.0.0.4435</FileVersion>
-    <PackageVersion>1.0.0.4435</PackageVersion>
+    <Version>1.0.0.4440</Version>
+    <AssemblyVersion>1.0.0.4440</AssemblyVersion>
+    <FileVersion>1.0.0.4440</FileVersion>
+    <PackageVersion>1.0.0.4440</PackageVersion>
   </PropertyGroup>
 
   <!-- ReSharper disable once UnknownProperty -->
