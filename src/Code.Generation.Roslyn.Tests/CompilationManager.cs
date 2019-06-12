@@ -106,10 +106,22 @@ namespace Code.Generation.Roslyn
         /// <param name="project"></param>
         /// <param name="compiling"></param>
         /// <param name="cancellationToken"></param>
+        [Obsolete("is the projectName/sources version really that necessary after all?")]
         protected virtual void ResolveCompilation(string projectName, IReadOnlyList<string> sources, Project project
             , Task<Compilation> compiling, CancellationToken cancellationToken = default)
         {
             // TODO: TBD: may need to reconsider Task<Compilation> in cases where Analyzers are involved, i.e. Task<CompilationWithAnalyzers> (?)
+            OnEvaluateCompilation(project, CreateDiagnosticFilter(compiling.Result));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="project"></param>
+        /// <param name="compiling"></param>
+        /// <param name="cancellationToken"></param>
+        protected virtual void ResolveCompilation(Project project, Task<Compilation> compiling, CancellationToken cancellationToken = default)
+        {
             OnEvaluateCompilation(project, CreateDiagnosticFilter(compiling.Result));
         }
 
@@ -242,6 +254,17 @@ namespace Code.Generation.Roslyn
 
             // Hold off getting the project because we need the most up to date state.
             return Solution.GetProject(projectId);
+        }
+
+        public virtual void CompileAllProjects()
+        {
+            // TODO: TBD: not counting build orders?
+            Solution.Projects.ToList().ForEach(
+                p => ResolveCompilation(
+                    p
+                    , p.WithCompilationOptions(CompilationOptions).WithParseOptions(ParseOptions).GetCompilationAsync()
+                )
+            );
         }
 
         /// <summary>
