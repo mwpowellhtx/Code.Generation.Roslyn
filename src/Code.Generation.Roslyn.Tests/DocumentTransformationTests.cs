@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using Code.Generation.Roslyn.Integration;
 
 namespace Code.Generation.Roslyn
 {
+    using Integration;
     using Xunit;
     using Xunit.Abstractions;
     using static Constants;
-    using static ModuleKind;
+    using static Generators.Integration.ModuleKind;
     using AttributeRenderingOptionDictionary = Dictionary<string, object>;
     using IAttributeRenderingOptionDictionary = IDictionary<string, object>;
 

@@ -2,6 +2,8 @@
 
 namespace Code.Generation.Roslyn.Integration
 {
+    using static String;
+
     // TODO: TBD: there are a several other Using Statement variants that might be interesting to leverage...
     // TODO: TBD: but we will leave this alone for the time being and add them if/when necessary...
     /// <summary>
@@ -36,22 +38,14 @@ namespace Code.Generation.Roslyn.Integration
         /// </summary>
         /// <param name="global"></param>
         /// <returns></returns>
-        private static string RenderGlobalPrefix(bool global) => global ? $"{nameof(global)}{DoubleColon}" : "";
+        private static string RenderGlobalPrefix(bool global) => global ? $"{nameof(global)}{DoubleColon}" : Empty;
 
         /// <summary>
         /// Renders the <paramref name="path"/> in terms of a <see cref="@using"/> Statement.
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        public static string RenderUsingStatement(string path, bool global = false) => $"{@using} {RenderGlobalPrefix(global)}{path}{SemiColon}";
-
-        /// <summary>
-        /// Renders the <see cref="@using"/> Statement for the <paramref name="type"/>
-        /// <see cref="Type.Namespace"/>.
-        /// </summary>
-        /// <param name="global"></param>
-        /// <returns></returns>
-        public static string RenderUsingTypeNameSpace(Type type, bool global = false) => RenderUsingStatement(type.Namespace, global);
+        public static string RenderUsingStatement(this string path, bool global = false) => $"{@using} {RenderGlobalPrefix(global)}{path}{SemiColon}";
 
         /// <summary>
         /// Renders the <see cref="@using"/> Statement for the <typeparamref name="T"/>
@@ -60,6 +54,6 @@ namespace Code.Generation.Roslyn.Integration
         /// <typeparam name="T"></typeparam>
         /// <param name="global"></param>
         /// <returns></returns>
-        public static string RenderUsingTypeNameSpace<T>(bool global = false) => RenderUsingTypeNameSpace(typeof(T), global);
+        public static string RenderUsingTypeNameSpace<T>(this object anchor, bool global = false) => typeof(T).Namespace.RenderUsingStatement(global);
     }
 }
