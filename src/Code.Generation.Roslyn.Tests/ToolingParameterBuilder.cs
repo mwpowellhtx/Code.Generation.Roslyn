@@ -85,7 +85,11 @@ namespace Code.Generation.Roslyn
         internal ICollection<string> Sources { get; } = new List<string> { };
 
         /// <summary>
-        /// Adds <paramref name="values"/> to the <see cref="Sources"/>.
+        /// Adds <paramref name="values"/> to the <see cref="Sources"/>. Sources would ordinarily
+        /// be discovered during the Code Generation GenerateCodeFromAttributes Microsoft Build
+        /// step. Following which they are tallied by the Targets
+        /// CodeGenCompilationInputsFromAttributes property. However, it is necessary to specify
+        /// them manually for integration testing purposes.
         /// </summary>
         /// <param name="values"></param>
         /// <returns></returns>
@@ -102,7 +106,9 @@ namespace Code.Generation.Roslyn
         internal ICollection<string> Defines { get; } = new List<string> { };
 
         /// <summary>
-        /// Adds <paramref name="values"/> to the <see cref="Defines"/>.
+        /// Adds <paramref name="values"/> to the <see cref="Defines"/>. Similarly as with
+        /// Sources, Defines are tallied by the DefineConstants Microsoft Build property.
+        /// However, they must be manually specified during integration testing.
         /// </summary>
         /// <param name="values"></param>
         /// <returns></returns>
@@ -116,6 +122,8 @@ namespace Code.Generation.Roslyn
         /// Enumerates the Command Line Arguments for purposes of internal unit testing.
         /// </summary>
         /// <returns></returns>
+        /// <remarks>The naming conventions herein are not an accident. They are carefully
+        /// chosen and aligned with the tooling command line argument prototypes.</remarks>
         private IEnumerable<string> GetToolingParameters()
         {
             yield return $@"{DoubleDash}{nameof(Project).ToLower()}";
