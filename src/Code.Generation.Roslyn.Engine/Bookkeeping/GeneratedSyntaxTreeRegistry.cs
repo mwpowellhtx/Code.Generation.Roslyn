@@ -34,7 +34,7 @@ namespace Code.Generation.Roslyn
 
         internal IDictionary<string, string[]> GeneratedSourceBundles
             => this.ToDictionary(x => x.SourceFilePath
-                , x => x.GeneratedAssetKeys.Select(y => $"{y:D}.g.s")
+                , x => x.GeneratedAssetKeys.Select(y => $"{y:D}.g.cs")
                     .Select(y => Combine(OutputDirectory, y)).ToArray());
 
         public GeneratedSyntaxTreeRegistry() : this(Array.Empty<GeneratedSyntaxTreeDescriptor>())
@@ -45,6 +45,7 @@ namespace Code.Generation.Roslyn
         internal GeneratedSyntaxTreeRegistry(IEnumerable<GeneratedSyntaxTreeDescriptor> descriptors)
             : base(descriptors, new InputSyntaxTreeFileDescriptorComparer { })
         {
+            // TODO: TBD: why did we elect to purge the descriptors initially?
             RemoveWhere(null);
         }
 
@@ -57,6 +58,8 @@ namespace Code.Generation.Roslyn
         /// <inheritdoc cref="SortedSet{T}.RemoveWhere"/>
         public new int RemoveWhere(Predicate<GeneratedSyntaxTreeDescriptor> predicate)
         {
+            predicate = predicate ?? (_ => true);
+
             foreach (var y in this.Where(x => predicate(x)))
             {
                 foreach (var path in y.GeneratedAssets.Select(z => Combine(OutputDirectory, $"{z}.g.cs")))
