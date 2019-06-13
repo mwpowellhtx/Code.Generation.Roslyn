@@ -137,15 +137,18 @@ namespace Code.Generation.Roslyn
                 }
             }
 
-            // TODO: TBD: best I can figure, the "loaded assemblies" 'registry' was only ever glommed on to...
-            // TODO: TBD: would never grow, shrink, adjust, to the current state of a target project.
-            foreach (var x in GetAllMatchingAssemblyReferencePaths(ReferencePath, SearchPaths).Where(IsNotNullOrEmpty)
-            )
             {
-                return LoadAssembly(x);
-            }
+                // TODO: TBD: best I can figure, the "loaded assemblies" 'registry' was only ever glommed on to...
+                // TODO: TBD: would never grow, shrink, adjust, to the current state of a target project.
 
-            return Assembly.Load(assemblyName);
+                var y = GetAllMatchingAssemblyReferencePaths(ReferencePath, SearchPaths)
+                            .Where(IsNotNullOrEmpty).Select(LoadAssembly).FirstOrDefault()
+                        ?? Assembly.Load(assemblyName);
+
+                RegistrySet.Add(AssemblyDescriptor.Create(y.Location));
+
+                return y;
+            }
         }
 
         /// <summary>
