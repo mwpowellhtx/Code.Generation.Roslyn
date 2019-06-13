@@ -101,7 +101,12 @@ namespace Code.Generation.Roslyn
         /// </summary>
         /// <param name="registrySet"></param>
         /// <returns></returns>
-        internal bool TryLoad(out TSet registrySet) => TryLoad(RegistrySetPath, out registrySet);
+        internal bool TryLoad(out TSet registrySet)
+        {
+            var loaded = TryLoad(RegistrySetPath, out registrySet);
+            RegistrySet = registrySet;
+            return loaded;
+        }
 
         /// <summary>
         /// Tries to Load the <see cref="IRegistrySet{T}"/> given the
@@ -110,7 +115,7 @@ namespace Code.Generation.Roslyn
         /// <param name="registrySetPath"></param>
         /// <param name="registrySet"></param>
         /// <returns></returns>
-        protected bool TryLoad(string registrySetPath, out TSet registrySet)
+        internal static bool TryLoad(string registrySetPath, out TSet registrySet)
         {
             // ReSharper disable RedundantEmptyObjectOrCollectionInitializer
             registrySet = null;
@@ -118,6 +123,7 @@ namespace Code.Generation.Roslyn
             {
                 registrySet = new TSet { };
                 var set = registrySet;
+
                 // We will assume for the time being that a Set.Add at this level will succeed.
                 void Add(T item) => set.Add(item);
                 if (File.Exists(registrySetPath))
@@ -139,12 +145,13 @@ namespace Code.Generation.Roslyn
             }
             finally
             {
-                RegistrySet = registrySet ?? new TSet { };
-                RegistrySet.OutputDirectory = IntermediateOutputDirectory;
+                registrySet = registrySet ?? new TSet { };
             }
-            // ReSharper restore RedundantEmptyObjectOrCollectionInitializer
 
-            return RegistrySet?.Any() == true;
+            // Assume for the moment that the Output Directory fell out from the given Path.
+            registrySet.OutputDirectory = GetDirectoryName(registrySetPath);
+
+            return registrySet?.Any() == true;
         }
     }
 }
