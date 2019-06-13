@@ -110,7 +110,7 @@ namespace Code.Generation.Roslyn
 
             // TODO: TBD: borderline complexity boundary here, could potentially benefit from a DI container...
             AssemblyReferenceServiceManager CreateReferenceService()
-                => new AssemblyReferenceServiceManager(OutputDirectory, IntermediateGeneratedRegistryFileName
+                => new AssemblyReferenceServiceManager(OutputDirectory, IntermediateAssembliesRegistryFileName
                     , Sanitize(ReferencePathList).ToArray(), Sanitize(GeneratorSearchPathList).ToArray());
 
             var referenceService = CreateReferenceService();
