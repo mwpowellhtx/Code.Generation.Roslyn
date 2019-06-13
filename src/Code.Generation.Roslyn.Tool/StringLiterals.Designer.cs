@@ -160,6 +160,15 @@ namespace Code.Generation.Roslyn {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No source files specified..
+        /// </summary>
+        internal static string NoSourceFilesSpecified {
+            get {
+                return ResourceManager.GetString("NoSourceFilesSpecified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Option &apos;{0}&apos; is already defined..
         /// </summary>
         internal static string OptionAlreadyDefinedFormat {
@@ -192,6 +201,15 @@ namespace Code.Generation.Roslyn {
         internal static string OptionsMustBeDefinedBeforeParameters {
             get {
                 return ResourceManager.GetString("OptionsMustBeDefinedBeforeParameters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An output directory must be specified..
+        /// </summary>
+        internal static string OutputDirectoryMustBeSpecified {
+            get {
+                return ResourceManager.GetString("OutputDirectoryMustBeSpecified", resourceCulture);
             }
         }
         

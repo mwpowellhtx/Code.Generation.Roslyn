@@ -180,4 +180,10 @@
   <data name="ParameterNameIsNotValidFormat" xml:space="preserve">
     <value>Name '{0}' cannot be used for a parameter.</value>
   </data>
+  <data name="NoSourceFilesSpecified" xml:space="preserve">
+    <value>No source files specified.</value>
+  </data>
+  <data name="OutputDirectoryMustBeSpecified" xml:space="preserve">
+    <value>An output directory must be specified.</value>
+  </data>
 </root>
