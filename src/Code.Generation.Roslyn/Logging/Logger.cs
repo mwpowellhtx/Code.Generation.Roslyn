@@ -10,7 +10,6 @@ using System.Linq;
 namespace Code.Generation.Roslyn.Logging
 {
     // TODO: TBD: for now working through Console, but we might consider using a furnished TextWriter...
-    using static Activator;
     using static Console;
     using static Constants;
     using static StringSplitOptions;
@@ -43,7 +42,7 @@ namespace Code.Generation.Roslyn.Logging
         private TextWriter OutputWriter { get; }
 
         // ReSharper disable once RedundantEmptyObjectOrCollectionInitializer
-        private static Lazy<Logger> LazyResource { get; } = new Lazy<Logger>(CreateInstance<Logger>);
+        private static Lazy<Logger> LazyResource { get; } = new Lazy<Logger>(() => new Logger());
 
         public static Logger Resource => LazyResource.Value;
 
@@ -153,6 +152,7 @@ namespace Code.Generation.Roslyn.Logging
 
     internal static class LoggerExtensionMethods
     {
+        // ReSharper disable once UseDeconstructionOnParameter this is why we are here to Deconstruct
         /// <summary>
         /// Deconstructs the <see cref="KeyValuePair{TKey,TValue}"/>.
         /// </summary>
@@ -163,6 +163,9 @@ namespace Code.Generation.Roslyn.Logging
         /// but for whatever reason this is necessary.</remarks>
         public static void Deconstruct(this KeyValuePair<int, LoggerCallback> pair, out int level
             , out LoggerCallback callback)
-            => (level, callback) = pair;
+        {
+            level = pair.Key;
+            callback = pair.Value;
+        }
     }
 }
