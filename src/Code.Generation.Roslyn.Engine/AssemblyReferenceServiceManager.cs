@@ -41,10 +41,11 @@ namespace Code.Generation.Roslyn
         private CompositeCompilationAssemblyResolver Resolver { get; set; }
 
         /// <summary>
-        /// Gets a registry of <see cref="Assembly"/> instances by <see cref="string"/> Path.
+        /// Gets a registry of <see cref="Assembly"/> instances by <see cref="string"/> Assembly Name.
         /// </summary>
-        private Dictionary<string, Assembly> AssembliesByPath { get; } = new Dictionary<string, Assembly>();
+        private Dictionary<string, Assembly> AssembliesByName { get; } = new Dictionary<string, Assembly>();
 
+        // TODO: TBD: not sure what the purpose behind this is/was to be honest...
         private HashSet<string> DirectoryPathsWithResolver { get; } = new HashSet<string>();
 
         /// <summary>
@@ -222,21 +223,23 @@ namespace Code.Generation.Roslyn
             return null;
         }
 
+        //// TODO: TBD: the whole thing with this one is a faulty assumption, quite probably...
+        //// TODO: TBD: would the assembly name not be sufficient? why by path?
         /// <summary>
-        /// Loads the <see cref="Assembly"/> corresponding with the <paramref name="path"/>.
+        /// Loads the <see cref="Assembly"/> corresponding with the <paramref name="assemblyName"/>.
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="assemblyName"></param>
         /// <returns></returns>
-        private Assembly LoadAssembly(string path)
+        private Assembly LoadAssembly(string assemblyName)
         {
             Assembly LoadAssemblyFromTypeLoadContext()
             {
                 var loadContext = GetLoadContext(GetType().GetTypeInfo().Assembly);
-                return loadContext.LoadFromAssemblyPath(path);
+                return loadContext.LoadFromAssemblyName(new AssemblyName(assemblyName));
             }
 
             // ReSharper disable once InvertIf
-            if (!AssembliesByPath.ContainsKey(path))
+            if (!AssembliesByName.ContainsKey(assemblyName))
             {
                 var assembly = LoadAssemblyFromTypeLoadContext();
 
@@ -246,17 +249,18 @@ namespace Code.Generation.Roslyn
                     Context = Context.Merge(loadedContext);
                 }
 
-                var basePath = GetDirectoryName(path);
-                if (!DirectoryPathsWithResolver.Contains(basePath))
-                {
-                    Resolver = Resolver.AbsorbResolvers(new AppBaseCompilationAssemblyResolver(basePath));
-                    DirectoryPathsWithResolver.Add(basePath);
-                }
+                //// TODO: TBD: what was the intent behind this?
+                //var basePath = GetDirectoryName(path);
+                //if (!DirectoryPathsWithResolver.Contains(basePath))
+                //{
+                //    Resolver = Resolver.AbsorbResolvers(new AppBaseCompilationAssemblyResolver(basePath));
+                //    DirectoryPathsWithResolver.Add(basePath);
+                //}
 
-                AssembliesByPath.Add(path, assembly);
+                AssembliesByName.Add(assemblyName, assembly);
             }
 
-            return AssembliesByPath[path];
+            return AssembliesByName[assemblyName];
         }
     }
 }
