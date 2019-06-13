@@ -9,6 +9,7 @@ namespace Code.Generation.Roslyn
     using Microsoft.CodeAnalysis;
     using NConsole.Options;
     using static String;
+    using static StringLiterals;
 
     internal class ToolConsoleManager : OptionSetConsoleManager
     {
@@ -73,8 +74,8 @@ namespace Code.Generation.Roslyn
 
             Levels = new ErrorLevelCollection
             {
-                {1, () => !SourcePathList.Values.Any(), () => "No source files specified."},
-                {2, () => IsNullOrEmpty(OutputDirectory.Value), () => "An output directory must be specified."},
+                {1, () => !SourcePathList.Values.Any(), () => NoSourceFilesSpecified},
+                {2, () => IsNullOrEmpty(OutputDirectory.Value), () => OutputDirectoryMustBeSpecified},
                 {3, () => ServiceException != null, RenderServiceException},
                 DefaultErrorLevel
             };
@@ -95,10 +96,12 @@ namespace Code.Generation.Roslyn
                     Writer.WriteLine(descriptor.Description);
                 }
 
-                return level == DefaultErrorLevel;
+                // Error Level will have been Reported.
+                return level != DefaultErrorLevel;
             }
 
-            if (TryReportErrorLevel(errorLevel) || VersionSwitch.Enabled)
+            // Version trumps Reporting any Error Levels.
+            if (VersionSwitch.Enabled || TryReportErrorLevel(errorLevel))
             {
                 return;
             }
