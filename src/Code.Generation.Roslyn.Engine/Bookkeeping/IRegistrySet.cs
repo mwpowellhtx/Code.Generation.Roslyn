@@ -2,9 +2,13 @@
 
 namespace Code.Generation.Roslyn
 {
-    /// <inheritdoc />
-    public interface IRegistrySet<T> : ISet<T>
+    public interface IRegistrySet
     {
         string OutputDirectory { get; set; }
+    }
+
+    /// <inheritdoc cref="ISet{T}"/>
+    public interface IRegistrySet<T> : ISet<T>, IRegistrySet
+    {
     }
 }
