@@ -6,10 +6,10 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <!-- ReSharper disable once UnknownProperty -->
     <AssemblyName>$(CodeGenerationToolName)</AssemblyName>
-    <Version>1.0.0.4437</Version>
-    <AssemblyVersion>1.0.0.4437</AssemblyVersion>
-    <FileVersion>1.0.0.4437</FileVersion>
-    <PackageVersion>1.0.0.4437</PackageVersion>
+    <Version>1.0.0.4454</Version>
+    <AssemblyVersion>1.0.0.4454</AssemblyVersion>
+    <FileVersion>1.0.0.4454</FileVersion>
+    <PackageVersion>1.0.0.4454</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup>
