@@ -62,7 +62,7 @@ namespace Code.Generation.Roslyn
 
             foreach (var y in this.Where(x => predicate(x)))
             {
-                foreach (var path in y.GeneratedAssets.Select(z => Combine(OutputDirectory, $"{z}.g.cs")))
+                foreach (var path in y.GeneratedAssetKeys.Select(z => Combine(OutputDirectory, $"{z:D}.g.cs")))
                 {
                     if (!File.Exists(path))
                     {
