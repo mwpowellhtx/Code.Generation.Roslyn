@@ -116,8 +116,8 @@ namespace Code.Generation.Roslyn.Generators
 
             IEnumerable<CodeGeneratorDescriptor> Generate()
             {
-                var namespaceDecl = context.SourceCompilationUnit.ChildNodes().OfType<NamespaceDeclarationSyntax>().Single();
-                var classDecl = context.SourceCompilationUnit.ChildNodes().OfType<ClassDeclarationSyntax>().Single();
+                var namespaceDecl = context.SourceCompilationUnit.DescendantNodesAndSelf().OfType<NamespaceDeclarationSyntax>().Single();
+                var classDecl = context.SourceCompilationUnit.DescendantNodesAndSelf().OfType<ClassDeclarationSyntax>().Single();
 
                 yield return new CodeGeneratorDescriptor
                 {
