@@ -26,5 +26,10 @@ namespace Code.Generation.Roslyn
         /// </summary>
         /// <see cref="Attribute"/>
         public const string AttributeName = nameof(Attribute);
+
+        /// <summary>
+        /// &quot;--&quot;
+        /// </summary>
+        internal const string DoubleDash = @"--";
     }
 }
