@@ -75,7 +75,8 @@ namespace Code.Generation.Roslyn
         protected override bool TrySave(string registrySetPath)
         {
             // ReSharper disable once AssignNullToNotNullAttribute
-            var compilationResponsePath = Combine(GetFileNameWithoutExtension(registrySetPath), ".rsp");
+            var compilationResponsePath = Combine(GetDirectoryName(registrySetPath)
+                , $"{GetFileNameWithoutExtension(registrySetPath)}.rsp");
 
             void RemoveOldResponseFile()
             {
@@ -118,6 +119,7 @@ namespace Code.Generation.Roslyn
                 throw;
             }
 
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             return result;
         }
 
@@ -131,6 +133,10 @@ namespace Code.Generation.Roslyn
             Verify.Operation(SourcePathsToCompile != null, FormatVerifyOperationMessage(nameof(SourcePathsToCompile)));
 
             var compilation = CreateCompilation(cancellationToken);
+
+            // TODO: TBD: we should have a pretty good idea whether an initial compilation would be successful...
+            // TODO: TBD: as to whether any subsequent code generation would be justified...
+            // TODO: TBD: and somehow capture/report those errors through caller channels...
 
             if (ReferenceService.TryLoad(out _))
             {
@@ -189,8 +195,11 @@ namespace Code.Generation.Roslyn
 
                     try
                     {
+                        /* This is ordinarily auto-created by environmental tooling. However, depending
+                         on when our CG tooling `sees´ the event, the paths may not entirely exist yet. */
+
                         // TODO: TBD: may need the full path?
-                        var outputPath = Combine(RegistrySet.OutputDirectory, $"{genId:D}.g.cs");
+                        var outputPath = Combine(RegistrySet.EnsureOutputDirectoryExists().OutputDirectory, $"{genId:D}.g.cs");
 
                         if (File.Exists(outputPath))
                         {
@@ -224,16 +233,20 @@ namespace Code.Generation.Roslyn
                 RegistrySet.Add(genDescriptor);
             }
 
-            // Shake out the Compilation Set one last time.
-            RegistrySet.RemoveWhere(x => !x.GeneratedAssetKeys.Any());
-
-            // TODO: TBD: need to revisit these calls...
-            ReferenceService.TrySave();
-
+            // Throw sooner if there were any file failures.
             if (fileFailures.Count > 0)
             {
                 throw new AggregateException(fileFailures);
             }
+
+            // Shake out the Compilation Set one last time.
+            RegistrySet.RemoveWhere(x => !x.GeneratedAssetKeys.Any());
+
+            // TODO: TBD: need to revisit these calls...
+            // TODO: TBD: somewhere during the course of add references, etc, those should probably be registering with the service...
+            ReferenceService.TrySave();
+
+            TrySave();
         }
 
         private static void ReportError(IProgress<Diagnostic> progress, string id, SyntaxTree inputSyntaxTree, Exception exception)
