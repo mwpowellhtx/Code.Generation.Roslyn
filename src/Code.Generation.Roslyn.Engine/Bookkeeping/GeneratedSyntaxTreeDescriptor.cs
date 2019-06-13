@@ -39,16 +39,6 @@ namespace Code.Generation.Roslyn
         /// Gets or Sets a <see cref="List{T}"/> of GeneratedAssets by <see cref="Guid"/> key. All
         /// further bookkeeping operations all derive a full path based on the <see cref="Guid"/>.
         /// </summary>
-        internal ICollection<Guid> GeneratedAssetKeys { get; private set; } = new List<Guid> { };
-
-        /// <summary>
-        /// Gets or Sets the <see cref="GeneratedAssetKeys"/> in terms of the <see cref="Guid"/>
-        /// <see cref="string"/> representation.
-        /// </summary>
-        public List<string> GeneratedAssets
-        {
-            get => GeneratedAssetKeys.Select(x => $"{x:D}").ToList();
-            set => GeneratedAssetKeys = (value ?? Array.Empty<string>().ToList()).Select(Guid.Parse).ToArray();
-        }
+        public ICollection<Guid> GeneratedAssetKeys { get; set; } = new List<Guid> { };
     }
 }
