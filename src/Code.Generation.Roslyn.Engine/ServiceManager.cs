@@ -75,6 +75,8 @@ namespace Code.Generation.Roslyn
         {
             try
             {
+                RegistrySet.EnsureOutputDirectoryExists();
+
                 var json = JsonConvert.SerializeObject(RegistrySet.ToList(), Formatting.Indented);
 
                 using (var s = File.Open(registrySetPath, FileMode.Create, FileAccess.Write, FileShare.Read))
