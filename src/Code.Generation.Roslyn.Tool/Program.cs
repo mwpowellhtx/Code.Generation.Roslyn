@@ -10,12 +10,19 @@ namespace Code.Generation.Roslyn
         /// <summary>
         /// Gets the Out <see cref="TextWriter"/>.
         /// </summary>
-        public static TextWriter Out { get; set; } = Console.Out;
+        /// <remarks>Allows for Internal Set for unit test purposes.</remarks>
+        public static TextWriter Out { get; internal set; } = Console.Out;
 
         /// <summary>
         /// Gets the Error <see cref="TextWriter"/>.
         /// </summary>
-        public static TextWriter Error { get; set; } = Console.Error;
+        /// <remarks>Allows for Internal Set for unit test purposes.</remarks>
+        public static TextWriter Error { get; internal set; } = Console.Error;
+
+        /// <summary>
+        /// <see cref="ConsoleManager.DefaultErrorLevel"/>
+        /// </summary>
+        internal const int DefaultErrorLevel = ConsoleManager.DefaultErrorLevel;
 
         /// <summary>
         /// The Main method Program entry point.
@@ -26,7 +33,7 @@ namespace Code.Generation.Roslyn
         {
             using (var toolConsoleManager = new ToolConsoleManager(Out, Error))
             {
-                var errorLevel = ConsoleManager.DefaultErrorLevel;
+                var errorLevel = DefaultErrorLevel;
 
                 if (toolConsoleManager.TryParseOrShowHelp(args))
                 {
