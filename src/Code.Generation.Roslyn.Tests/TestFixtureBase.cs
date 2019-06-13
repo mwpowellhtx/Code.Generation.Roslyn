@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Code.Generation.Roslyn
 {
@@ -41,6 +42,8 @@ namespace Code.Generation.Roslyn
                 yield return value;
             }
         }
+
+        protected static T[] GetRangeArray<T>(params T[] values) => GetRange(values).ToArray();
 
         protected virtual void Dispose(bool disposing)
         {
