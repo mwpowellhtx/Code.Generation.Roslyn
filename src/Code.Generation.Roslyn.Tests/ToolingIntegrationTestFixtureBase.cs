@@ -33,6 +33,10 @@ namespace Code.Generation.Roslyn
         /// </summary>
         protected TestCaseBundle Bundle { get; } = new TestCaseBundle();
 
+        protected string ExpectedOutputDirectory => Combine(Bundle.ProjectName, "obj");
+
+        protected string ExpectedResponsePath => Combine(ExpectedOutputDirectory, $"{Bundle.ProjectName}.g.rsp");
+
         /// <summary>
         /// Protected Constructor.
         /// </summary>
@@ -181,6 +185,57 @@ namespace Code.Generation.Roslyn
         /// <see cref="VerifyWithOperators(TestCaseBundleOperator,ToolingParameterOperator,out GeneratedSyntaxTreeRegistry)"/>
         internal virtual int VerifyWithOperators(TestCaseBundleOperator bundleOp, ToolingParameterOperator parameterOp)
             => VerifyWithOperators(bundleOp, parameterOp, out _);
+
+        protected virtual void VerifyGeneratedSyntaxTreeRegistry(GeneratedSyntaxTreeRegistry registry, int? expectedCount = null)
+        {
+            var expectedOutputDirectory = ExpectedOutputDirectory;
+
+            // TODO: TBD: it is probably fair to say this should be the case ALWAYS, regardless of the scenario.
+            registry.AssertNotNull().OutputDirectory.AssertNotNull().AssertEqual(expectedOutputDirectory);
+
+            if (expectedCount.HasValue)
+            {
+                registry.Count.AssertEqual(expectedCount.Value);
+            }
+
+            // Not so much Asserting the Collection, as it is leaving it potentially Open Ended.
+            void VerifyGenerated(GeneratedSyntaxTreeDescriptor x)
+            {
+                var sourceLastWritten = File.GetLastWriteTimeUtc(x.SourceFilePath.AssertFileExists());
+
+                var generatedPaths = x.GeneratedAssetKeys
+                    .Select(y => $"{Combine(expectedOutputDirectory, $"{y:D}.g.cs").AssertFileExists()}")
+                    .ToArray();
+
+                var allGeneratedLastWritten = generatedPaths.Select(File.GetLastWriteTimeUtc).ToArray();
+                allGeneratedLastWritten.All(y => y >= sourceLastWritten).AssertTrue();
+            }
+
+            registry.ToList().ForEach(VerifyGenerated);
+        }
+
+        protected virtual void VerifyResponseFile(GeneratedSyntaxTreeRegistry expectedRegistry)
+        {
+            var actualPaths = File.ReadLines(ExpectedResponsePath.AssertFileExists()).ToArray();
+
+            var expectedOutputDirectory = ExpectedOutputDirectory;
+
+            string CombineBaseDirectory(string fileName) => Combine(expectedOutputDirectory, fileName);
+
+            var expectedPaths = expectedRegistry.SelectMany(d => d.GeneratedAssetKeys.Select(x => $"{x:D}.g.cs"))
+                .Select(CombineBaseDirectory).ToArray();
+
+            // ReSharper disable CommentTypo
+            // Make sure that the Actuals are Actuals, same for Expected.
+            actualPaths.Length.AssertEqual(expectedPaths.Length);
+
+            // In no particular order so long as all of the Paths are present and accounted for.
+            foreach (var expectedPath in expectedPaths)
+            {
+                actualPaths.AssertContains(expectedPath);
+            }
+            // ReSharper restore CommentTypo
+        }
 
         protected override void Dispose(bool disposing)
         {
