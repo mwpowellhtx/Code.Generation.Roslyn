@@ -114,6 +114,14 @@ namespace Code.Generation.Roslyn
             return path;
         }
 
+        public static IEnumerable<T> AssertContains<T>(this IEnumerable<T> collection, T expected)
+        {
+            // ReSharper disable PossibleMultipleEnumeration
+            Assert.Contains(expected, collection);
+            return collection;
+            // ReSharper restore PossibleMultipleEnumeration
+        }
+
         public static IEnumerable<T> AssertCollection<T>(this IEnumerable<T> values, params Action<T>[] elementInspectors)
         {
             // ReSharper disable PossibleMultipleEnumeration
