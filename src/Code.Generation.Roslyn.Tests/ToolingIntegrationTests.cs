@@ -38,24 +38,9 @@ namespace Code.Generation.Roslyn
                 }
                 , out var registrySet).AssertEqual(DefaultErrorLevel);
 
-            var expectedOutputDirectory = Combine(Bundle.ProjectName, "obj");
+            VerifyGeneratedSyntaxTreeRegistry(registrySet, 1);
 
-            // TODO: TBD: it is probably fair to say this should be the case ALWAYS, regardless of the scenario.
-            registrySet.AssertNotNull().OutputDirectory.AssertNotNull().AssertEqual(expectedOutputDirectory);
-
-            registrySet.AssertCollection(
-                x =>
-                {
-                    var sourceLastWritten = File.GetLastWriteTimeUtc(x.SourceFilePath.AssertFileExists());
-
-                    var generatedPaths = x.GeneratedAssetKeys
-                        .Select(y => $"{Combine(expectedOutputDirectory, $"{y:D}.g.cs").AssertFileExists()}")
-                        .ToArray();
-
-                    var allGeneratedLastWritten = generatedPaths.Select(File.GetLastWriteTimeUtc).ToArray();
-                    allGeneratedLastWritten.All(y => y >= sourceLastWritten).AssertTrue();
-                }
-            );
+            VerifyResponseFile(registrySet);
         }
     }
 }
