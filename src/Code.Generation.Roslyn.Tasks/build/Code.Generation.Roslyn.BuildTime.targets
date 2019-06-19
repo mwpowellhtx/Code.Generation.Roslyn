@@ -85,8 +85,8 @@ $(CodeGenToolAssemblyReferenceRegistryFileName)
       <_CodeGenWarning>CGR1000</_CodeGenWarning>
       <_CodeGenToolWarningText>$(CodeGenerationToolingFullName): Failed to yield code generation artifacts, please check https://github.com/mwpowellhtx/Code.Generation.Roslyn for usage instructions.</_CodeGenToolWarningText>
     </PropertyGroup>
-    <!-- Run the tool and evaluate the expected outcome. -->
-    <Exec Command="dotnet $(DotnetCodeGenerationToolPath) &quot;%40$(CodeGenToolResponsePath)&quot;" StandardOutputImportance="normal"  ContinueOnError="true" />
+    <!-- Run the tool using the Response File, which we do need an Argument for, and evaluate the expected outcome. -->
+    <Exec Command="dotnet $(DotnetCodeGenerationToolPath) --response &quot;%40$(CodeGenToolResponsePath)&quot;" StandardOutputImportance="normal"  ContinueOnError="true" />
     <Warning Code="$(_CodeGenWarning)" Text="$(_CodeGenToolWarningText)" Condition="!(Exists('$(CodeGenToolCompilationRegistryPath)') And Exists('$(CodeGenToolCompilationResponsePath)') And Exists('$(CodeGenToolAssemblyReferenceRegistryPath))'))" />
   </Target>
 

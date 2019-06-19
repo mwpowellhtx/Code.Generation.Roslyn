@@ -40,6 +40,12 @@ namespace Code.Generation.Roslyn
 
         private VariableList<string> SourcePathList { get; }
 
+        /// <summary>
+        /// Gets the ResponseFile Variable. A ResponseFile may be provide in lieu
+        /// of or in addition to Arguments appearing at the Command Line.
+        /// </summary>
+        private Variable<string> ResponseFile { get; }
+
         private Exception ServiceException { get; set; }
 
         private string RenderServiceException()
@@ -71,6 +77,8 @@ namespace Code.Generation.Roslyn
             IntermediateAssembliesRegistryFileName = Options.AddVariable<string>("a|assemblies", "JSON formatted intermediate assemblies registry file name.");
             IntermediateGeneratedRegistryFileName = Options.AddVariable<string>("g|generated", "JSON formatted intermediate generated registry file name.");
             SourcePathList = Options.AddVariableList<string>("src|source", "Source paths included during compilation.");
+            // Which we should be able to unit test this as well, given our approach.
+            ResponseFile = Options.AddVariable<string>("response", "Processes argument input from a new line delimited response file.");
 
             Levels = new ErrorLevelCollection
             {
@@ -81,8 +89,50 @@ namespace Code.Generation.Roslyn
             };
         }
 
+        /// <summary>
+        /// Tries to Load the <paramref name="responseFilePath"/> Arguments. Try not to do much
+        /// in the way of stupid, like providing ANOTHER Response File. That would be silly.
+        /// Otherwise, virtually any Arguments may be specified in this way in addition to
+        /// at the Command Line itself.
+        /// </summary>
+        /// <param name="responseFilePath"></param>
+        /// <returns></returns>
+        private bool TryLoadResponseFile(string responseFilePath)
+        {
+            IEnumerable<string> unparsed = null;
+
+            // ReSharper disable once InvertIf
+            if (File.Exists(responseFilePath))
+            {
+                // TODO: TBD: should be fine in and of itself... may want to consider the new line specifier? we will see...
+                var args = File.ReadAllLines(responseFilePath);
+                unparsed = Options.Parse(args);
+            }
+
+            return unparsed?.Any() == false;
+        }
+
         public override void Run(out int errorLevel)
         {
+            /* We are here because we Parsed. We could potentially allow for Parse extensibility,
+             but this will suffice as a workaround for the time being. We do this here because we
+             want to have evaluated the Arguments, regardless of their sourcing, in front of
+             evaluating any error levels. */
+
+            // Allowing for a Response File as input instead of the direct Command Line Arguments.
+            bool TryEvaluateResponseFile(out int responseLevel)
+            {
+                responseLevel = DefaultErrorLevel;
+                // TODO: TBD: we might otherwise throw on this one...
+                return !ResponseFile.HasValue() || TryLoadResponseFile(ResponseFile.Value);
+            }
+
+            if (!TryEvaluateResponseFile(out errorLevel))
+            {
+                return;
+            }
+            // From this point, we should have arguments parsed, where ever we sourced them.
+
             base.Run(out errorLevel);
 
             // TODO: TBD: refactor this type of functionality to base class, i.e. ReportErrorLevel...
@@ -106,7 +156,9 @@ namespace Code.Generation.Roslyn
                 return;
             }
 
-            IEnumerable<string> Sanitize(IEnumerable<string> inputs) => inputs.Where(x => !IsNullOrWhiteSpace(x)).Select(x => x.Trim());
+            IEnumerable<string> Sanitize(IEnumerable<string> inputs) => inputs.Where(
+                x => !IsNullOrWhiteSpace(x)).Select(x => x.Trim()
+            );
 
             // TODO: TBD: borderline complexity boundary here, could potentially benefit from a DI container...
             AssemblyReferenceServiceManager CreateReferenceService()
@@ -137,19 +189,19 @@ namespace Code.Generation.Roslyn
                 return;
             }
 
-            void ReportGeneratedFiles(Logging.Logger logger, IDictionary<string, string[]> generatedFiles)
+            void ReportGeneratedFiles(Logger logger, IDictionary<string, string[]> generatedFiles)
             {
-                foreach (var g in generatedFiles)
+                foreach (var (key, value) in generatedFiles)
                 {
-                    logger.Information($"Code generation triggered by `{g.Key}'...");
-                    foreach (var h in g.Value)
+                    logger.Information($"Code generation triggered by `{key}'...");
+                    foreach (var h in value)
                     {
                         logger.Information($"Generated `{h}'.");
                     }
                 }
             }
 
-            ReportGeneratedFiles(Logging.Logger.Resource, serviceManager.RegistrySet.GeneratedSourceBundles);
+            ReportGeneratedFiles(Logger.Resource, serviceManager.RegistrySet.GeneratedSourceBundles);
         }
     }
 }
