@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 namespace Code.Generation.Roslyn
 {
     using Microsoft.CodeAnalysis.CSharp;
+    using Xunit;
     using Xunit.Abstractions;
     using static Constants;
     using static String;

@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace Code.Generation.Roslyn
 {
+    using Xunit;
     using Xunit.Abstractions;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
