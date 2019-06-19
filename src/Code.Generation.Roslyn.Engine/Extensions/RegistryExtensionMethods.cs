@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Code.Generation.Roslyn
 {
@@ -14,5 +15,10 @@ namespace Code.Generation.Roslyn
 
             return registry;
         }
+
+        // TODO: TBD: for now, assuming generating CSharp ...
+        public static string MakeRelativeSourcePath<TRegistry>(this TRegistry registry, Guid generatedId)
+            where TRegistry : IRegistrySet
+            => Path.Combine(registry.EnsureOutputDirectoryExists().OutputDirectory, $"{generatedId:D}.g.cs");
     }
 }
