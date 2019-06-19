@@ -6,62 +6,44 @@ using System.Linq;
 namespace Code.Generation.Roslyn
 {
     using static Path;
-    using static StringComparison;
 
-    public class GeneratedSyntaxTreeRegistry : SortedSet<GeneratedSyntaxTreeDescriptor>, IRegistrySet<GeneratedSyntaxTreeDescriptor>
+    // "RemoveWhere" is a bit too aggressive, or we need to add some flags that help to control the level of removal we expect.
+    public class GeneratedSyntaxTreeRegistry : PurgingSyntaxTreeRegistry<GeneratedSyntaxTreeDescriptor, GeneratedSyntaxTreeDescriptorComparer>
     {
-        // TODO: TBD: ignore this one for JSON purposes...
-        /// <summary>
-        /// Gets or Sets the OutputDirectory.
-        /// </summary>
-        public string OutputDirectory { get; set; }
-
-        private class InputSyntaxTreeFileDescriptorComparer : IComparer<GeneratedSyntaxTreeDescriptor>
-        {
-            public int Compare(GeneratedSyntaxTreeDescriptor x, GeneratedSyntaxTreeDescriptor y)
-            {
-                const int lt = -1, gt = 1;
-
-                return x == null && y == null
-                    ? lt
-                    : x != null && y == null
-                        ? gt
-                        : x == null
-                            ? lt
-                            : string.Compare(x.SourceFilePath, y.SourceFilePath, InvariantCultureIgnoreCase);
-            }
-        }
-
         internal IDictionary<string, string[]> GeneratedSourceBundles
             => this.ToDictionary(x => x.SourceFilePath
                 , x => x.GeneratedAssetKeys.Select(y => $"{y:D}.g.cs")
                     .Select(y => Combine(OutputDirectory, y)).ToArray());
 
-        public GeneratedSyntaxTreeRegistry() : this(Array.Empty<GeneratedSyntaxTreeDescriptor>())
-        {
-        }
-
-        // ReSharper disable once RedundantEmptyObjectOrCollectionInitializer
-        internal GeneratedSyntaxTreeRegistry(IEnumerable<GeneratedSyntaxTreeDescriptor> descriptors)
-            : base(descriptors, new InputSyntaxTreeFileDescriptorComparer { })
-        {
-            // TODO: TBD: why did we elect to purge the descriptors initially?
-            RemoveWhere(null);
-        }
+        /// <summary>
+        /// Gets a Default Comparer.
+        /// </summary>
+        private static GeneratedSyntaxTreeDescriptorComparer DefaultComparer => GeneratedSyntaxTreeDescriptorComparer.Comparer;
 
         /// <summary>
-        /// Invoke this method in order to Purge the Set of any underlying generated assets.
-        /// This includes all actual generated files.
+        /// Default Public Constructor.
         /// </summary>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        /// <inheritdoc cref="SortedSet{T}.RemoveWhere"/>
-        public new int RemoveWhere(Predicate<GeneratedSyntaxTreeDescriptor> predicate)
+        /// <inheritdoc />
+        public GeneratedSyntaxTreeRegistry() : base(DefaultComparer) { }
+
+        // ReSharper disable once RedundantEmptyObjectOrCollectionInitializer
+        /// <summary>
+        /// Internal Constructor.
+        /// </summary>
+        /// <param name="descriptors"></param>
+        /// <inheritdoc />
+        internal GeneratedSyntaxTreeRegistry(IEnumerable<GeneratedSyntaxTreeDescriptor> descriptors) : base(descriptors, DefaultComparer) { }
+
+        /// <inheritdoc />
+        public override int PurgeWhere(Predicate<GeneratedSyntaxTreeDescriptor> predicate)
         {
+            // TODO: TBD: really need an EligibleSyntaxTreeRegistry... which is the in-memory version of the Generated ...
             predicate = predicate ?? (_ => true);
 
+            // TODO: TBD: do we really need to check Exists/Delete so aggressively here?
             foreach (var y in this.Where(x => predicate(x)))
             {
+                // TODO: TBD: this bit probably ought to go with the descriptor anyways ...
                 foreach (var path in y.GeneratedAssetKeys.Select(z => Combine(OutputDirectory, $"{z:D}.g.cs")))
                 {
                     if (!File.Exists(path))
@@ -73,7 +55,7 @@ namespace Code.Generation.Roslyn
                 }
             }
 
-            return base.RemoveWhere(predicate);
+            return base.PurgeWhere(predicate);
         }
     }
 }
