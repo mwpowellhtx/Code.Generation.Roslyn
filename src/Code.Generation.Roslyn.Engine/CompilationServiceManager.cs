@@ -245,11 +245,7 @@ namespace Code.Generation.Roslyn
                         // TODO: TBD: may need the full path?
                         var outputPath = RegistrySet.MakeRelativeSourcePath(genId);
 
-                        if (File.Exists(outputPath))
-                        {
-                            File.Delete(outputPath);
-                        }
-
+                        // Create/Truncate should be sufficient.
                         using (var s = File.Open(outputPath, FileMode.Create, FileAccess.Write, FileShare.Read))
                         {
                             using (var sw = new StreamWriter(s))
