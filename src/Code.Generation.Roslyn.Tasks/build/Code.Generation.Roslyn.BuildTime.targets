@@ -8,12 +8,11 @@
     <CodeGenerationAssemblyReferenceExtension>.a</CodeGenerationAssemblyReferenceExtension>
     <CodeGenerationRegistryExtension>.json</CodeGenerationRegistryExtension>
     <CodeGenerationResponseFileExtension>.rsp</CodeGenerationResponseFileExtension>
-    <GenerateCodeFromAttributesDependsOn>
-      $(GenerateCodeFromAttributesDependsOn)
-      ;PrepareToGenerateCodeFromAttributes
+    <GenerateCodeFromAttributesDependencies>
+      PrepareToGenerateCodeFromAttributes
       ;InvokeCodeGenerationFromAttributes
       ;CompileCodeGenerationGeneratedCode
-    </GenerateCodeFromAttributesDependsOn>
+    </GenerateCodeFromAttributesDependencies>
     <!-- Literally, Response File items separated by Carriage Return Line Feed. -->
     <CodeGenerationResponseFileLineSeparator>%0d%0a</CodeGenerationResponseFileLineSeparator>
   </PropertyGroup>
@@ -37,11 +36,12 @@
     <DotnetCodeGenerationToolPath Condition="'$(DotnetCodeGenerationToolPath)' == ''">codegen</DotnetCodeGenerationToolPath>
   </PropertyGroup>
 
-  <Target Name="GenerateCodeFromAttributes" DependsOnTargets="$(GenerateCodeFromAttributesDependsOn)" BeforeTargets="CoreCompile;PrepareResources" />
+  <!-- Rolls up the Targets into the front-facing Code Generation Target. -->
+  <Target Name="GenerateCodeFromAttributes" DependsOnTargets="$(GenerateCodeFromAttributesDependencies)" BeforeTargets="CoreCompile;PrepareResources" />
 
   <!-- ReSharper disable once UnknownTarget -->
   <Target Name="PrepareToGenerateCodeFromAttributes" DependsOnTargets="ResolveReferences">
-    <Message Text="Preparing to run code generation using intermediate directory `$(CodeGenToolIntermediateOutputDirectory)´..." Importance="normal" />
+    <Message Text="Preparing to run code generation using intermediate directory `$(CodeGenToolIntermediateOutputDirectory)´ ..." Importance="normal" />
     <ItemGroup>
       <!-- ReSharper disable once UnknownProperty -->
       <CodeGenCompilationDefineConstants Include="$(DefineConstants)" />
