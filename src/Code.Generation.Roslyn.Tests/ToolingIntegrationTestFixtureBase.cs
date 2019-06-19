@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace Code.Generation.Roslyn
 {
+    using Generators;
     using Integration;
     using Xunit;
     using Xunit.Abstractions;
@@ -157,19 +158,31 @@ namespace Code.Generation.Roslyn
         /// as there is short of calling out to the Command Line Process itself, never mind wiring
         /// up the Microsoft Build targets.
         /// </summary>
-        /// <param name="bundleOp"></param>
-        /// <param name="parameterOp"></param>
+        /// <param name="bundleVisitor"></param>
+        /// <param name="paramsVisitor"></param>
         /// <param name="registrySet"></param>
         /// <returns></returns>
-        internal virtual int VerifyWithOperators(TestCaseBundleOperator bundleOp, ToolingParameterOperator parameterOp
+        internal virtual int VerifyWithOperators(
+            TestCaseBundleOperator bundleVisitor
+            , ToolingParameterOperator paramsVisitor
             , out GeneratedSyntaxTreeRegistry registrySet)
         {
-            bundleOp?.Invoke(Bundle);
-            var builder = new ToolingParameterBuilder {Project = $"{Bundle.ProjectName}"};
-            parameterOp?.Invoke(builder);
+            bundleVisitor?.Invoke(Bundle);
+
+            var builder = new ToolingParameterBuilder {Project = $"{Bundle.ProjectName}"}
+                    .AddReferenceToTypeAssembly<object>()
+                    .AddTypeAssemblyLocationBasedReferences<object>("netstandard.dll", "System.Runtime.dll")
+                    .AddReferenceToTypeAssembly<ImplementBuzInterfaceAttribute>()
+                ;
+
+            paramsVisitor?.Invoke(builder);
+
             var verified = Verify(builder.ToArray());
-            var loaded = TryLoad(Combine(builder.Output, builder.Generated), out registrySet);
-            loaded.AssertEqual(registrySet?.Any() == true);
+
+            TryLoad(Combine(builder.Output, builder.Generated), out registrySet)
+                .AssertEqual(registrySet?.Any() == true)
+                ;
+
             return verified;
         }
 
@@ -185,57 +198,6 @@ namespace Code.Generation.Roslyn
         /// <see cref="VerifyWithOperators(TestCaseBundleOperator,ToolingParameterOperator,out GeneratedSyntaxTreeRegistry)"/>
         internal virtual int VerifyWithOperators(TestCaseBundleOperator bundleOp, ToolingParameterOperator parameterOp)
             => VerifyWithOperators(bundleOp, parameterOp, out _);
-
-        protected virtual void VerifyGeneratedSyntaxTreeRegistry(GeneratedSyntaxTreeRegistry registry, int? expectedCount = null)
-        {
-            var expectedOutputDirectory = ExpectedOutputDirectory;
-
-            // TODO: TBD: it is probably fair to say this should be the case ALWAYS, regardless of the scenario.
-            registry.AssertNotNull().OutputDirectory.AssertNotNull().AssertEqual(expectedOutputDirectory);
-
-            if (expectedCount.HasValue)
-            {
-                registry.Count.AssertEqual(expectedCount.Value);
-            }
-
-            // Not so much Asserting the Collection, as it is leaving it potentially Open Ended.
-            void VerifyGenerated(GeneratedSyntaxTreeDescriptor x)
-            {
-                var sourceLastWritten = File.GetLastWriteTimeUtc(x.SourceFilePath.AssertFileExists());
-
-                var generatedPaths = x.GeneratedAssetKeys
-                    .Select(y => $"{Combine(expectedOutputDirectory, $"{y:D}.g.cs").AssertFileExists()}")
-                    .ToArray();
-
-                var allGeneratedLastWritten = generatedPaths.Select(File.GetLastWriteTimeUtc).ToArray();
-                allGeneratedLastWritten.All(y => y >= sourceLastWritten).AssertTrue();
-            }
-
-            registry.ToList().ForEach(VerifyGenerated);
-        }
-
-        protected virtual void VerifyResponseFile(GeneratedSyntaxTreeRegistry expectedRegistry)
-        {
-            var actualPaths = File.ReadLines(ExpectedResponsePath.AssertFileExists()).ToArray();
-
-            var expectedOutputDirectory = ExpectedOutputDirectory;
-
-            string CombineBaseDirectory(string fileName) => Combine(expectedOutputDirectory, fileName);
-
-            var expectedPaths = expectedRegistry.SelectMany(d => d.GeneratedAssetKeys.Select(x => $"{x:D}.g.cs"))
-                .Select(CombineBaseDirectory).ToArray();
-
-            // ReSharper disable CommentTypo
-            // Make sure that the Actuals are Actuals, same for Expected.
-            actualPaths.Length.AssertEqual(expectedPaths.Length);
-
-            // In no particular order so long as all of the Paths are present and accounted for.
-            foreach (var expectedPath in expectedPaths)
-            {
-                actualPaths.AssertContains(expectedPath);
-            }
-            // ReSharper restore CommentTypo
-        }
 
         protected override void Dispose(bool disposing)
         {
