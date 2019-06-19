@@ -29,7 +29,7 @@ namespace Code.Generation.Roslyn
     /// <typeparam name="T"></typeparam>
     /// <typeparam name="TSet"></typeparam>
     public abstract class ServiceManager<T, TSet> : ServiceManager
-        where TSet : class, IRegistrySet<T>, new()
+        where TSet : class, IPurgingRegistrySet<T>, new()
     {
         /// <summary>
         /// Gets the <typeparamref name="TSet"/> that the Service is Managing.
