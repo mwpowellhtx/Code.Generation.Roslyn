@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,6 +11,26 @@ namespace Code.Generation.Roslyn
 
     internal class ToolingParameterBuilder : IToolingParameterBuilder<ToolingParameterBuilder>
     {
+        private Guid? ResponseId { get; set; }
+
+        /// <summary>
+        /// Gets or Sets whether UsingResponseFile.
+        /// </summary>
+        internal bool UsingResponseFile
+        {
+            get => ResponseId.HasValue;
+            set => ResponseId = value ? Guid.NewGuid() : (Guid?) null;
+        }
+
+        /// <summary>
+        /// Gets the Response File Path contingent upon whether <see cref="UsingResponseFile"/>.
+        /// The full path is also contingent upon <see cref="Output"/> having been provided.
+        /// </summary>
+        /// <see cref="UsingResponseFile"/>
+        /// <see cref="Output"/>
+        /// <see cref="ResponseId"/>
+        private string Response => UsingResponseFile ? $"{Combine(Output, $"{ResponseId:D}.rsp")}" : null;
+
         internal string Project { get; set; }
 
         private string _output;
@@ -119,45 +140,108 @@ namespace Code.Generation.Roslyn
         }
 
         /// <summary>
-        /// Enumerates the Command Line Arguments for purposes of internal unit testing.
+        /// Enumerates the Response File only Command Line arguments for purposes of internal
+        /// unit testing.
         /// </summary>
         /// <returns></returns>
         /// <remarks>The naming conventions herein are not an accident. They are carefully
         /// chosen and aligned with the tooling command line argument prototypes.</remarks>
-        private IEnumerable<string> GetToolingParameters()
+        private IEnumerable<string> GetResponseFileToolingParameters()
         {
-            yield return $@"{DoubleDash}{nameof(Project).ToLower()}";
-            yield return $@"{Project}";
+            yield return $"{DoubleDash}{nameof(Response).ToLower()}";
+            yield return $"{Response}";
+        }
 
-            yield return $@"{DoubleDash}{nameof(Output).ToLower()}";
-            yield return $@"{Output}";
+        /// <summary>
+        /// Enumerates the Command Line Arguments for purposes of internal unit testing.
+        /// As it happens, the enumerated arguments serve as the actual command line
+        /// arguments as well as those relayed through a <see cref="Response"/> file.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>The naming conventions herein are not an accident. They are carefully
+        /// chosen and aligned with the tooling command line argument prototypes.</remarks>
+        private IEnumerable<string> GetCommandLineToolingParameters()
+        {
+            yield return $"{DoubleDash}{nameof(Project).ToLower()}";
+            yield return $"{Project}";
 
-            yield return $@"{DoubleDash}{nameof(Generated).ToLower()}";
-            yield return $@"{Generated}";
+            yield return $"{DoubleDash}{nameof(Output).ToLower()}";
+            yield return $"{Output}";
 
-            yield return $@"{DoubleDash}{nameof(Assemblies).ToLower()}";
-            yield return $@"{Assemblies}";
+            yield return $"{DoubleDash}{nameof(Generated).ToLower()}";
+            yield return $"{Generated}";
+
+            yield return $"{DoubleDash}{nameof(Assemblies).ToLower()}";
+            yield return $"{Assemblies}";
 
             foreach (var source in Sources)
             {
-                yield return $@"{DoubleDash}{nameof(source)}";
+                yield return $"{DoubleDash}{nameof(source)}";
                 yield return source;
             }
 
             foreach (var define in Defines)
             {
-                yield return $@"{DoubleDash}{nameof(define)}";
+                yield return $"{DoubleDash}{nameof(define)}";
                 yield return define;
             }
 
             foreach (var reference in References)
             {
-                yield return $@"{DoubleDash}{nameof(reference)}";
+                yield return $"{DoubleDash}{nameof(reference)}";
                 yield return reference;
             }
         }
 
-        public IEnumerator<string> GetEnumerator() => GetToolingParameters().GetEnumerator();
+        /// <summary>
+        /// Returns the Appropriate set of Command Line Parameters contingent on whether
+        /// <see cref="UsingResponseFile"/>. Which also requires for <see cref="Output"/>
+        /// to have been specified in any event. <see cref="Response"/> will also be provided
+        /// as a function of whether <see cref="UsingResponseFile"/>.
+        /// </summary>
+        /// <returns></returns>
+        /// <see cref="Output"/>
+        /// <see cref="Response"/>
+        /// <see cref="UsingResponseFile"/>
+        /// <see cref="GetCommandLineToolingParameters"/>
+        /// <see cref="GetResponseFileToolingParameters"/>
+        private IEnumerable<string> GetResponseFileOrCommandLineParameters()
+        {
+            var args = GetCommandLineToolingParameters().ToArray();
+
+            if (!UsingResponseFile)
+            {
+                return args;
+            }
+
+            // Remember to do a little bookkeeping along the way.
+            void EnsureOutputDirectoryExists(string output)
+            {
+                if (Directory.Exists(output))
+                {
+                    return;
+                }
+
+                Directory.CreateDirectory(output);
+            }
+
+            EnsureOutputDirectoryExists(Output);
+
+            using (var s = File.Open(Response, FileMode.Create, FileAccess.Write, FileShare.Read))
+            {
+                using (var writer = new StreamWriter(s))
+                {
+                    foreach (var arg in args)
+                    {
+                        writer.WriteLine(arg.ToArray());
+                    }
+                }
+            }
+
+            return GetResponseFileToolingParameters();
+        }
+
+        public IEnumerator<string> GetEnumerator() => GetResponseFileOrCommandLineParameters().GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }

@@ -16,9 +16,15 @@ namespace Code.Generation.Roslyn
         {
         }
 
+        /// <summary>
+        /// false
+        /// </summary>
+        private const bool DoNotUseResponseFile = false;
+
         private void VerifySinglePass(ModuleKind modules, ModuleKind module
             , string expectedOutputDirectory, string expectedResponsePath
-            , out GeneratedSyntaxTreeRegistry registrySet)
+            , out GeneratedSyntaxTreeRegistry registrySet
+            , bool usingResponseFile = DoNotUseResponseFile)
         {
             // Do a little Fact checking of the parameters.
             modules.Distinct().ToArray().AssertTrue(x => x.Length > 1);
@@ -36,6 +42,13 @@ namespace Code.Generation.Roslyn
                 {
                     args.AddSources($"{Bundle.GetFilePath(module)}");
                     args.AddDefines("DEBUG");
+                    if (usingResponseFile)
+                    {
+                        args.UsingResponseFile = true;
+                    }
+
+                    // And do an immediate verification that we set it correctly.
+                    args.UsingResponseFile.AssertTrue(x => x == usingResponseFile);
                 }
                 , out registrySet).AssertEqual(DefaultErrorLevel);
 
@@ -47,7 +60,8 @@ namespace Code.Generation.Roslyn
 
         private void VerifySecondPass(ModuleKind module, ModuleKind modules
             , string expectedOutputDirectory, string expectedResponsePath
-            , out GeneratedSyntaxTreeRegistry registrySet)
+            , out GeneratedSyntaxTreeRegistry registrySet
+            , bool usingResponseFile = DoNotUseResponseFile)
         {
             // Do a little Fact checking of the parameters.
             module.Distinct().ToArray().AssertTrue(x => x.Length == 1);
@@ -65,7 +79,15 @@ namespace Code.Generation.Roslyn
 
                     args.AddDefines("DEBUG");
 
-                }, out registrySet).AssertEqual(DefaultErrorLevel);
+                    if (usingResponseFile)
+                    {
+                        args.UsingResponseFile = true;
+                    }
+
+                    // Ditto immediate verification.
+                    args.UsingResponseFile.AssertTrue(x => x == usingResponseFile);
+                }
+                , out registrySet).AssertEqual(DefaultErrorLevel);
 
             registrySet
                 .VerifyRegistry(expectedOutputDirectory, 2)
@@ -94,6 +116,43 @@ namespace Code.Generation.Roslyn
 
             // Then we engage with a second, different pass.
             VerifySecondPass(Baz, Bar, expectedOutputDirectory, expectedResponsePath, out registrySets[1]);
+        }
+
+        /// <summary>
+        /// true
+        /// </summary>
+        private const bool UseResponseFile = true;
+
+        /// <summary>
+        /// This test gets even closer to a full end-to-end integration involving Microsoft
+        /// Build Targets, or even simply Command Line, Tooling invocation.
+        /// </summary>
+        [Fact]
+        public void Single_CG_Pass_Generates_Correctly_Using_Response_File()
+            => VerifySinglePass(Bar | Baz | Biz | Buz | AssemblyInfo, Bar
+                , ExpectedOutputDirectory, ExpectedResponsePath, out _, UseResponseFile);
+
+        /// <summary>
+        /// This test gets even closer to a full end-to-end integration involving Microsoft
+        /// Build Targets, or even simply Command Line, Tooling invocation.
+        /// </summary>
+        [Fact]
+        public void Multiple_CG_Pass_Generates_Delta_Only_Using_Response_Files()
+        {
+            var registrySets = GetRange<GeneratedSyntaxTreeRegistry>(null, null).ToArray();
+
+            var expectedOutputDirectory = ExpectedOutputDirectory;
+            var expectedResponsePath = ExpectedResponsePath;
+
+            // Establish the first pass.
+            VerifySinglePass(Bar | Baz | Biz | Buz | AssemblyInfo, Bar
+                , expectedOutputDirectory, expectedResponsePath, out registrySets[0], UseResponseFile);
+
+            registrySets[0].AssertNotNull();
+
+            // Then we engage with a second, different pass.
+            VerifySecondPass(Baz, Bar, expectedOutputDirectory, expectedResponsePath
+                , out registrySets[1], UseResponseFile);
         }
     }
 }
