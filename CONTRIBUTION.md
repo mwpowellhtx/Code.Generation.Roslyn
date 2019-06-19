@@ -9,6 +9,8 @@ We have taken the opportunity to recast the original *CodeGeneration.Roslyn* <su
 1. Registries of required Assembly references are maintained during the Code Generation process. The Assembly references is nothing new, but the manner in which we keep track of the Registry is refined.
 1. More critically, we try to prohibit code from generating when triggering assets, the Assembly references, but more importantly the source files themselves in which your Code Generation Attributes appeared as annotations.
 1. We also aggressively purge previously generated code when triggering source files were renamed, moved, or removed.
+1. A big difference between our offering and the original work is in what it is how code generators respond. We want a descriptor in response, which includes a collection of CompilationUnitSyntax items, not MemberDeclarationSyntax. Yes, we want you to produce unit level code.
+1. Another difference is that we also allow you to furnish your own boilerplate preamble comments. If you decline to do this, we will default to canned preamble comments. However, if you do choose to do this, the responsibility rests on your authorship to ensure the comments are correctly formatted as such.
 1. Last, but certainly not least, the responsibility for generating appropriate code rests entirely on your *ICodeGenerator* <sup>[[4]]</sup> authorship. We have included a couple of generator examples, which we use throughout the unit tests, as examples for you, along these very lines.
 
 ### Changes in the unit testing strategy
