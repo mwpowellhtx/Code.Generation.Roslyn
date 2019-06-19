@@ -151,20 +151,64 @@ namespace Code.Generation.Roslyn
             // TODO: TBD: just a list of Exceptions? with comprehension over the InputSyntaxTree (below) ?
             var fileFailures = new List<Exception>();
 
-            /* Purge any generated code that was based on files that
-             * have recently been removed or in any way renamed. */
-            compilation.SyntaxTrees.Select(x => x.FilePath)
-                .Where(x => RegistrySet.All(y => x != y.SourceFilePath)).ToList()
-                .ForEach(x => RegistrySet.RemoveWhere(y => y.SourceFilePath == x))
-                ;
+            EligibleSyntaxTreeRegistry ineligibleSet;
 
-            /* We cannot reasonably know much about the generated code itself, but we can
-             * Purge based on the Input File in comparison with the Last Written Assemblies. */
-            RegistrySet.Select(x => x.SourceFilePath).ToArray()
-                .Where(x => compilation.SyntaxTrees.Any(y => x == y.FilePath)
-                            && File.GetLastWriteTimeUtc(x) > assembliesLastWritten).ToList()
-                .ForEach(x => RegistrySet.RemoveWhere(y => y.SourceFilePath == x))
-                ;
+            {
+                // The Current set of Compilation FilePaths...
+                var compilationFilePaths = compilation.SyntaxTrees.Select(x => x.FilePath).ToArray();
+
+                {
+                    // This is a type-specific capture of the Compilation FilePaths, that lets us more concisely Where...
+                    bool CompilationFilePathsDoNotContain(string registrySourceFilePath)
+                        => !compilationFilePaths.Contains(registrySourceFilePath);
+
+                    Requires.NotNull(RegistrySet, $"`{nameof(RegistrySet)}´ instance required.");
+
+                    // TODO: TBD: it might be interesting to capture/report in some way the purged counts...
+                    // TODO: TBD: if for nothing else than metric, static/performance analysis, purposes...
+                    /* Purge any generated code that was based on files that have recently been
+                     * renamed, moved, or removed, in which case(s), we want to re-gen. */
+                    var registryPurgedCount = RegistrySet.Select(x => x.SourceFilePath)
+                            .Where(CompilationFilePathsDoNotContain).ToList()
+                            .Sum(x => RegistrySet.PurgeWhere(y => y.SourceFilePath == x))
+                        ;
+                }
+
+                /* To this point we have ruled out artifacts which will obviously have changed
+                 * and which require re-gen. Now we must consider bypassing artifacts which do
+                 * not require re-gen. Eligibility Purging is less strong than the Generated.
+                 * In other words, in this case, we want to preserve whatever generated assets
+                 * might be previously existing, and which subsequently do not require re-gen. */
+
+                // Working from the Existing Registry Set.
+                ineligibleSet = new EligibleSyntaxTreeRegistry(RegistrySet);
+
+                // It SHOULD be, but verify that expectation here.
+                Requires.NotNull(ineligibleSet, $"`{nameof(ineligibleSet)}´ instance required.");
+
+                /* To this point we have*/
+
+                /* Because we are working from the previous CG iteration, we cannot know
+                 * POSITIVELY which additional artifacts might possibly be ELIGIBLE, but
+                 * rather, we CAN know NEGATIVELY which artifacts ought to be INELIGIBLE.
+                 * In order to do this, we want to establish a clear DateTime boundary,
+                 * the earliest possible triggering moment meeting the earliest possible
+                 * historical generated moment, and we want to re-gen assets meeting this
+                 * triggering condition. Yes, we do want the EARLIEST possible moments for
+                 * both sides of the trigger condition. */
+
+                // TODO: TBD: we might want to break out elements of these embedded conditions...
+                var ineligiblePurgeCount = ineligibleSet
+                    .Where(x => compilationFilePaths.Any(y => y == x.SourceFilePath)
+                                && x.GeneratedAssetKeys
+                                    .Any(g => ineligibleSet.MakeRelativeSourcePath(g).GetLastWriteTimeUtc()
+                                              < x.SourceFilePath.GetLastWriteTimeUtc().Max(assembliesLastWritten))
+                    ).ToArray()
+                    .Sum(x => ineligibleSet.PurgeWhere(y => y.SourceFilePath == x.SourceFilePath));
+
+                /* From this point on, excepting for reconciliation during bookkeeping
+                 * opportunities, we want to work with the EligibleSet. */
+            }
 
             // TODO: TBD: need to pre-load the assemblies here ?
             // TODO: TBD: trim/shake the references if they do not exist at this moment ?
@@ -174,7 +218,7 @@ namespace Code.Generation.Roslyn
             bool ShouldRetry(ref int retries, int delta = -1) => (retries += delta) > 0;
 
             var eligibleSyntaxTrees = compilation.SyntaxTrees.Where(
-                x => RegistrySet.All(y => x.FilePath != y.SourceFilePath)).ToArray();
+                x => ineligibleSet.All(y => x.FilePath != y.SourceFilePath)).ToArray();
 
             foreach (var currentSyntaxTree in eligibleSyntaxTrees)
             {
@@ -199,7 +243,7 @@ namespace Code.Generation.Roslyn
                          on when our CG tooling `sees´ the event, the paths may not entirely exist yet. */
 
                         // TODO: TBD: may need the full path?
-                        var outputPath = Combine(RegistrySet.EnsureOutputDirectoryExists().OutputDirectory, $"{genId:D}.g.cs");
+                        var outputPath = RegistrySet.MakeRelativeSourcePath(genId);
 
                         if (File.Exists(outputPath))
                         {
@@ -230,6 +274,8 @@ namespace Code.Generation.Roslyn
                     }
                 }
 
+                /* This is the point of RegistrySet reconciliation, where we take the
+                 * Generated Descriptor result, and map it back in with the Registry. */
                 RegistrySet.Add(genDescriptor);
             }
 
@@ -239,7 +285,7 @@ namespace Code.Generation.Roslyn
                 throw new AggregateException(fileFailures);
             }
 
-            // Shake out the Compilation Set one last time.
+            // Shake out the Compilation Set one last time. No need to Purge here, Remove is sufficient here.
             RegistrySet.RemoveWhere(x => !x.GeneratedAssetKeys.Any());
 
             // TODO: TBD: need to revisit these calls...
