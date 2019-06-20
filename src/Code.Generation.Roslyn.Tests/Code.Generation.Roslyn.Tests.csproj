@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <Version>1.0.0.4675</Version>
-    <AssemblyVersion>1.0.0.4675</AssemblyVersion>
-    <FileVersion>1.0.0.4675</FileVersion>
+    <Version>1.0.0.4683</Version>
+    <AssemblyVersion>1.0.0.4683</AssemblyVersion>
+    <FileVersion>1.0.0.4683</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,9 +14,14 @@
 
   <ItemGroup>
     <!-- Redirect the focus here towards Integration, included as Embedded Resources, and NOT for local Build. -->
-    <Compile Remove="Integration\*.cs" />
-    <None Remove="Integration\*.xml" />
-    <EmbeddedResource Include="Integration\*.*" />
+    <!--<Compile Remove="Integration\*.cs" />-->
+    <!--<None Remove="Integration\*.xml" />-->
+    <EmbeddedResource Include="Integration\*.*"></EmbeddedResource>
+    <EmbeddedResource Include="..\tools\Shared\AssemblyInfo.cs" Link="Integration\AssemblyInfo.cs" />
+    <EmbeddedResource Include="..\tools\Shared\Bar.cs" Link="Integration\Bar.cs" />
+    <EmbeddedResource Include="..\tools\Shared\Baz.cs" Link="Integration\Baz.cs" />
+    <EmbeddedResource Include="..\tools\Shared\IBiz.cs" Link="Integration\IBiz.cs" />
+    <EmbeddedResource Include="..\tools\Shared\IBuz.cs" Link="Integration\IBuz.cs" />
   </ItemGroup>
 
   <ItemGroup>
