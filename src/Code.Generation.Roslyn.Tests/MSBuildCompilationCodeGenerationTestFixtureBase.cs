@@ -50,10 +50,12 @@ namespace Code.Generation.Roslyn
         /// Before we can Build anything, we need to know whether we are even Opening
         /// a Solution properly.
         /// </summary>
+        /// <remarks>Not positive, but I think the Async was messing with the underlying bits.
+        /// For whatever reason, the Workspace does not play well in an Async environment.</remarks>
         [Fact]
-        public async void Can_Open_Project_Async()
+        public void Can_Open_Project()
         {
-            await OpenBundledProjectAsync();
+            OpenBundledProjectAsync().Wait();
 
             void VerifyPath(string path)
                 => path.AssertEndsWith(Bundle.ProjectFileName)

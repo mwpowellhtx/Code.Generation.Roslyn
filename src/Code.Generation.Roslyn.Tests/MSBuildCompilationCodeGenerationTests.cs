@@ -14,9 +14,9 @@
         }
 
         [Fact]
-        public async void Verify_That_Async()
+        public void Can_Generate_Code_Using_Microsoft_Build_Compilation()
         {
-            await OpenBundledProjectAsync();
+            OpenBundledProjectAsync().Wait();
 
             Bundle.AddClassAnnotation<ImplementBuzInterfaceAttribute>(Bar);
             Bundle.AddOuterTypeNamespaceUsingStatement<ImplementBuzInterfaceAttribute>(Bar);
