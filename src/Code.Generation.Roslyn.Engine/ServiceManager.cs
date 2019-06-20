@@ -58,6 +58,8 @@ namespace Code.Generation.Roslyn
             // ReSharper disable AssignNullToNotNullAttribute
             RegistrySetPath = Combine(outputDirectory, registryFileName);
             // ReSharper restore AssignNullToNotNullAttribute
+
+            TryLoad(out _);
         }
 
         /// <summary>
