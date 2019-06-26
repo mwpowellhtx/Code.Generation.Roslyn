@@ -121,7 +121,7 @@ namespace Code.Generation.Roslyn
             var errorLevelNotExpected = (int?) null;
 
             // ReSharper disable once ExpressionIsAlwaysNull
-            var errorLevel = Verify($"{DoubleDash}version").AssertEqual(1);
+            var errorLevel = Verify($"{DoubleDash}version").AssertEqual(DefaultErrorLevel);
 
             var rendered = RenderOut();
 
