@@ -168,9 +168,19 @@ namespace Code.Generation.Roslyn
                     // TODO: TBD: if for nothing else than metric, static/performance analysis, purposes...
                     /* Purge any generated code that was based on files that have recently been
                      * renamed, moved, or removed, in which case(s), we want to re-gen. */
-                    var registryPurgedCount = RegistrySet.Select(x => x.SourceFilePath)
+                    var purgedFileDeltaCount = RegistrySet.Select(x => x.SourceFilePath)
                             .Where(CompilationFilePathsDoNotContain).ToList()
                             .Sum(x => RegistrySet.PurgeWhere(y => y.SourceFilePath == x))
+                        ;
+                }
+
+                {
+                    bool GeneratedAssetDoesNotExist(Guid assetId)
+                        => !File.Exists(RegistrySet.MakeRelativeSourcePath(assetId));
+
+                    var purgedGeneratedGapsCount = RegistrySet
+                            .Where(x => x.GeneratedAssetKeys.Any(GeneratedAssetDoesNotExist)).ToList()
+                            .Sum(x => RegistrySet.PurgeWhere(y => ReferenceEquals(y, x)))
                         ;
                 }
 
@@ -185,8 +195,6 @@ namespace Code.Generation.Roslyn
 
                 // It SHOULD be, but verify that expectation here.
                 Requires.NotNull(ineligibleSet, $"`{nameof(ineligibleSet)}´ instance required.");
-
-                /* To this point we have*/
 
                 /* Because we are working from the previous CG iteration, we cannot know
                  * POSITIVELY which additional artifacts might possibly be ELIGIBLE, but
