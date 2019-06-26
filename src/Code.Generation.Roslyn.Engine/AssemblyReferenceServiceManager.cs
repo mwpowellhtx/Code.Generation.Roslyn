@@ -14,7 +14,7 @@ namespace Code.Generation.Roslyn
     using static Directory;
     using static Path;
     using static Resources;
-    using static Strings;
+    using static String;
     using static SearchOption;
     using static StringComparison;
     using StringBinaryPredicate = BinaryPredicate<string>;
@@ -41,9 +41,9 @@ namespace Code.Generation.Roslyn
         private CompositeCompilationAssemblyResolver Resolver { get; set; }
 
         /// <summary>
-        /// Gets a registry of <see cref="Assembly"/> instances by <see cref="string"/> Assembly Name.
+        /// Gets a registry of <see cref="Assembly"/> instances by <see cref="string"/> path.
         /// </summary>
-        private Dictionary<string, Assembly> AssembliesByName { get; } = new Dictionary<string, Assembly>();
+        private Dictionary<string, Assembly> AssembliesByPath { get; } = new Dictionary<string, Assembly>();
 
         // TODO: TBD: not sure what the purpose behind this is/was to be honest...
         private HashSet<string> DirectoryPathsWithResolver { get; } = new HashSet<string>();
@@ -84,7 +84,7 @@ namespace Code.Generation.Roslyn
 
             // TODO: TBD: doesn't this get recycled by the GC then?
             var loadContext = GetLoadContext(GetType().GetTypeInfo().Assembly);
-            loadContext.Resolving += ResolveAssembly;
+            loadContext.Resolving += LoadContext_OnResolveAssembly;
         }
 
         /// <summary>
@@ -107,49 +107,91 @@ namespace Code.Generation.Roslyn
             return this;
         }
 
-        /// <summary>
-        /// Loads the <see cref="Assembly"/> associated with the <paramref name="assemblyName"/>.
-        /// </summary>
-        /// <param name="assemblyName"></param>
-        /// <returns></returns>
         internal Assembly LoadAssembly(AssemblyName assemblyName)
         {
-            IEnumerable<string> GetAllMatchingAssemblyReferencePaths(
-                IEnumerable<string> referencePaths, IEnumerable<string> searchPaths)
-            {
-                const StringComparison comparison = OrdinalIgnoreCase;
+            string GetMatchingReferenceAssemblyPath()
+                => ReferencePath.FirstOrDefault(
+                    x => GetFileNameWithoutExtension(x)
+                             ?.Equals(assemblyName.Name, OrdinalIgnoreCase) == true);
 
-                foreach (var y in referencePaths.Select(GetFileNameWithoutExtension)
-                    .Where(x => x.Equals(assemblyName.Name, comparison)))
+            string GetMatchingAssemblyPath()
+                => SearchPaths.SelectMany(
+                        x => EnumerateFiles(x, $"{assemblyName.Name}.dll", TopDirectoryOnly))
+                    .FirstOrDefault(x => AllowedAssemblyExtensions.Contains(GetExtension(x)));
+
+            bool TryRegisterMatchingAssembly(string matching, out Assembly assembly)
+            {
+                assembly = null;
+                if (IsNullOrEmpty(matching))
                 {
-                    yield return y;
+                    return false;
                 }
 
-                var searchPattern = $"{assemblyName.Name}{AllowedAssemblyExtensionDll}";
-                const SearchOption option = TopDirectoryOnly;
-
-                foreach (var y in searchPaths
-                    .SelectMany(x => EnumerateFiles(x, searchPattern, option), (_, x) => new { _, x })
-                    .Where(tuple => AllowedAssemblyExtensions.Contains(GetExtension(tuple.x)))
-                    .Select(tuple => tuple.x))
-                {
-                    yield return y;
-                }
+                RegistrySet.Add(AssemblyDescriptor.Create(matching));
+                assembly = LoadAssembly(matching);
+                return assembly != null;
             }
 
-            {
-                // TODO: TBD: best I can figure, the "loaded assemblies" 'registry' was only ever glommed on to...
-                // TODO: TBD: would never grow, shrink, adjust, to the current state of a target project.
+            // ReSharper disable once ImplicitlyCapturedClosure
+            Assembly LoadAssemblyByName() => Assembly.Load(assemblyName);
 
-                var y = GetAllMatchingAssemblyReferencePaths(ReferencePath, SearchPaths)
-                            .Where(IsNotNullOrEmpty).Select(LoadAssembly).FirstOrDefault()
-                        ?? Assembly.Load(assemblyName);
+            var loaded = TryRegisterMatchingAssembly(GetMatchingReferenceAssemblyPath() ?? GetMatchingAssemblyPath()
+                , out var y)
+                ? y
+                : LoadAssemblyByName();
 
-                RegistrySet.Add(AssemblyDescriptor.Create(y.Location));
-
-                return y;
-            }
+            return loaded;
         }
+
+        ///// <summary>
+        ///// Loads the <see cref="Assembly"/> associated with the <paramref name="assemblyName"/>.
+        ///// </summary>
+        ///// <param name="assemblyName"></param>
+        ///// <returns></returns>
+        //internal Assembly LoadAssembly(AssemblyName assemblyName)
+        //{
+        //    IEnumerable<string> GetAllMatchingAssemblyReferencePaths(
+        //        IEnumerable<string> referencePaths, IEnumerable<string> searchPaths)
+        //    {
+        //        const StringComparison comparison = OrdinalIgnoreCase;
+
+        //        foreach (var y in referencePaths.Select(GetFileNameWithoutExtension)
+        //            .Where(x => x.Equals(assemblyName.Name, comparison)))
+        //        {
+        //            yield return y;
+        //        }
+
+        //        var searchPattern = $"{assemblyName.Name}{AllowedAssemblyExtensionDll}";
+        //        const SearchOption option = TopDirectoryOnly;
+
+        //        foreach (var y in searchPaths
+        //            .SelectMany(x => EnumerateFiles(x, searchPattern, option), (_, x) => new { _, x })
+        //            .Where(tuple => AllowedAssemblyExtensions.Contains(GetExtension(tuple.x)))
+        //            .Select(tuple => tuple.x))
+        //        {
+        //            yield return y;
+        //        }
+        //    }
+
+        //    {
+        //        Assembly GetFirstOrDefaultMatching()
+        //        {
+        //            return GetAllMatchingAssemblyReferencePaths(ReferencePath, SearchPaths)
+        //                .Where(IsNotNullOrEmpty).Select(LoadAssembly).FirstOrDefault();
+        //        }
+
+        //        Assembly LoadAssemblyByName() => Assembly.Load(assemblyName);
+
+        //        // TODO: TBD: best I can figure, the "loaded assemblies" 'registry' was only ever glommed on to...
+        //        // TODO: TBD: would never grow, shrink, adjust, to the current state of a target project.
+
+        //        var y = GetFirstOrDefaultMatching() ?? LoadAssemblyByName();
+
+        //        RegistrySet.Add(AssemblyDescriptor.Create(y.Location));
+
+        //        return y;
+        //    }
+        //}
 
         /// <summary>
         /// Resolves the <see cref="Assembly"/> given <paramref name="context"/> and
@@ -159,11 +201,11 @@ namespace Code.Generation.Roslyn
         /// <param name="context"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        private Assembly ResolveAssembly(AssemblyLoadContext context, AssemblyName name) => ResolveAssembly(context, name, DoesNameEqual);
+        private Assembly LoadContext_OnResolveAssembly(AssemblyLoadContext context, AssemblyName name)
+            => OnResolveAssembly(context, name, DoesNameEqual);
 
-        private Assembly ResolveAssembly(AssemblyLoadContext context, AssemblyName name, StringBinaryPredicate predicate)
+        private Assembly OnResolveAssembly(AssemblyLoadContext context, AssemblyName name, StringBinaryPredicate predicate)
         {
-            // ReSharper disable once RedundantEmptyObjectOrCollectionInitializer
             bool TryResolveAssemblyPaths(out IEnumerable<string> assemblyPaths)
             {
                 var paths = (List<string>) (assemblyPaths = new List<string> { });
@@ -176,10 +218,10 @@ namespace Code.Generation.Roslyn
 
                 var groups = rl.RuntimeAssemblyGroups;
 
-                var wrapper = new CompilationLibrary(rl.Type, rl.Name, rl.Version, rl.Hash
+                var cl = new CompilationLibrary(rl.Type, rl.Name, rl.Version, rl.Hash
                     , groups.SelectMany(g => g.AssetPaths), rl.Dependencies, rl.Serviceable);
 
-                return Resolver.TryResolveAssemblyPaths(wrapper, paths) && assemblyPaths.Any();
+                return Resolver.TryResolveAssemblyPaths(cl, paths) && assemblyPaths.Any();
             }
 
             if (TryResolveAssemblyPaths(out var resolvedPaths))
@@ -226,44 +268,50 @@ namespace Code.Generation.Roslyn
             return null;
         }
 
-        //// TODO: TBD: the whole thing with this one is a faulty assumption, quite probably...
-        //// TODO: TBD: would the assembly name not be sufficient? why by path?
         /// <summary>
-        /// Loads the <see cref="Assembly"/> corresponding with the <paramref name="assemblyName"/>.
+        /// Loads the <see cref="Assembly"/> corresponding with the <paramref name="path"/>.
         /// </summary>
-        /// <param name="assemblyName"></param>
+        /// <param name="path"></param>
         /// <returns></returns>
-        private Assembly LoadAssembly(string assemblyName)
+        private Assembly LoadAssembly(string path)
         {
             Assembly LoadAssemblyFromTypeLoadContext()
             {
                 var loadContext = GetLoadContext(GetType().GetTypeInfo().Assembly);
-                return loadContext.LoadFromAssemblyName(new AssemblyName(assemblyName));
+                return loadContext.LoadFromAssemblyPath(path);
+            }
+
+            // Ensures that we have the Contact fully loaded.
+            void ResolveCompilationAssemblies()
+            {
+                var pathDirectoryName = GetDirectoryName(path);
+                if (DirectoryPathsWithResolver.Contains(pathDirectoryName))
+                {
+                    return;
+                }
+
+                Resolver = Resolver.AbsorbResolvers(new AppBaseCompilationAssemblyResolver(pathDirectoryName));
+                DirectoryPathsWithResolver.Add(pathDirectoryName);
             }
 
             // ReSharper disable once InvertIf
-            if (!AssembliesByName.ContainsKey(assemblyName))
+            if (!AssembliesByPath.ContainsKey(path))
             {
                 var assembly = LoadAssemblyFromTypeLoadContext();
 
-                var loadedContext = DependencyContext.Load(assembly);
-                if (loadedContext != null)
+                var dc = DependencyContext.Load(assembly);
+
+                if (dc != null)
                 {
-                    Context = Context.Merge(loadedContext);
+                    Context = Context.Merge(dc);
                 }
 
-                //// TODO: TBD: what was the intent behind this?
-                //var basePath = GetDirectoryName(path);
-                //if (!DirectoryPathsWithResolver.Contains(basePath))
-                //{
-                //    Resolver = Resolver.AbsorbResolvers(new AppBaseCompilationAssemblyResolver(basePath));
-                //    DirectoryPathsWithResolver.Add(basePath);
-                //}
+                ResolveCompilationAssemblies();
 
-                AssembliesByName.Add(assemblyName, assembly);
+                AssembliesByPath.Add(path, assembly);
             }
 
-            return AssembliesByName[assemblyName];
+            return AssembliesByPath[path];
         }
     }
 }
