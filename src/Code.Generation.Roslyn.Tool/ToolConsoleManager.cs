@@ -10,10 +10,24 @@ namespace Code.Generation.Roslyn
     using NConsole.Options;
     using static String;
     using static StringLiterals;
+    using static OperationKind;
 
     internal class ToolConsoleManager : OptionSetConsoleManager
     {
         private Switch VersionSwitch { get; }
+
+        // TODO: TBD: and if this does not work, then fall back on Switch approach...
+        private Variable<OperationKind?> Operation { get; }
+
+        /// <summary>
+        /// Gets the <see cref="Variable{T}.Value"/> from <see cref="Operation"/>.
+        /// Default is <see cref="Generate"/>.
+        /// </summary>
+        /// <returns></returns>
+        private OperationKind PrivateOperation => ((OperationKind?)Operation) ?? Generate;
+
+        //private Switch GenerateSwitch { get; }
+        //private Switch CleanSwitch { get; }
 
         // TODO: TBD: depend on the Nerdly stuff? for ThisAssembly "code gen" ?
         // TODO: TBD: ways to expose "other versions"? i.e. assembly version?
@@ -69,25 +83,49 @@ namespace Code.Generation.Roslyn
                 , errorWriter: errorWriter)
         {
             VersionSwitch = Options.AddSwitch("version", OnVersion, "Shows the version of the tool.");
+
+            // TODO: TBD: do we need to do a $"nameof(Operation)" ? or would $"{Operation}" be sufficient?
+            Operation = Options.AddVariable<OperationKind?>("operation".MaySpecify()
+                , $"[ {nameof(Clean)} | {nameof(Generate)} ]"
+                  + $", specify the operation the tool should perform. Default Operation is {nameof(Generate)}.");
+
+            /* While, technically, we `MustSpecify´ Project, Output, and so on, only when the
+             * Tool Operation is Generate. However, as an OptionSet, we only `MaySpecify´ the
+             * options. We will further vet the Error Levels independently further in. */
+
+            ProjectDirectory = Options.AddVariable<string>("p|project".MaySpecify(), "Project directory absolute path.");
+            OutputDirectory = Options.AddVariable<string>("o|output".MaySpecify(), "Generated source files output directory.");
+            IntermediateAssembliesRegistryFileName = Options.AddVariable<string>("a|assemblies".MaySpecify(), "JSON formatted intermediate assemblies registry file name.");
+            IntermediateGeneratedRegistryFileName = Options.AddVariable<string>("g|generated".MaySpecify(), "JSON formatted intermediate generated registry file name.");
+
+            SourcePathList = Options.AddVariableList<string>("src|source".MaySpecify(), "Source paths included during compilation.");
             ReferencePathList = Options.AddVariableList<string>("r|reference".MaySpecify(), "Paths to assemblies being referenced.");
-            PreprocessorSymbolsList = Options.AddVariableList<string>("d|define", "Paths to preprocessor symbols.");
-            GeneratorSearchPathList = Options.AddVariableList<string>("s|search", "Paths to folders that may contain generator assemblies.");
-            OutputDirectory = Options.AddVariable<string>("o|output", "Generated source files output directory.");
-            ProjectDirectory = Options.AddVariable<string>("p|project", "Project directory absolute path.");
-            IntermediateAssembliesRegistryFileName = Options.AddVariable<string>("a|assemblies", "JSON formatted intermediate assemblies registry file name.");
-            IntermediateGeneratedRegistryFileName = Options.AddVariable<string>("g|generated", "JSON formatted intermediate generated registry file name.");
-            SourcePathList = Options.AddVariableList<string>("src|source", "Source paths included during compilation.");
+            PreprocessorSymbolsList = Options.AddVariableList<string>("d|define".MaySpecify(), "Paths to preprocessor symbols.");
+            GeneratorSearchPathList = Options.AddVariableList<string>("s|search".MaySpecify(), "Paths to folders that may contain generator assemblies.");
+
             // Which we should be able to unit test this as well, given our approach.
-            ResponseFile = Options.AddVariable<string>("response", "Processes argument input from a new line delimited response file.");
+            ResponseFile = Options.AddVariable<string>("response".MaySpecify(), "Processes argument input from a new line delimited response file.");
 
             Levels = new ErrorLevelCollection
             {
-                {1, () => !SourcePathList.Values.Any(), () => NoSourceFilesSpecified},
+                // TODO: TBD: and to be fair, we may consider an NConsole version that allows for null message factory...
+                // No message should ever be relayed, this should allow --version to short-circuit the rest.
+                {DefaultErrorLevel, () => VersionSwitch, () => Empty},
+                // TODO: TBD: might do the same for a Help `--help´ or `--?´ option as for Version `--version´...
+                {1, () => PrivateOperation == Generate && !SourcePathList.Values.Any(), () => NoSourceFilesSpecified},
                 {2, () => IsNullOrEmpty(OutputDirectory.Value), () => OutputDirectoryMustBeSpecified},
                 {3, () => ServiceException != null, RenderServiceException},
                 DefaultErrorLevel
             };
         }
+
+        //// TODO: TBD: I do not think we are actually landing here...
+        //public new virtual bool TryParseOrShowHelp(params string[] args)
+        //{
+        //    throw new ArgumentException($@"The arguments were: `{Join(" ", args)}´.", nameof(args));
+        //    Writer.WriteLine($@"The arguments were: {Join(" ", args)}");
+        //    return base.TryParseOrShowHelp(args);
+        //}
 
         /// <summary>
         /// Tries to Load the <paramref name="responseFilePath"/> Arguments. Try not to do much
@@ -112,12 +150,121 @@ namespace Code.Generation.Roslyn
             return unparsed?.Any() == false;
         }
 
+        // TODO: TBD: refactor this type of functionality to base class, i.e. ReportErrorLevel...
+        private bool TryReportErrorLevel(int level)
+        {
+            // TODO: TBD: perhaps an indexer would be great as well...
+            var descriptor = Levels.FirstOrDefault(x => x.ErrorLevel == level);
+            // TODO: TBD: perhaps, CanReport property?
+
+            // ReSharper disable once InvertIf
+            if (descriptor != null && !IsNullOrEmpty(descriptor.Description))
+            {
+                switch (level)
+                {
+                    case Logger.CriticalLevel:
+                    case Logger.ErrorLevel:
+                        ErrorWriter.WriteLine(descriptor.Description);
+                        break;
+
+                    default:
+                        Writer.WriteLine(descriptor.Description);
+                        break;
+                }
+            }
+
+            // Error Level will have been Reported.
+            return level != DefaultErrorLevel;
+        }
+
+        /// <summary>
+        /// Callback occurs On <see cref="Generate"/> <see cref="Operation"/>.
+        /// </summary>
+        /// <param name="_">Receives an Error Level. However, for all intents and purposes, we are
+        /// here because any error preconditions apart from <see cref="Logger.CriticalLevel"/> on
+        /// <see cref="Exception"/> will have been fully vetted.</param>
+        /// <see cref="OperationKind"/>
+        /// <see cref="Operation"/>
+        /// <see cref="Generate"/>
+        private void OnGenerate(int _)
+        {
+            // TODO: TBD: borderline complexity boundary here, could potentially benefit from a DI container...
+            AssemblyReferenceServiceManager CreateReferenceService()
+                => new AssemblyReferenceServiceManager(OutputDirectory, IntermediateAssembliesRegistryFileName
+                    , ReferencePathList.Sanitize().ToArray(), GeneratorSearchPathList.Sanitize().ToArray());
+
+            var referenceService = CreateReferenceService();
+
+            DocumentTransformation CreateDocumentTransformation() => new DocumentTransformation(referenceService);
+
+            var serviceManager = new CompilationServiceManager(OutputDirectory, IntermediateGeneratedRegistryFileName
+                , referenceService, CreateDocumentTransformation())
+            {
+                ProjectDirectory = ProjectDirectory,
+                SourcePathsToCompile = SourcePathList.Sanitize().ToArray(),
+                PreprocessorSymbols = PreprocessorSymbolsList.ToArray()
+            };
+
+            var progress = new Progress<Diagnostic>(d => Writer.WriteLine($"{d}"));
+
+            try
+            {
+                serviceManager.Generate(progress);
+            }
+            catch (Exception ex)
+            {
+                ServiceException = ex;
+                TryReportErrorLevel(Logger.CriticalLevel);
+                return;
+            }
+
+            void ReportGeneratedFiles(Logger logger, IDictionary<string, string[]> generatedFiles)
+            {
+                foreach (var (key, value) in generatedFiles)
+                {
+                    logger.Information($"Code generation triggered by `{key}'...");
+                    foreach (var h in value)
+                    {
+                        logger.Information($"Generated `{h}´.");
+                    }
+                }
+            }
+
+            ReportGeneratedFiles(Logger.Resource, serviceManager.RegistrySet.GeneratedSourceBundles);
+        }
+
+        /// <summary>
+        /// Callback occurs On <see cref="Clean"/> <see cref="Operation"/>.
+        /// </summary>
+        /// <param name="_">Receives an Error Level. However, for all intents and purposes, we are
+        /// here because any error preconditions apart from <see cref="Logger.CriticalLevel"/> on
+        /// <see cref="Exception"/> will have been fully vetted.</param>
+        /// <see cref="OperationKind"/>
+        /// <see cref="Operation"/>
+        /// <see cref="Clean"/>
+        private void OnClean(int _)
+        {
+            try
+            {
+                using (new CleanServiceManager(OutputDirectory
+                    , IntermediateGeneratedRegistryFileName
+                    , IntermediateAssembliesRegistryFileName))
+                {
+                }
+            }
+            catch (Exception ex)
+            {
+                ServiceException = ex;
+                TryReportErrorLevel(Logger.CriticalLevel);
+            }
+        }
+
         public override void Run(out int errorLevel)
         {
             /* We are here because we Parsed. We could potentially allow for Parse extensibility,
-             but this will suffice as a workaround for the time being. We do this here because we
-             want to have evaluated the Arguments, regardless of their sourcing, in front of
-             evaluating any error levels. */
+             * but this will suffice as a workaround for the time being. We do this here because
+             * we want to have evaluated the Arguments, regardless of their sourcing, in front of
+             * evaluating any error levels. */
 
             // Allowing for a Response File as input instead of the direct Command Line Arguments.
             bool TryEvaluateResponseFile(out int responseLevel)
@@ -135,73 +282,16 @@ namespace Code.Generation.Roslyn
 
             base.Run(out errorLevel);
 
-            // TODO: TBD: refactor this type of functionality to base class, i.e. ReportErrorLevel...
-            bool TryReportErrorLevel(int level)
-            {
-                // TODO: TBD: perhaps an indexer would be great as well...
-                var descriptor = Levels.FirstOrDefault(x => x.ErrorLevel == level);
-                // TODO: TBD: perhaps, CanReport property?
-                if (descriptor != null && !IsNullOrEmpty(descriptor.Description))
-                {
-                    Writer.WriteLine(descriptor.Description);
-                }
-
-                // Error Level will have been Reported.
-                return level != DefaultErrorLevel;
-            }
-
             // Version trumps Reporting any Error Levels.
             if (VersionSwitch.Enabled || TryReportErrorLevel(errorLevel))
             {
                 return;
             }
 
-            IEnumerable<string> Sanitize(IEnumerable<string> inputs) => inputs.Where(
-                x => !IsNullOrWhiteSpace(x)).Select(x => x.Trim()
-            );
-
-            // TODO: TBD: borderline complexity boundary here, could potentially benefit from a DI container...
-            AssemblyReferenceServiceManager CreateReferenceService()
-                => new AssemblyReferenceServiceManager(OutputDirectory, IntermediateAssembliesRegistryFileName
-                    , Sanitize(ReferencePathList).ToArray(), Sanitize(GeneratorSearchPathList).ToArray());
-
-            var referenceService = CreateReferenceService();
-
-            DocumentTransformation CreateDocumentTransformation() => new DocumentTransformation(referenceService);
-
-            var serviceManager = new CompilationServiceManager(OutputDirectory, IntermediateGeneratedRegistryFileName
-                , referenceService, CreateDocumentTransformation())
-            {
-                ProjectDirectory = ProjectDirectory,
-                SourcePathsToCompile = Sanitize(SourcePathList).ToArray(),
-                PreprocessorSymbols = PreprocessorSymbolsList.ToArray()
-            };
-
-            var progress = new Progress<Diagnostic>(d => Writer.WriteLine($"{d}"));
-
-            try
-            {
-                serviceManager.Generate(progress);
-            }
-            catch (Exception ex)
-            {
-                TryReportErrorLevel(errorLevel = Logger.CriticalLevel);
-                return;
-            }
-
-            void ReportGeneratedFiles(Logger logger, IDictionary<string, string[]> generatedFiles)
-            {
-                foreach (var (key, value) in generatedFiles)
-                {
-                    logger.Information($"Code generation triggered by `{key}'...");
-                    foreach (var h in value)
-                    {
-                        logger.Information($"Generated `{h}'.");
-                    }
-                }
-            }
-
-            ReportGeneratedFiles(Logger.Resource, serviceManager.RegistrySet.GeneratedSourceBundles);
+            /* Kind of a roundabout way of doing it, except to underscore the control flow.
+             * The focus is on Invoking the Operation. Which, this should also be demonstrable
+             * regardless of the caller context. */
+            PrivateOperation.InvokeOperation(this, errorLevel);
         }
     }
 }
