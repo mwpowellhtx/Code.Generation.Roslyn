@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <RootNamespace>Foo</RootNamespace>
+    <Version>1.0.0.4761</Version>
+    <AssemblyVersion>1.0.0.4761</AssemblyVersion>
+    <FileVersion>1.0.0.4761</FileVersion>
+  </PropertyGroup>
+
+  <Import Project="..\Code.Generation.Roslyn.Tasks\build\Code.Generation.Roslyn.BuildTime.props" />
+  <Import Project="..\Code.Generation.Roslyn.Tasks\build\Code.Generation.Roslyn.BuildTime.targets" />
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\tools\Shared\AssemblyInfo.cs" Link="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\tools\Shared\Bar.cs" Link="Code\Bar.cs" />
+    <Compile Include="..\tools\Shared\Baz.cs" Link="Code\Baz.cs" />
+    <Compile Include="..\tools\Shared\IBiz.cs" Link="Code\IBiz.cs" />
+    <Compile Include="..\tools\Shared\IBuz.cs" Link="Code\IBuz.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="$(MSBuildProjectFile).DotSettings" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Code.Generation.Roslyn.Generators\Code.Generation.Roslyn.Generators.csproj" />
+    <ProjectReference Include="..\Code.Generation.Roslyn.Tool\Code.Generation.Roslyn.Tool.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <!-- TODO: TBD: literally `dotnet asset´ gets translated to dotnet-asset.dll at the command line... -->
+    <!-- We will leverage the TargetFramework here. This works as long as we are able to stay aligned with the Tool. -->
+    <DotnetCodeGenerationToolPath>..\Code.Generation.Roslyn.Tool\bin\$(Configuration)\$(TargetFramework)\dotnet-codegen.dll</DotnetCodeGenerationToolPath>
+    <!--<DotnetCodeGenerationToolPath>bin\$(Configuration)\$(TargetFramework)\dotnet-codegen.dll</DotnetCodeGenerationToolPath>-->
+  </PropertyGroup>
+
+  <!-- ReSharper disable UnknownProperty -->
+  <ItemGroup>
+    <PackageReference Include="NConsole.Options.Extensions" Version="$(NConsoleOptionsExtensionsVersion)" />
+  </ItemGroup>
+  <!-- ReSharper restore UnknownProperty -->
+
+</Project>
