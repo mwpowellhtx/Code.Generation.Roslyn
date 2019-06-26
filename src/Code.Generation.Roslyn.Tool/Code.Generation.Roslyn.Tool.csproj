@@ -6,14 +6,15 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <!-- ReSharper disable once UnknownProperty -->
     <AssemblyName>$(CodeGenerationToolName)</AssemblyName>
-    <Version>1.0.0.4478</Version>
-    <AssemblyVersion>1.0.0.4478</AssemblyVersion>
-    <FileVersion>1.0.0.4478</FileVersion>
-    <PackageVersion>1.0.0.4478</PackageVersion>
+    <Version>1.0.0.4574</Version>
+    <AssemblyVersion>1.0.0.4574</AssemblyVersion>
+    <FileVersion>1.0.0.4574</FileVersion>
+    <PackageVersion>1.0.0.4574</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup>
-    <!--  So as not to collide with https://www.nuget.org/packages/dotnet-codegen/ -->
+    <!-- So as not to collide with https://www.nuget.org/packages/dotnet-codegen/ -->
+    <!-- TODO: TBD: may call this `dotnet-codegen-cli-tool´, which, technically, it is. thereby making it ultra clear what its intended purpose is, by name -->
     <PackageId>dotnet-code.gen</PackageId>
     <Description>The dotnet code generation CLI tool that works with the Code.Generation.Roslyn NuGet package.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -24,8 +25,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- TODO: TBD: may need to include this in the nuget packaging somehow (?) -->
     <!-- Tells the dotnet cli to allow the tool being run even if the run-time version does not match the target version. -->
-    <Content Include="prefercliruntime" Pack="true" PackagePath="" />
+    <Content Include="prefercliruntime" Pack="true" PackagePath="">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Compile Update="StringLiterals.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -41,10 +45,12 @@
     <ProjectReference Include="..\Code.Generation.Roslyn.Engine\Code.Generation.Roslyn.Engine.csproj" />
   </ItemGroup>
 
+  <!-- ReSharper disable UnknownProperty -->
   <ItemGroup>
-    <PackageReference Include="NConsole.Options.Extensions" Version="1.4.7.23428" />
+    <PackageReference Include="NConsole.Options.Extensions" Version="$(NConsoleOptionsExtensionsVersion)" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
+  <!-- ReSharper restore UnknownProperty -->
 
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
