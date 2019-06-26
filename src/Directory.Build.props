@@ -19,6 +19,7 @@
 
   <PropertyGroup>
     <RootNamespace>Code.Generation.Roslyn</RootNamespace>
+    <NConsoleOptionsExtensionsVersion>[1.4.7,2)</NConsoleOptionsExtensionsVersion>
     <MicrosoftBuildVersion>[15.9.20,16)</MicrosoftBuildVersion>
     <MicrosoftCodeAnalysisCSharpVersion>[2.10,3)</MicrosoftCodeAnalysisCSharpVersion>
     <ValidationVersion>2.4.22</ValidationVersion>
