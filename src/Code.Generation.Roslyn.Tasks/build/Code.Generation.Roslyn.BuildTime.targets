@@ -9,85 +9,112 @@
     <CodeGenerationRegistryExtension>.json</CodeGenerationRegistryExtension>
     <CodeGenerationResponseFileExtension>.rsp</CodeGenerationResponseFileExtension>
     <GenerateCodeFromAttributesDependencies>
-      PrepareToGenerateCodeFromAttributes
+      PrepareCodeGenPropertyGroups
+      ;PrepareToGenerateCodeFromAttributes
       ;InvokeCodeGenerationFromAttributes
       ;CompileCodeGenerationGeneratedCode
     </GenerateCodeFromAttributesDependencies>
-    <!-- Literally, Response File items separated by Carriage Return Line Feed. -->
-    <CodeGenerationResponseFileLineSeparator>%0d%0a</CodeGenerationResponseFileLineSeparator>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <!-- So that we are not having to make any intermediate directories. -->
-    <CodeGenToolIntermediateOutputDirectory>$(IntermediateOutputPath)</CodeGenToolIntermediateOutputDirectory>
-    <CodeGenToolOutputBaseFileName>$(MSBuildProjectFile)</CodeGenToolOutputBaseFileName>
-    <CodeGenToolCompilationRegistryFileName>$(CodeGenToolOutputBaseFileName)$(CodeGenerationGeneratedExtension)$(CodeGenerationRegistryExtension)</CodeGenToolCompilationRegistryFileName>
-    <CodeGenToolCompilationRegistryPath>$(CodeGenToolIntermediateOutputDirectory)$(CodeGenToolCompilationRegistryFileName)</CodeGenToolCompilationRegistryPath>
-    <CodeGenToolCompilationResponseFileName>$(CodeGenToolOutputBaseFileName)$(CodeGenerationGeneratedExtension)$(CodeGenerationRegistryExtension)</CodeGenToolCompilationResponseFileName>
-    <CodeGenToolCompilationResponsePath>$(CodeGenToolIntermediateOutputDirectory)$(CodeGenToolCompilationResponseFileName)</CodeGenToolCompilationResponsePath>
-    <CodeGenToolAssemblyReferenceRegistryFileName>$(CodeGenToolOutputBaseFileName)$(CodeGenerationAssemblyReferenceExtension)$(CodeGenerationRegistryExtension)</CodeGenToolAssemblyReferenceRegistryFileName>
-    <CodeGenToolAssemblyReferenceRegistryPath>$(CodeGenToolIntermediateOutputDirectory)$(CodeGenToolAssemblyReferenceRegistryFileName)</CodeGenToolAssemblyReferenceRegistryPath>
-    <CodeGenToolResponseFileName>$(CodeGenToolOutputBaseFileName)$(CodeGenerationResponseFileExtension)</CodeGenToolResponseFileName>
-    <CodeGenToolResponsePath>$(CodeGenToolIntermediateOutputDirectory)$(CodeGenToolResponseFileName)</CodeGenToolResponsePath>
-  </PropertyGroup>
+  <Target Name="PrepareCodeGenPropertyGroups">
+    <PropertyGroup>
+      <!-- So that we are not having to make any intermediate directories. -->
+      <CodeGenToolIntermediateOutputDirectory>$(IntermediateOutputPath)</CodeGenToolIntermediateOutputDirectory>
+      <CodeGenToolOutputBaseFileName>$(MSBuildProjectFile)</CodeGenToolOutputBaseFileName>
+      <CodeGenToolGeneratedRegistryFileName>$(CodeGenToolOutputBaseFileName)$(CodeGenerationGeneratedExtension)$(CodeGenerationRegistryExtension)</CodeGenToolGeneratedRegistryFileName>
+      <CodeGenToolCompilationRegistryPath>$(IntermediateOutputPath)$(CodeGenToolGeneratedRegistryFileName)</CodeGenToolCompilationRegistryPath>
+      <CodeGenToolAssemblyReferenceRegistryFileName>$(CodeGenToolOutputBaseFileName)$(CodeGenerationAssemblyReferenceExtension)$(CodeGenerationRegistryExtension)</CodeGenToolAssemblyReferenceRegistryFileName>
+      <CodeGenToolAssemblyReferenceRegistryPath>$(IntermediateOutputPath)$(CodeGenToolAssemblyReferenceRegistryFileName)</CodeGenToolAssemblyReferenceRegistryPath>
+      <CodeGenToolCommandLineArgumentsResponseFileName>$(CodeGenToolOutputBaseFileName)$(CodeGenerationResponseFileExtension)</CodeGenToolCommandLineArgumentsResponseFileName>
+      <CodeGenToolCommandLineArgumentsResponsePath>$(IntermediateOutputPath)$(CodeGenToolCommandLineArgumentsResponseFileName)</CodeGenToolCommandLineArgumentsResponsePath>
+      <CodeGenToolCompilationResponseFileName>$(CodeGenToolOutputBaseFileName)$(CodeGenerationGeneratedExtension)$(CodeGenerationResponseFileExtension)</CodeGenToolCompilationResponseFileName>
+      <CodeGenToolCompilationResponsePath>$(IntermediateOutputPath)$(CodeGenToolCompilationResponseFileName)</CodeGenToolCompilationResponsePath>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="CleanCodeGenerationArtifacts" BeforeTargets="Clean">
+    <PropertyGroup>
+      <!-- TODO: TBD: we always depend on this as a base set of arguments. -->
+      <!-- TODO: TBD: perhaps establish these up front as a first class CGR property. -->
+      <_CodeGenToolResponseFileContent>
+--project
+$(MSBuildProjectDirectory)
+--output
+$(IntermediateOutputPath)
+--generated
+$(CodeGenToolGeneratedRegistryFileName)
+--assemblies
+$(CodeGenToolAssemblyReferenceRegistryFileName)
+      </_CodeGenToolResponseFileContent>
+    </PropertyGroup>
+    <!-- Must make the Intermediate Output Directory because the invoking context may not have output directory comprehension. -->
+    <MakeDir Directories="$(IntermediateOutputPath)" Condition="!Exists('$(IntermediateOutputPath)')" />
+    <!-- Write the response file with arguments for dotnet-codegen. -->
+    <WriteLinesToFile File="$(CodeGenToolCommandLineArgumentsResponsePath)" Lines="$(_CodeGenToolResponseFileContent)" Overwrite="true" />
+    <Message Text="Evaluating `dotnet $(_DotnetCommandLineSwitches)$(DotnetCodeGenerationToolPath) --response &quot;$(CodeGenToolCommandLineArgumentsResponsePath)&quot;´ ..." Importance="high" />
+    <Exec Command="dotnet $(_DotnetCommandLineSwitches)$(DotnetCodeGenerationToolPath) --response &quot;$(CodeGenToolCommandLineArgumentsResponsePath)&quot;" ConsoleToMSBuild="true" StandardOutputImportance="normal" ContinueOnError="true" />
+  </Target>
 
   <PropertyGroup>
     <!-- Which the `tool´ build needs to yield literally, `dotnet-codegen´ for its assembly output. -->
     <DotnetCodeGenerationToolPath Condition="'$(DotnetCodeGenerationToolPath)' == ''">codegen</DotnetCodeGenerationToolPath>
+    <DotnetCommandLineSwitches Condition="'$(DotnetCommandLineSwitches)' != ''"></DotnetCommandLineSwitches>
   </PropertyGroup>
 
   <!-- Rolls up the Targets into the front-facing Code Generation Target. -->
   <Target Name="GenerateCodeFromAttributes" DependsOnTargets="$(GenerateCodeFromAttributesDependencies)" BeforeTargets="CoreCompile;PrepareResources" />
 
   <!-- ReSharper disable once UnknownTarget -->
-  <Target Name="PrepareToGenerateCodeFromAttributes" DependsOnTargets="ResolveReferences">
-    <Message Text="Preparing to run code generation using intermediate directory `$(CodeGenToolIntermediateOutputDirectory)´ ..." Importance="normal" />
+  <Target Name="PrepareToGenerateCodeFromAttributes" DependsOnTargets="ResolveReferences;PrepareCodeGenPropertyGroups">
+    <Message Text="Preparing to run code generation using intermediate directory `$(IntermediateOutputPath)´ ..." Importance="high" />
     <ItemGroup>
       <!-- ReSharper disable once UnknownProperty -->
       <CodeGenCompilationDefineConstants Include="$(DefineConstants)" />
       <CodeGenCompilationInputsFromAttributes Include="@(Compile)" Condition="'%(Compile.Generator)' == 'MSBuild:GenerateCodeFromAttributes'" />
     </ItemGroup>
     <PropertyGroup>
-      <!-- TODO: TBD: perhaps we do not need to quote-enclose the arguments? -->
+      <!-- Literally, Response File lines separated by Carriage Return Line Feed. -->
+      <_CgrSep>%0d%0a</_CgrSep>
+      <!-- TODO: TBD: may refactor this to the actual invocation since it reallyhas nothing to do with `preparation´ or `identifying tooling versions´... -->
       <!-- ReSharper disable once UnknownItemGroup -->
       <_CodeGenToolResponseFileContent>
 --project
 $(MSBuildProjectDirectory)
 --output
-$(CodeGenToolIntermediateOutputDirectory)
+$(IntermediateOutputPath)
 --generated
-$(CodeGenToolCompilationRegistryFileName)
+$(CodeGenToolGeneratedRegistryFileName)
 --assemblies
-$(CodeGenToolAssemblyReferenceRegistryFileName)
-@(ReferencePath->'--reference$(CodeGenerationResponseFileLineSeparator)%(Identity)', '$(CodeGenerationResponseFileLineSeparator)')
-@(CodeGenCompilationDefineConstants->'--define$(CodeGenerationResponseFileLineSeparator)%(Identity)', '$(CodeGenerationResponseFileLineSeparator)')
-@(GeneratorAssemblySearchPaths->'--search$(CodeGenerationResponseFileLineSeparator)%(Identity)', '$(CodeGenerationResponseFileLineSeparator)')
-@(CodeGenCompilationInputsFromAttributes->'--source$(CodeGenerationResponseFileLineSeparator)(Identity)', '$(CodeGenerationResponseFileLineSeparator)')
+$(CodeGenToolAssemblyReferenceRegistryFileName)@(ReferencePath->'$(_CgrSep)--reference$(_CgrSep)%(Identity)', '')@(CodeGenCompilationDefineConstants->'$(_CgrSep)--define$(_CgrSep)%(Identity)', '')@(GeneratorAssemblySearchPaths->'$(_CgrSep)--search$(_CgrSep)%(Identity)', '')@(CodeGenCompilationInputsFromAttributes->'$(_CgrSep)--source$(_CgrSep)%(Identity)', '')
       </_CodeGenToolResponseFileContent>
+      <!--<_CodeGenToolResponseFileContent Condition="'$(GeneratorAssemblySearchPaths)' != ''">$(_CodeGenToolResponseFileContent)</_CodeGenToolResponseFileContent>-->
       <_GenerateCodeToolVersion>(n/a)</_GenerateCodeToolVersion>
+      <_DotnetCommandLineSwitches>$(DotnetCommandLineSwitches) </_DotnetCommandLineSwitches>
     </PropertyGroup>
     <!-- Must make the Intermediate Output Directory because the invoking context may not have output directory comprehension. -->
-    <MakeDir Directories="$(CodeGenToolIntermediateOutputDirectory)" Condition="!Exists('$(CodeGenToolIntermediateOutputDirectory)')" />
+    <MakeDir Directories="$(IntermediateOutputPath)" Condition="!Exists('$(IntermediateOutputPath)')" />
     <!-- Write the response file with arguments for dotnet-codegen. -->
-    <WriteLinesToFile File="$(CodeGenToolResponsePath)" Lines="$(_CodeGenToolResponseFileContent)" Overwrite="true" />
+    <WriteLinesToFile File="$(CodeGenToolCommandLineArgumentsResponsePath)" Lines="$(_CodeGenToolResponseFileContent)" Overwrite="true" />
     <!-- TODO: TBD: for now, do not delete the Compilation Registry... This helps preclude unnecessarily regenerating code... -->
     <!-- TODO: TBD: if anything, maybe we also respond to 'Clean' target requests in order to do this bit... -->
     <!--<Delete Condition="Exists('$(CodeGenToolCompilationRegistryPath)')" Files="$(CodeGenToolCompilationRegistryPath)" ContinueOnError="true" />-->
     <!-- Verify and report the tool version. -->
-    <Exec Command="dotnet $(DotnetCodeGenerationToolPath) --version" ConsoleToMSBuild="true" StandardOutputImportance="normal" ContinueOnError="true">
+    <Message Text="Evaluating `dotnet $(_DotnetCommandLineSwitches)$(DotnetCodeGenerationToolPath) --version´ ..." Importance="high" />
+    <Exec Command="dotnet $(_DotnetCommandLineSwitches)$(DotnetCodeGenerationToolPath) --version" ConsoleToMSBuild="true" StandardOutputImportance="normal" ContinueOnError="true">
       <Output TaskParameter="ConsoleOutput" PropertyName="_GenerateCodeToolVersion" />
     </Exec>
-    <Message Text="Running $(CodeGenerationToolFullName) v$(_GenerateCodeToolVersion) ..." Importance="normal" />
+    <Message Text="Running $(CodeGenerationToolFullName) v$(_GenerateCodeToolVersion) ..." Importance="high" />
   </Target>
 
   <Target Name="InvokeCodeGenerationFromAttributes" DependsOnTargets="PrepareToGenerateCodeFromAttributes" Condition="'@(CodeGenCompilationInputsFromAttributes)' != ''">
     <PropertyGroup>
-      <_CodeGenWarning>CGR1000</_CodeGenWarning>
+      <_CgrWarning>CGR1000</_CgrWarning>
       <_CodeGenToolWarningText>$(CodeGenerationToolingFullName): Failed to yield code generation artifacts, please check https://github.com/mwpowellhtx/Code.Generation.Roslyn for usage instructions.</_CodeGenToolWarningText>
     </PropertyGroup>
     <!-- Run the tool using the Response File, which we do need an Argument for, and evaluate the expected outcome. -->
-    <Exec Command="dotnet $(DotnetCodeGenerationToolPath) --response &quot;%40$(CodeGenToolResponsePath)&quot;" StandardOutputImportance="normal"  ContinueOnError="true" />
-    <Warning Code="$(_CodeGenWarning)" Text="$(_CodeGenToolWarningText)" Condition="!(Exists('$(CodeGenToolCompilationRegistryPath)') And Exists('$(CodeGenToolCompilationResponsePath)') And Exists('$(CodeGenToolAssemblyReferenceRegistryPath))'))" />
+    <Message Text="Evaluating `dotnet $(_DotnetCommandLineSwitches)$(DotnetCodeGenerationToolPath) --response &quot;$(CodeGenToolCommandLineArgumentsResponsePath)&quot;´ ..." Importance="high" />
+    <Exec Command="dotnet $(_DotnetCommandLineSwitches)$(DotnetCodeGenerationToolPath) --response &quot;$(CodeGenToolCommandLineArgumentsResponsePath)&quot;" ConsoleToMSBuild="true" StandardOutputImportance="normal" ContinueOnError="true" />
+    <Warning Code="$(_CgrWarning)" Text="$(_CodeGenToolWarningText)" Condition="!(Exists('$(CodeGenToolCompilationRegistryPath)') And Exists('$(CodeGenToolCompilationResponsePath)') And Exists('$(CodeGenToolAssemblyReferenceRegistryPath))'))" />
   </Target>
 
   <Target Name="CompileCodeGenerationGeneratedCode" DependsOnTargets="InvokeCodeGenerationFromAttributes" Condition="Exists('$(CodeGenToolCompilationResponsePath)')">
