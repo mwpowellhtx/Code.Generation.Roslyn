@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{9A
 		Directory.Build.props = Directory.Build.props
 		..\LICENSE = ..\LICENSE
 		NuGet.Config = NuGet.Config
+		Unit.Testing.props = Unit.Testing.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{C5C48C55-7BCB-4DB0-8B51-FE6EC7C2C98C}"
@@ -35,7 +36,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Code.Generation.Roslyn.Gene
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Code.Generation.Roslyn.Tests", "Code.Generation.Roslyn.Tests\Code.Generation.Roslyn.Tests.csproj", "{26C7C18E-CB17-4F46-92DA-1FC62ADECCE4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Code.Generation.Roslyn.Integration.Tests", "Code.Generation.Roslyn.Integration.Tests\Code.Generation.Roslyn.Integration.Tests.csproj", "{A6CD9DEB-416C-4C13-A526-49A35BFCD68F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Code.Generation.Roslyn.Integration.Tests", "Code.Generation.Roslyn.Integration.Tests\Code.Generation.Roslyn.Integration.Tests.csproj", "{A6CD9DEB-416C-4C13-A526-49A35BFCD68F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

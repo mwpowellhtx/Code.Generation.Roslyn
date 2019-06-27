@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <Version>1.0.0.4692</Version>
-    <AssemblyVersion>1.0.0.4692</AssemblyVersion>
-    <FileVersion>1.0.0.4692</FileVersion>
+    <Version>1.0.0.4693</Version>
+    <AssemblyVersion>1.0.0.4693</AssemblyVersion>
+    <FileVersion>1.0.0.4693</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -41,18 +41,9 @@
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(MicrosoftCodeAnalysisCSharpVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(MicrosoftCodeAnalysisCSharpVersion)" />
-    <PackageReference Include="xunit" Version="$(XunitVersion)" />
-    <PackageReference Include="xunit.runner.console" Version="$(XunitVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="xunit.fluently.assert" Version="[1.2,2)" />
-    <PackageReference Include="xunit.fluently.assert.ioly" Version="[1,2)" />
   </ItemGroup>
   <!-- ReSharper restore UnknownProperty -->
+
+  <Import Project="..\Unit.Testing.props" />
 
 </Project>
