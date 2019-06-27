@@ -17,8 +17,14 @@ namespace Code.Generation.Roslyn
     /// the best we can do with this one is to unit test the bits on the sandbox self-contained
     /// projects and see what happens. We will have to see how this works for purposes of
     /// deploying via package sources.</remarks>
+    [Obsolete(ObsoleteMessage)]
     public class CleanServiceManager : ServiceManager, IDisposable
     {
+        internal const string ObsoleteMessage
+            = "Leaving this in for now, but will more than likely remove this eventually,"
+              + " especially considering successful leveraging of internal targets triggered"
+              + " by the Microsoft Build `Clean´ target.";
+
         /// <summary>
         /// Gets the GeneratedRegistryPath.
         /// </summary>
