@@ -1,0 +1,21 @@
+<Project>
+
+  <PropertyGroup>
+    <XunitVersion>2.4.1</XunitVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit" Version="$(XunitVersion)" />
+    <PackageReference Include="xunit.runner.console" Version="$(XunitVersion)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="xunit.fluently.assert" Version="[1.2,2)" />
+    <PackageReference Include="xunit.fluently.assert.ioly" Version="[1,2)" />
+  </ItemGroup>
+
+</Project>
