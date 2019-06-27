@@ -3,9 +3,9 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>Foo</RootNamespace>
-    <Version>1.0.0.4761</Version>
-    <AssemblyVersion>1.0.0.4761</AssemblyVersion>
-    <FileVersion>1.0.0.4761</FileVersion>
+    <Version>1.0.0.4766</Version>
+    <AssemblyVersion>1.0.0.4766</AssemblyVersion>
+    <FileVersion>1.0.0.4766</FileVersion>
   </PropertyGroup>
 
   <Import Project="..\Code.Generation.Roslyn.Tasks\build\Code.Generation.Roslyn.BuildTime.props" />

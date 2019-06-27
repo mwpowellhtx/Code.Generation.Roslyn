@@ -3,10 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>The Engine of Source Code Generation used by the `dotnet-codegen` tool.</Description>
-    <Version>1.0.0.4585</Version>
-    <AssemblyVersion>1.0.0.4585</AssemblyVersion>
-    <FileVersion>1.0.0.4585</FileVersion>
-    <PackageVersion>1.0.0.4585</PackageVersion>
+    <Version>1.0.0.4590</Version>
+    <AssemblyVersion>1.0.0.4590</AssemblyVersion>
+    <FileVersion>1.0.0.4590</FileVersion>
+    <PackageVersion>1.0.0.4590</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
