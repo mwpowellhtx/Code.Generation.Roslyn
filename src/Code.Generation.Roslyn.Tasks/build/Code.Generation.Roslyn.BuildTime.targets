@@ -32,27 +32,50 @@
     </PropertyGroup>
   </Target>
 
-  <Target Name="CleanCodeGenerationArtifacts" BeforeTargets="Clean">
-    <PropertyGroup>
-      <!-- TODO: TBD: we always depend on this as a base set of arguments. -->
-      <!-- TODO: TBD: perhaps establish these up front as a first class CGR property. -->
-      <_CodeGenToolResponseFileContent>
---project
-$(MSBuildProjectDirectory)
---output
-$(IntermediateOutputPath)
---generated
-$(CodeGenToolGeneratedRegistryFileName)
---assemblies
-$(CodeGenToolAssemblyReferenceRegistryFileName)
-      </_CodeGenToolResponseFileContent>
-    </PropertyGroup>
+  <Target Name="PrepareCodeGenCleanTargets" DependsOnTargets="PrepareCodeGenPropertyGroups">
     <!-- Must make the Intermediate Output Directory because the invoking context may not have output directory comprehension. -->
     <MakeDir Directories="$(IntermediateOutputPath)" Condition="!Exists('$(IntermediateOutputPath)')" />
-    <!-- Write the response file with arguments for dotnet-codegen. -->
-    <WriteLinesToFile File="$(CodeGenToolCommandLineArgumentsResponsePath)" Lines="$(_CodeGenToolResponseFileContent)" Overwrite="true" />
-    <Message Text="Evaluating `dotnet $(_DotnetCommandLineSwitches)$(DotnetCodeGenerationToolPath) --response &quot;$(CodeGenToolCommandLineArgumentsResponsePath)&quot;´ ..." Importance="high" />
-    <Exec Command="dotnet $(_DotnetCommandLineSwitches)$(DotnetCodeGenerationToolPath) --response &quot;$(CodeGenToolCommandLineArgumentsResponsePath)&quot;" ConsoleToMSBuild="true" StandardOutputImportance="normal" ContinueOnError="true" />
+  </Target>
+
+  <Target Name="CleanCodeGenToolCommandLineArgumentsResponse" DependsOnTargets="PrepareCodeGenCleanTargets" AfterTargets="Clean">
+    <!-- We keep the Path/Message pairings close to each other, which we have also found helps reading comprehension. -->
+    <PropertyGroup>
+      <_CodeGenToolCommandLineArgumentsResponsePath>$(MSBuildProjectDirectory)\$(CodeGenToolCommandLineArgumentsResponsePath)</_CodeGenToolCommandLineArgumentsResponsePath>
+      <_CodeGenToolCommandLineArgumentsResponseMessage Condition="Exists('$(_CodeGenToolCommandLineArgumentsResponsePath)')">Code Generation command line arguments response file cleaned.</_CodeGenToolCommandLineArgumentsResponseMessage>
+    </PropertyGroup>
+    <!-- It appears as though Source Files are cleaned, however, artifacts such as Response Files, JSON registries, are not. -->
+    <Delete Files="$(_CodeGenToolCommandLineArgumentsResponsePath)" Condition="Exists('$(_CodeGenToolCommandLineArgumentsResponsePath)')" />
+    <Message Text="$(_CodeGenToolCommandLineArgumentsResponseMessage)" Condition="'$(_CodeGenToolCommandLineArgumentsResponseMessage)' != ''" Importance="high" />
+  </Target>
+
+  <Target Name="CleanCodeGenToolCompilationRegistry" DependsOnTargets="PrepareCodeGenCleanTargets" AfterTargets="Clean">
+    <!-- Ditto `Clean´ target groups... -->
+    <PropertyGroup>
+      <_CodeGenToolCompilationRegistryPath>$(MSBuildProjectDirectory)\$(CodeGenToolCompilationRegistryPath)</_CodeGenToolCompilationRegistryPath>
+      <_CodeGenToolCompilationRegistryMessage Condition="Exists('$(_CodeGenToolCompilationRegistryPath)')">Code Generation compilation registry file cleaned.</_CodeGenToolCompilationRegistryMessage>
+    </PropertyGroup>
+    <Delete Files="$(_CodeGenToolCompilationRegistryPath)" Condition="Exists('$(_CodeGenToolCompilationRegistryPath)')" />
+    <Message Text="$(_CodeGenToolCompilationRegistryMessage)" Condition="'$(_CodeGenToolCompilationRegistryMessage)' != ''" Importance="high" />
+  </Target>
+
+  <Target Name="CleanCodeGenToolAssemblyReferenceRegistry" DependsOnTargets="PrepareCodeGenCleanTargets" AfterTargets="Clean">
+    <!-- Ditto `Clean´ target groups... -->
+    <PropertyGroup>
+      <_CodeGenToolAssemblyReferenceRegistryPath>$(MSBuildProjectDirectory)\$(CodeGenToolAssemblyReferenceRegistryPath)</_CodeGenToolAssemblyReferenceRegistryPath>
+      <_CodeGenToolAssemblyReferenceRegistryMessage Condition="Exists('$(_CodeGenToolAssemblyReferenceRegistryPath)')">Code Generation assembly reference registry cleaned.</_CodeGenToolAssemblyReferenceRegistryMessage>
+    </PropertyGroup>
+    <Delete Files="$(_CodeGenToolAssemblyReferenceRegistryPath)" Condition="Exists('$(_CodeGenToolAssemblyReferenceRegistryPath)')" />
+    <Message Text="$(_CodeGenToolAssemblyReferenceRegistryMessage)" Condition="'$(_CodeGenToolAssemblyReferenceRegistryMessage)' != ''" Importance="high" />
+  </Target>
+
+  <Target Name="CleanCodeGenToolCompilationResponse" DependsOnTargets="PrepareCodeGenCleanTargets" BeforeTargets="Clean">
+    <!-- Ditto `Clean´ target groups... Although, Compilation Response file appears to be cleaned up by `Clean´. -->
+    <PropertyGroup>
+      <_CodeGenToolCompilationResponsePath>$(MSBuildProjectDirectory)\$(CodeGenToolCompilationResponsePath)</_CodeGenToolCompilationResponsePath>
+      <_CodeGenToolCompilationResponseMessage Condition="Exists('$(_CodeGenToolCompilationResponsePath)')">Code Generation compilation response file cleaned.</_CodeGenToolCompilationResponseMessage>
+    </PropertyGroup>
+    <Delete Files="$(_CodeGenToolCompilationResponsePath)" Condition="Exists('$(_CodeGenToolCompilationResponsePath)')" />
+    <Message Text="$(_CodeGenToolCompilationResponseMessage)" Condition="'$(_CodeGenToolCompilationResponseMessage)' != ''" Importance="high" />
   </Target>
 
   <PropertyGroup>
@@ -61,6 +84,8 @@ $(CodeGenToolAssemblyReferenceRegistryFileName)
     <DotnetCommandLineSwitches Condition="'$(DotnetCommandLineSwitches)' != ''"></DotnetCommandLineSwitches>
   </PropertyGroup>
 
+  <!-- TODO: TBD: do we really need to do this before CoreCompile and/or PrepareResources targets? Or just prior to Build? -->
+  <!-- TODO: TBD: which, at the moment, we really do we see this being re-established, even following a `Clean´ build target. -->
   <!-- Rolls up the Targets into the front-facing Code Generation Target. -->
   <Target Name="GenerateCodeFromAttributes" DependsOnTargets="$(GenerateCodeFromAttributesDependencies)" BeforeTargets="CoreCompile;PrepareResources" />
 
@@ -76,6 +101,7 @@ $(CodeGenToolAssemblyReferenceRegistryFileName)
       <!-- Literally, Response File lines separated by Carriage Return Line Feed. -->
       <_CgrSep>%0d%0a</_CgrSep>
       <!-- TODO: TBD: may refactor this to the actual invocation since it reallyhas nothing to do with `preparation´ or `identifying tooling versions´... -->
+      <!-- The spacing is intentional here in order to get the Response File formatted correctly as expected. -->
       <!-- ReSharper disable once UnknownItemGroup -->
       <_CodeGenToolResponseFileContent>
 --project
@@ -106,6 +132,7 @@ $(CodeGenToolAssemblyReferenceRegistryFileName)@(ReferencePath->'$(_CgrSep)--ref
     <Message Text="Running $(CodeGenerationToolFullName) v$(_GenerateCodeToolVersion) ..." Importance="high" />
   </Target>
 
+  <!-- TODO: TBD: depending on internal targets? Or connect with the Microsoft Build `Build´ target(s)? should consider this... -->
   <Target Name="InvokeCodeGenerationFromAttributes" DependsOnTargets="PrepareToGenerateCodeFromAttributes" Condition="'@(CodeGenCompilationInputsFromAttributes)' != ''">
     <PropertyGroup>
       <_CgrWarning>CGR1000</_CgrWarning>
@@ -117,6 +144,7 @@ $(CodeGenToolAssemblyReferenceRegistryFileName)@(ReferencePath->'$(_CgrSep)--ref
     <Warning Code="$(_CgrWarning)" Text="$(_CodeGenToolWarningText)" Condition="!(Exists('$(CodeGenToolCompilationRegistryPath)') And Exists('$(CodeGenToolCompilationResponsePath)') And Exists('$(CodeGenToolAssemblyReferenceRegistryPath))'))" />
   </Target>
 
+  <!-- TODO: TBD: ditto `which targets´ ... -->
   <Target Name="CompileCodeGenerationGeneratedCode" DependsOnTargets="InvokeCodeGenerationFromAttributes" Condition="Exists('$(CodeGenToolCompilationResponsePath)')">
     <ReadLinesFromFile File="$(CodeGenToolCompilationResponsePath)">
       <Output TaskParameter="Lines" ItemName="_CodeGenToolCompilationGeneratedInputFiles" />
