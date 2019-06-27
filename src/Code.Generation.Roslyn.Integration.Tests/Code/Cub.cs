@@ -1,6 +1,11 @@
 ﻿namespace Foo
 {
-    public class Cub
+    public class Cub : Car
     {
+        public Cub()
+        {
+        }
+
+        internal bool InternalIsDisposed => IsDisposed;
     }
 }
