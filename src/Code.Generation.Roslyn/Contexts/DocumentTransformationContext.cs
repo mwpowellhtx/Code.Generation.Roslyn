@@ -1,6 +1,5 @@
-﻿// TODO: TBD: ditto licensing...
-// Copyright (c) 2019 Michael W. Powell. All rights reserved.
-// Licensed under the MS-PL license. See LICENSE.txt file in the project root for full license information.
+﻿// Copyright (c) Michael W. Powell. All rights reserved.
+// Licensed under the GPLv3 license. See LICENSE file in the project root for full license information.
 
 namespace Code.Generation.Roslyn
 {
@@ -8,30 +7,31 @@ namespace Code.Generation.Roslyn
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+    // TODO: TBD: could potentially be informed by a Context base class...
     /// <summary>
     /// Provides all the inputs and context necessary to perform the code generation.
     /// </summary>
-    public class TransformationContext
+    public class DocumentTransformationContext : TransformationContextBase
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransformationContext" /> class.
+        /// Initializes a new instance of the <see cref="DocumentTransformationContext" /> class.
         /// </summary>
+        /// <param name="compilation">The compilation for which code is being Generated.</param>
         /// <param name="processingNode">The node at which point the generator attribute is
         /// discovered.</param>
         /// <param name="semanticModel">The semantic model for the
         /// <paramref name="compilation"/>.</param>
-        /// <param name="compilation">The compilation for which code is being Generated.</param>
         /// <param name="projectDirectory">The absolute path of the Project Directory
         /// corresponding to the <paramref name="compilation"/>.</param>
         /// <param name="sourceCompilationUnit">The Source <see cref="CompilationUnitSyntax"/>
         /// at which point Code Generation was triggered.</param>
-        internal TransformationContext(CSharpSyntaxNode processingNode, SemanticModel semanticModel
-            , CSharpCompilation compilation, string projectDirectory, CompilationUnitSyntax sourceCompilationUnit
-        )
+        /// <inheritdoc />
+        internal DocumentTransformationContext(CSharpCompilation compilation, CSharpSyntaxNode processingNode
+            , SemanticModel semanticModel, string projectDirectory, CompilationUnitSyntax sourceCompilationUnit)
+            : base(compilation)
         {
             ProcessingNode = processingNode;
             SemanticModel = semanticModel;
-            Compilation = compilation;
             ProjectDirectory = projectDirectory;
             SourceCompilationUnit = sourceCompilationUnit;
         }
@@ -47,11 +47,6 @@ namespace Code.Generation.Roslyn
         /// Gets the semantic model for the <see cref="Compilation" />.
         /// </summary>
         public SemanticModel SemanticModel { get; }
-
-        /// <summary>
-        /// Gets the <see cref="CSharpCompilation"/> for which the code being generated.
-        /// </summary>
-        public CSharpCompilation Compilation { get; }
 
         /// <summary>
         /// Gets the absolute path of the the project directory corresponding
