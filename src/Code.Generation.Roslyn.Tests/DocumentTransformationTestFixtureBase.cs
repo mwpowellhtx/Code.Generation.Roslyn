@@ -17,6 +17,8 @@ namespace Code.Generation.Roslyn
 
         private string TransformationName => $"{TransformationId:D}";
 
+        private string ProjectDirectory => TransformationName;
+
         private string IntermediateAssemblyReferenceRegistryFileName => $"{TransformationName}.a.json";
 
         protected DocumentTransformationTestFixtureBase(ITestOutputHelper outputHelper)
@@ -57,11 +59,6 @@ namespace Code.Generation.Roslyn
                 TransformationName, IntermediateAssemblyReferenceRegistryFileName
                 , referencePath.ToArray(), generatorSearchPath.ToArray());
 
-            DocumentTransformation CreateDocumentTransformation() => new DocumentTransformation(
-                CreateReferenceService().AssertNotNull());
-
-            var transformation = CreateDocumentTransformation().AssertNotNull();
-
             var docs = e.Project.Documents;
 
             // TODO: TBD: this approach is loosely informed by the original project:
@@ -76,10 +73,16 @@ namespace Code.Generation.Roslyn
             docs.First().TryGetSyntaxTree(out var tree).AssertTrue();
             // ReSharper restore PossibleMultipleEnumeration
 
+            var transformation = new DocumentTransformation(CreateReferenceService().AssertNotNull())
+            {
+                ProjectDirectory = ProjectDirectory,
+                InputDocument = tree.AssertNotNull()
+            };
+
             var compilation = e.Compilation as CSharpCompilation;
 
             // TODO: TBD: may want to convey task cancellation from other sources than `default´.
-            var results = transformation.TransformAsync(compilation, tree, TransformationName, Progress, default).Result;
+            var results = transformation.TransformAsync(compilation, Progress, default).Result;
 
             TransformedSources = results.Select(x => $"{x.GetText()}").ToArray();
         }
