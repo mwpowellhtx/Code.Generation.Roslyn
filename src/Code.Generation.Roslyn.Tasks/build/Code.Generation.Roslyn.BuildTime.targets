@@ -113,6 +113,9 @@ $(CodeGenToolGeneratedRegistryFileName)
 --assemblies
 $(CodeGenToolAssemblyReferenceRegistryFileName)@(ReferencePath->'$(_CgrSep)--reference$(_CgrSep)%(Identity)', '')@(CodeGenCompilationDefineConstants->'$(_CgrSep)--define$(_CgrSep)%(Identity)', '')@(GeneratorAssemblySearchPaths->'$(_CgrSep)--search$(_CgrSep)%(Identity)', '')@(CodeGenCompilationInputsFromAttributes->'$(_CgrSep)--source$(_CgrSep)%(Identity)', '')
       </_CodeGenToolResponseFileContent>
+      <!-- ReSharper disable UnknownItemGroup -->
+      <_CodeGenToolResponseFileContent Condition="@(CodeGenCompilationAdditionalInputs->Count()) > 0">$(_CodeGenToolResponseFileContent)@(CodeGenCompilationAdditionalInputs->'--source$(_CgrSep)%(Identity)', '')</_CodeGenToolResponseFileContent>
+      <!-- ReSharper restore UnknownItemGroup -->
       <!--<_CodeGenToolResponseFileContent Condition="'$(GeneratorAssemblySearchPaths)' != ''">$(_CodeGenToolResponseFileContent)</_CodeGenToolResponseFileContent>-->
       <_GenerateCodeToolVersion>(n/a)</_GenerateCodeToolVersion>
       <_DotnetCommandLineSwitches>$(DotnetCommandLineSwitches) </_DotnetCommandLineSwitches>
