@@ -12,7 +12,12 @@ namespace Code.Generation.Roslyn
     using static StringLiterals;
     using static OperationKind;
 
-    internal class ToolConsoleManager : OptionSetConsoleManager
+    /// <summary>
+    /// The Tool Console Manager.
+    /// </summary>
+    /// <see cref="OptionSetConsoleManager"/>
+    /// <inheritdoc cref="IToolConsoleManager"/>
+    internal class ToolConsoleManager : OptionSetConsoleManager, IToolConsoleManager
     {
         private Switch VersionSwitch { get; }
 
@@ -24,7 +29,7 @@ namespace Code.Generation.Roslyn
         /// Default is <see cref="Generate"/>.
         /// </summary>
         /// <returns></returns>
-        private OperationKind PrivateOperation => ((OperationKind?)Operation) ?? Generate;
+        private OperationKind PrivateOperation => ((OperationKind?) Operation) ?? Generate;
 
         //private Switch GenerateSwitch { get; }
         //private Switch CleanSwitch { get; }
@@ -38,21 +43,21 @@ namespace Code.Generation.Roslyn
             Writer.WriteLine(informational == version ? $"{version}" : $"{version} ({informational})");
         }
 
-        private VariableList<string> ReferencePathList { get; }
+        public VariableList<string> ReferencePathList { get; }
 
-        private VariableList<string> PreprocessorSymbolsList { get; }
+        public VariableList<string> PreprocessorSymbolsList { get; }
 
-        private VariableList<string> GeneratorSearchPathList { get; }
+        public VariableList<string> GeneratorSearchPathList { get; }
 
-        private Variable<string> OutputDirectory { get; }
+        public Variable<string> OutputDirectory { get; }
 
-        private Variable<string> ProjectDirectory { get; }
+        public Variable<string> ProjectDirectory { get; }
 
-        private Variable<string> IntermediateAssembliesRegistryFileName { get; }
+        public Variable<string> IntermediateAssembliesRegistryFileName { get; }
 
-        private Variable<string> IntermediateGeneratedRegistryFileName { get; }
+        public Variable<string> IntermediateGeneratedRegistryFileName { get; }
 
-        private VariableList<string> SourcePathList { get; }
+        public VariableList<string> SourcePathList { get; }
 
         /// <summary>
         /// Gets the ResponseFile Variable. A ResponseFile may be provide in lieu
@@ -82,6 +87,8 @@ namespace Code.Generation.Roslyn
             : base($"{typeof(ToolConsoleManager).Namespace}.Tool", writer
                 , errorWriter: errorWriter)
         {
+            PrivateFactories = new ManagerFactories(this);
+
             VersionSwitch = Options.AddSwitch("version", OnVersion, "Shows the version of the tool.");
 
             // TODO: TBD: do we need to do a $"nameof(Operation)" ? or would $"{Operation}" be sufficient?
@@ -119,13 +126,10 @@ namespace Code.Generation.Roslyn
             };
         }
 
-        //// TODO: TBD: I do not think we are actually landing here...
-        //public new virtual bool TryParseOrShowHelp(params string[] args)
-        //{
-        //    throw new ArgumentException($@"The arguments were: `{Join(" ", args)}´.", nameof(args));
-        //    Writer.WriteLine($@"The arguments were: {Join(" ", args)}");
-        //    return base.TryParseOrShowHelp(args);
-        //}
+        /// <summary>
+        /// Handles the Service creation aspects for the Manager.
+        /// </summary>
+        private ManagerFactories PrivateFactories { get; }
 
         /// <summary>
         /// Tries to Load the <paramref name="responseFilePath"/> Arguments. Try not to do much
@@ -139,11 +143,13 @@ namespace Code.Generation.Roslyn
         {
             IEnumerable<string> unparsed = null;
 
+            bool IsNotNullOrEmpty(string s) => !IsNullOrEmpty((s ?? "").Trim());
+
             // ReSharper disable once InvertIf
             if (File.Exists(responseFilePath))
             {
-                // TODO: TBD: should be fine in and of itself... may want to consider the new line specifier? we will see...
-                var args = File.ReadAllLines(responseFilePath);
+                // Allowing for blank lines, leading or trailing whitespace, etc.
+                var args = File.ReadAllLines(responseFilePath).Where(IsNotNullOrEmpty).ToArray();
                 unparsed = Options.Parse(args);
             }
 
@@ -177,6 +183,7 @@ namespace Code.Generation.Roslyn
             return level != DefaultErrorLevel;
         }
 
+        // ReSharper disable UnusedMember.Local, UnusedParameter.Local
         /// <summary>
         /// Callback occurs On <see cref="Generate"/> <see cref="Operation"/>.
         /// </summary>
@@ -188,28 +195,13 @@ namespace Code.Generation.Roslyn
         /// <see cref="Generate"/>
         private void OnGenerate(int _)
         {
-            // TODO: TBD: borderline complexity boundary here, could potentially benefit from a DI container...
-            AssemblyReferenceServiceManager CreateReferenceService()
-                => new AssemblyReferenceServiceManager(OutputDirectory, IntermediateAssembliesRegistryFileName
-                    , ReferencePathList.Sanitize().ToArray(), GeneratorSearchPathList.Sanitize().ToArray());
-
-            var referenceService = CreateReferenceService();
-
-            DocumentTransformation CreateDocumentTransformation() => new DocumentTransformation(referenceService);
-
-            var serviceManager = new CompilationServiceManager(OutputDirectory, IntermediateGeneratedRegistryFileName
-                , referenceService, CreateDocumentTransformation())
-            {
-                ProjectDirectory = ProjectDirectory,
-                SourcePathsToCompile = SourcePathList.Sanitize().ToArray(),
-                PreprocessorSymbols = PreprocessorSymbolsList.ToArray()
-            };
+            var compilationService = PrivateFactories.CompilationService;
 
             var progress = new Progress<Diagnostic>(d => Writer.WriteLine($"{d}"));
 
             try
             {
-                serviceManager.Generate(progress);
+                compilationService.Generate(progress);
             }
             catch (Exception ex)
             {
@@ -230,7 +222,7 @@ namespace Code.Generation.Roslyn
                 }
             }
 
-            ReportGeneratedFiles(Logger.Resource, serviceManager.RegistrySet.GeneratedSourceBundles);
+            ReportGeneratedFiles(Logger.Resource, compilationService.RegistrySet.GeneratedSourceBundles);
         }
 
         /// <summary>
@@ -242,6 +234,7 @@ namespace Code.Generation.Roslyn
         /// <see cref="OperationKind"/>
         /// <see cref="Operation"/>
         /// <see cref="Clean"/>
+        [Obsolete("Ditto targets Clean work, could potentially drop this one after all...")]
         private void OnClean(int _)
         {
             try
@@ -258,6 +251,7 @@ namespace Code.Generation.Roslyn
                 TryReportErrorLevel(Logger.CriticalLevel);
             }
         }
+        // ReSharper restore UnusedMember.Local, UnusedParameter.Local
 
         public override void Run(out int errorLevel)
         {
