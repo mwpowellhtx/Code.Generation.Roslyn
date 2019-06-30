@@ -8,10 +8,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Code.Generation.Roslyn facilitates code generation driven by fit for purpose custom attributes.</Description>
-    <Version>1.0.0.4526</Version>
-    <AssemblyVersion>1.0.0.4526</AssemblyVersion>
-    <FileVersion>1.0.0.4526</FileVersion>
-    <PackageVersion>1.0.0.4526</PackageVersion>
+    <Version>1.0.0.4552</Version>
+    <AssemblyVersion>1.0.0.4552</AssemblyVersion>
+    <FileVersion>1.0.0.4552</FileVersion>
+    <PackageVersion>1.0.0.4552</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
@@ -50,5 +50,11 @@
       <_Parameter1>Code.Generation.Roslyn.Tests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
+
+  <!-- ReSharper disable UnknownProperty -->
+  <ItemGroup>
+    <PackageReference Include="Validation" Version="$(ValidationVersion)" />
+  </ItemGroup>
+  <!-- ReSharper restore UnknownProperty -->
 
 </Project>
