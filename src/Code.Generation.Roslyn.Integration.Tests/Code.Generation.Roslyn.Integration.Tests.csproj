@@ -3,10 +3,14 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>Foo</RootNamespace>
-    <Version>1.0.0.4771</Version>
-    <AssemblyVersion>1.0.0.4771</AssemblyVersion>
-    <FileVersion>1.0.0.4771</FileVersion>
+    <Version>1.0.0.4799</Version>
+    <AssemblyVersion>1.0.0.4799</AssemblyVersion>
+    <FileVersion>1.0.0.4799</FileVersion>
   </PropertyGroup>
+
+  <!-- TODO: TBD: will need to figure out what's going on with this formatting... -->
+  <!-- TODO: TBD: that or do something about my NConsole `response file´ and/or argument processing ... -->
+  <!--<ItemGroup><CodeGenCompilationAdditionalInputs Include="Code\Cub.cs"></CodeGenCompilationAdditionalInputs></ItemGroup>-->
 
   <Import Project="..\Code.Generation.Roslyn.Tasks\build\Code.Generation.Roslyn.BuildTime.props" />
   <Import Project="..\Code.Generation.Roslyn.Tasks\build\Code.Generation.Roslyn.BuildTime.targets" />
