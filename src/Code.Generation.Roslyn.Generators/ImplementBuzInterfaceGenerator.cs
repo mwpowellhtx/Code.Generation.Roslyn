@@ -19,11 +19,11 @@ namespace Code.Generation.Roslyn.Generators
     /// <summary>
     /// This Generator implements the fairly innocuous <see cref="IDisposable"/> pattern for
     /// the decorated class. This is a fairly non-trivial, fairly common, want to do from time
-    /// to time. There is no reason why a <see cref="ICodeGenerator"/> could not do this mundane
-    /// work for the subscriber.
+    /// to time. There is no reason why a <see cref="IDocumentCodeGenerator"/> could not do this
+    /// mundane work for the subscriber.
     /// </summary>
     /// <inheritdoc />
-    public class ImplementBuzInterfaceGenerator : CodeGeneratorBase
+    public class ImplementBuzInterfaceGenerator : DocumentCodeGenerator
     {
         /// <summary>
         /// Public Constructor.
@@ -107,7 +107,8 @@ namespace Code.Generation.Roslyn.Generators
         /// successfully.
         /// </summary>
         /// <inheritdoc />
-        public override Task GenerateAsync(TransformationContext context, IProgress<Diagnostic> progress, CancellationToken cancellationToken)
+        public override Task GenerateAsync(DocumentTransformationContext context, IProgress<Diagnostic> progress
+            , CancellationToken cancellationToken)
         {
             const string dispose = nameof(IDisposable.Dispose);
             const string disposing = nameof(disposing);
