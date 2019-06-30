@@ -1,6 +1,5 @@
-﻿// TODO: TBD: decide what kind of licensing to run with here? MS-PL? Apache?
-// Copyright (c) 2019 Michael W Powell. All rights reserved.
-// Licensed under the MS-PL license. See LICENSE.txt file in the project root for full license information.
+﻿// Copyright (c) Michael W. Powell. All rights reserved.
+// Licensed under the GPLv3 license. See LICENSE file in the project root for full license information.
 
 using System;
 
