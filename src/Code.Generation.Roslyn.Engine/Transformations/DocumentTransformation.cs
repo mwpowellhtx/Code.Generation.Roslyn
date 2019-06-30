@@ -12,63 +12,61 @@ namespace Code.Generation.Roslyn
     using Validation;
     using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-    public class DocumentTransformation : ServiceManager
+    public class DocumentTransformation : TransformationBase<DocumentTransformationContext, DocumentTransformation>
     {
         /// <summary>
-        /// Gets the ReferenceService.
+        /// Internal Constructor.
         /// </summary>
-        private AssemblyReferenceServiceManager ReferenceServiceManager { get; }
+        /// <param name="referenceService"></param>
+        /// <inheritdoc />
+        internal DocumentTransformation(AssemblyReferenceServiceManager referenceService)
+            : base(referenceService) { }
 
-        internal DocumentTransformation(AssemblyReferenceServiceManager referenceServiceManager)
+        private SyntaxTree _inputDocument;
+
+        /// <summary>
+        /// Gets or Sets the InputDocument.
+        /// </summary>
+        internal SyntaxTree InputDocument
         {
-            Verify.Operation(referenceServiceManager != null, FormatVerifyOperationMessage(nameof(referenceServiceManager)));
-
-            ReferenceServiceManager = referenceServiceManager;
+            get => _inputDocument;
+            set
+            {
+                Requires.NotNull(value, nameof(value));
+                Assumes.True(value.HasCompilationUnitRoot, $"{nameof(InputDocument)} expected to include a Compilation Unit.");
+                _inputDocument = value;
+            }
         }
 
-        // TODO: TBD: return set of CompilationUnitSyntax ...
-        /// <summary>
-        /// Transforms the current <paramref name="compilation"/> in terms of a set
-        /// of <see cref="CompilationUnitSyntax"/>.
-        /// </summary>
-        /// <param name="compilation"></param>
-        /// <param name="inputDocument"></param>
-        /// <param name="projectDirectory"></param>
-        /// <param name="progress"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        /// <see cref="ReferenceServiceManager"/>
-        public Task<IEnumerable<CompilationUnitSyntax>> TransformAsync(CSharpCompilation compilation
-            , SyntaxTree inputDocument, string projectDirectory, IProgress<Diagnostic> progress
-            , CancellationToken cancellationToken
+        /// <inheritdoc />
+        public override Task<IEnumerable<CompilationUnitSyntax>> TransformAsync(CSharpCompilation compilation
+            , IProgress<Diagnostic> progress, CancellationToken cancellationToken
         )
         {
             Requires.NotNull(compilation, nameof(compilation));
-            Requires.NotNull(inputDocument, nameof(inputDocument));
-            Requires.NotNull(ReferenceServiceManager, nameof(ReferenceServiceManager));
-
-            Assumes.True(inputDocument.HasCompilationUnitRoot, "Input document expected to include a Compilation Unit.");
+            Requires.NotNull(InputDocument, nameof(InputDocument));
 
             var crLf = CarriageReturnLineFeed;
 
+            // TODO: TBD: to a point, some of this code looks very similar, could be refactored to base class...
             IEnumerable<CompilationUnitSyntax> GetTransformations()
             {
                 // TODO: TBD: at this level I think it is because we have identified the Document in which the annotation did occur...
                 // TODO: TBD: in other words, so any Code Generation attribution has already occurred and been resolved...
-                var inputSemanticModel = compilation.GetSemanticModel(inputDocument);
-                var inputCompilationUnit = inputDocument.GetCompilationUnitRoot();
+                var inputSemanticModel = compilation.GetSemanticModel(InputDocument);
+                var inputCompilationUnit = InputDocument.GetCompilationUnitRoot();
 
                 // TODO: TBD: supporting C# today...
                 // TODO: TBD: possible for other types of SyntaxNode in the future?
-                foreach (var documentNode in new[] {inputDocument.GetRoot() as CSharpSyntaxNode})
+                foreach (var documentNode in new[] {InputDocument.GetRoot() as CSharpSyntaxNode})
                 {
                     // TODO: TBD: possibly this gets refactored outside the `foreach´ loop...
                     var attributeData = compilation.GetAttributeData(inputSemanticModel, documentNode);
-                    var generators = attributeData.LoadCodeGenerators(ReferenceServiceManager.LoadAssembly).ToArray();
+                    var generators = attributeData.LoadCodeGenerators<IDocumentCodeGenerator>(ReferenceService.LoadAssembly).ToArray();
 
                     foreach (var generator in generators)
                     {
-                        var context = new TransformationContext(documentNode, inputSemanticModel, compilation, projectDirectory, inputCompilationUnit);
+                        var context = new DocumentTransformationContext(compilation, documentNode, inputSemanticModel, ProjectDirectory, inputCompilationUnit);
 
                         generator.GenerateAsync(context, progress, cancellationToken).Wait(cancellationToken);
 

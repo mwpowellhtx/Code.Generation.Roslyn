@@ -3,9 +3,13 @@ using System.IO;
 
 namespace Code.Generation.Roslyn
 {
+    using static String;
+
     internal static class FileExtensionMethods
     {
         public static DateTime? GetLastWriteTimeUtc(this string path)
-            => File.Exists(path) ? File.GetLastWriteTimeUtc(path) : (DateTime?) null;
+            => IsNullOrEmpty(path) || !File.Exists(path)
+                ? (DateTime?) null
+                : File.GetLastWriteTimeUtc(path);
     }
 }

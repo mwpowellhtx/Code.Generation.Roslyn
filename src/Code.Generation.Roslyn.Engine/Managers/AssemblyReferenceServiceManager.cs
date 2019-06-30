@@ -51,12 +51,12 @@ namespace Code.Generation.Roslyn
         /// <summary>
         /// Gets the list of Assembly Reference Paths.
         /// </summary>
-        internal IReadOnlyList<string> ReferencePath { get; }
+        internal IReadOnlyCollection<string> ReferencePath { get; }
 
         /// <summary>
         /// Gets the Directory Paths in which to Search for Generator Assemblies.
         /// </summary>
-        private IReadOnlyList<string> SearchPaths { get; }
+        private IReadOnlyCollection<string> SearchPaths { get; }
 
         /// <summary>
         /// Internal Constructor.
@@ -67,7 +67,7 @@ namespace Code.Generation.Roslyn
         /// <param name="searchPaths">The Assembly Search Paths.</param>
         /// <inheritdoc />
         internal AssemblyReferenceServiceManager(string outputDirectory, string registryFileName
-        , IReadOnlyList<string> referencePath, IReadOnlyList<string> searchPaths)
+        , IReadOnlyCollection<string> referencePath, IReadOnlyCollection<string> searchPaths)
             : base(outputDirectory, registryFileName)
         {
             Verify.Operation(referencePath != null, FormatVerifyOperationMessage(nameof(referencePath)));

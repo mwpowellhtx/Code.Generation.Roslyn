@@ -1,29 +1,39 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Code.Generation.Roslyn
 {
     public class GeneratedSyntaxTreeDescriptor
     {
         /// <summary>
+        /// &quot;&quot;
+        /// </summary>
+        internal const string DefaultSourceFilePath = "";
+
+        /// <summary>
         /// Gets whether IsRegenerated. Default is false, or rather, when loading
         /// the Registry for the first time during Compilation.
         /// </summary>
         internal bool IsRegenerated { get; private set; }
 
-        internal static GeneratedSyntaxTreeDescriptor Create(string sourceFilePath)
+        /// <summary>
+        /// Creates a new Descriptor instance. A Null or Empty <paramref name="sourceFilePath"/>
+        /// indicates Assembly Level Code Generation.
+        /// </summary>
+        /// <param name="sourceFilePath"></param>
+        /// <returns></returns>
+        internal static GeneratedSyntaxTreeDescriptor Create(string sourceFilePath = DefaultSourceFilePath)
             => new GeneratedSyntaxTreeDescriptor
             {
                 SourceFilePath = sourceFilePath,
-                LastModifiedTimestamp = File.GetLastWriteTimeUtc(sourceFilePath),
+                LastModifiedTimestamp = sourceFilePath.GetLastWriteTimeUtc(),
                 IsRegenerated = true
             };
 
         /// <summary>
         /// Gets or Sets the Root SourceFilePath triggering the Code Generation for the
-        /// <see cref="GeneratedAssets"/> collection.
+        /// <see cref="GeneratedAssetKeys"/> collection. A Null or Empty Path means Code
+        /// Generation occurred at the Assembly Level.
         /// </summary>
         public string SourceFilePath { get; set; }
 

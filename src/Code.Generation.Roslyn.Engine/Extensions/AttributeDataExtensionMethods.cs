@@ -24,17 +24,35 @@ namespace Code.Generation.Roslyn
 
         private class GeneratorTuple : Tuple<Type, AttributeData>
         {
-            internal static GeneratorTuple Create(Type generatorType, AttributeData datum) => new GeneratorTuple(generatorType, datum);
+            /// <summary>
+            /// Creates a new <see cref="GeneratorTuple"/> instance.
+            /// </summary>
+            /// <param name="generatorType"></param>
+            /// <param name="datum"></param>
+            /// <returns></returns>
+            internal static GeneratorTuple Create(Type generatorType, AttributeData datum)
+                => new GeneratorTuple(generatorType, datum);
 
             internal Type GeneratorType => Item1;
 
-            internal AttributeData Datum => Item2;
+            private AttributeData Datum => Item2;
 
+            /// <summary>
+            /// Private Constructor.
+            /// </summary>
+            /// <param name="generatorType"></param>
+            /// <param name="datum"></param>
+            /// <inheritdoc />
             private GeneratorTuple(Type generatorType, AttributeData datum)
                 : base(generatorType, datum)
             {
             }
 
+            /// <summary>
+            /// Allows for Tuple Deconstruction.
+            /// </summary>
+            /// <param name="generatorType"></param>
+            /// <param name="datum"></param>
             internal void Deconstruct(out Type generatorType, out AttributeData datum)
             {
                 generatorType = GeneratorType;
@@ -42,18 +60,19 @@ namespace Code.Generation.Roslyn
             }
         }
 
-        public static IEnumerable<ICodeGenerator> LoadCodeGenerators(this ImmutableArray<AttributeData> attributeData, LoadAssemblyCallback loader)
+        public static IEnumerable<TGenerator> LoadCodeGenerators<TGenerator>(this ImmutableArray<AttributeData> attributeData, LoadAssemblyCallback loader)
+            where TGenerator : class, ICodeGenerator
         {
             Requires.NotNull(loader, nameof(loader));
 
-            ICodeGenerator CreateCodeGenerator(GeneratorTuple tuple)
+            TGenerator CreateCodeGenerator(GeneratorTuple tuple)
             {
                 var (generatorType, datum) = tuple;
                 var generator = Activator.CreateInstance(generatorType, datum);
                 Requires.NotNull(generator, nameof(generator));
                 // TODO: TBD: might be better if .Is<T> actually returned T... i.e. could simple `return Assumes.Is<ICodeGenerator>(generator);´
-                Assumes.Is<ICodeGenerator>(generator);
-                return (ICodeGenerator) generator;
+                Assumes.Is<TGenerator>(generator);
+                return (TGenerator) generator;
             }
 
             return attributeData
