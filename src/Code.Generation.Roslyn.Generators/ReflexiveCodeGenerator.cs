@@ -17,10 +17,10 @@ namespace Code.Generation.Roslyn
     /// <see cref="ReflexiveCodeGenerationByNameAttribute"/> attributes. We do not expect
     /// that this would necessarily compile successfully in an actual compilation scenario.
     /// The purpose that this serves is to exercise whether the
-    /// <see cref="TransformationContext"/> works properly.
+    /// <see cref="DocumentTransformationContext"/> works properly.
     /// </summary>
     /// <inheritdoc />
-    public class ReflexiveCodeGenerator : CodeGeneratorBase
+    public class ReflexiveCodeGenerator : DocumentCodeGenerator
     {
         /// <summary>
         /// Constructor.
@@ -30,15 +30,17 @@ namespace Code.Generation.Roslyn
         public ReflexiveCodeGenerator(AttributeData attributeData) : base(attributeData) { }
 
         /// <summary>
-        /// Now, this is a fairly trivial, if a bit naive Code Generation implementation.
-        /// We are solely interested in making sure that fundamental building blocks of
-        /// Code Generation, such as inserting a Leading Preamble Text, are taking place
-        /// successfully.
+        /// Now, this is a fairly trivial, if a bit naive Code Generation implementation. We are
+        /// solely interested in making sure that fundamental building blocks of Code Generation,
+        /// such as inserting a Leading Preamble Text, are taking place successfully.
         /// </summary>
         /// <inheritdoc />
-        public override Task GenerateAsync(TransformationContext context, IProgress<Diagnostic> progress, CancellationToken cancellationToken) => Task.Run(() =>
-        {
-            Descriptors.Add(new CodeGeneratorDescriptor {CompilationUnits = {context.SourceCompilationUnit}});
-        }, cancellationToken);
+        public override Task GenerateAsync(DocumentTransformationContext context, IProgress<Diagnostic> progress
+            , CancellationToken cancellationToken)
+            => Task.Run(
+                () =>
+                {
+                    Descriptors.Add(new CodeGeneratorDescriptor {CompilationUnits = {context.SourceCompilationUnit}});
+                }, cancellationToken);
     }
 }

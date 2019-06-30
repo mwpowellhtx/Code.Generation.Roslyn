@@ -14,7 +14,7 @@ namespace Code.Generation.Roslyn
     /// <see cref="CustomPreambleText"/>.
     /// </summary>
     /// <inheritdoc />
-    public class WithCustomPreambleGenerator : CodeGeneratorBase
+    public class WithCustomPreambleGenerator : DocumentCodeGenerator
     {
         /// <summary>
         /// Literally, &quot;// Custom Preamble Text&quot;.
@@ -37,9 +37,15 @@ namespace Code.Generation.Roslyn
         /// successfully.
         /// </summary>
         /// <inheritdoc />
-        public override Task GenerateAsync(TransformationContext context, IProgress<Diagnostic> progress, CancellationToken cancellationToken) => Task.Run(() =>
-        {
-            Descriptors.Add(new CodeGeneratorDescriptor {CompilationUnits = {context.SourceCompilationUnit}, PreambleCommentText = CustomPreambleText});
-        }, cancellationToken);
+        public override Task GenerateAsync(DocumentTransformationContext context, IProgress<Diagnostic> progress
+            , CancellationToken cancellationToken)
+            => Task.Run(
+                () =>
+                {
+                    Descriptors.Add(new CodeGeneratorDescriptor
+                    {
+                        CompilationUnits = {context.SourceCompilationUnit}, PreambleCommentText = CustomPreambleText
+                    });
+                }, cancellationToken);
     }
 }

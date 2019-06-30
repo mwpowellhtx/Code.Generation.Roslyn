@@ -25,7 +25,7 @@ namespace Code.Generation.Roslyn.Generators
     /// copy constructor, and so on.
     /// </summary>
     /// <inheritdoc />
-    public class ImplementCloneableInterfaceGenerator : CodeGeneratorBase
+    public class ImplementCloneableInterfaceGenerator : DocumentCodeGenerator
     {
         /// <summary>
         /// Public Constructor.
@@ -108,7 +108,8 @@ namespace Code.Generation.Roslyn.Generators
         /// successfully.
         /// </summary>
         /// <inheritdoc />
-        public override Task GenerateAsync(TransformationContext context, IProgress<Diagnostic> progress, CancellationToken cancellationToken)
+        public override Task GenerateAsync(DocumentTransformationContext context, IProgress<Diagnostic> progress
+            , CancellationToken cancellationToken)
         {
             IEnumerable<CodeGeneratorDescriptor> Generate()
             {
