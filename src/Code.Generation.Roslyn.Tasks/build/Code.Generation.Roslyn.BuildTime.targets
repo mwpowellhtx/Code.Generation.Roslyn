@@ -147,8 +147,8 @@ $(CodeGenToolAssemblyReferenceRegistryFileName)@(ReferencePath->'$(_CgrSep)--ref
     </PropertyGroup>
     <!-- Run the tool using the Response File, which we do need an Argument for, and evaluate the expected outcome. -->
     <!-- ReSharper disable UnknownProperty -->
-    <Message Text="Evaluating `dotnet $(_DotnetCommandLineSwitches)$(DotnetCodeGenerationToolPath) --response &quot;$(CodeGenToolCommandLineArgumentsResponsePath)&quot;´ ..." Importance="high" />
-    <Exec Command="dotnet $(_DotnetCommandLineSwitches)$(DotnetCodeGenerationToolPath) --response &quot;$(CodeGenToolCommandLineArgumentsResponsePath)&quot;" ConsoleToMSBuild="true" StandardOutputImportance="normal" ContinueOnError="true" />
+    <Message Text="Evaluating `dotnet $(DotnetCodeGenerationToolPath) --response &quot;$(CodeGenToolCommandLineArgumentsResponsePath)&quot;´ ..." Importance="high" />
+    <Exec Command="dotnet $(DotnetCodeGenerationToolPath) --response &quot;$(CodeGenToolCommandLineArgumentsResponsePath)&quot;" ConsoleToMSBuild="true" StandardOutputImportance="normal" ContinueOnError="true" />
     <!-- ReSharper restore UnknownProperty -->
     <Warning Code="$(_CgrWarning)" Text="$(_CodeGenToolWarningText)" Condition="!(Exists('$(CodeGenToolCompilationRegistryPath)') And Exists('$(CodeGenToolCompilationResponsePath)') And Exists('$(CodeGenToolAssemblyReferenceRegistryPath))'))" />
   </Target>
