@@ -22,11 +22,13 @@
     <NConsoleOptionsExtensionsVersion>[1.4.7,2)</NConsoleOptionsExtensionsVersion>
     <MicrosoftBuildVersion>[15.9.20,16)</MicrosoftBuildVersion>
     <MicrosoftCodeAnalysisCSharpVersion>[2.10,3)</MicrosoftCodeAnalysisCSharpVersion>
-    <ValidationVersion>2.4.22</ValidationVersion>
+    <ValidationVersion>[2.4.22,3)</ValidationVersion>
+    <NewtonsoftJsonVersion>[12.0.2,13)</NewtonsoftJsonVersion>
   </PropertyGroup>
 
   <PropertyGroup>
     <!-- Defined for internal consistency with the Code Generation targets. -->
+    <!-- Also, so as not to collide with https://www.nuget.org/packages/dotnet-codegen/ -->
     <CodeGenerationToolName>dotnet-cgr</CodeGenerationToolName>
   </PropertyGroup>
 
@@ -38,10 +40,15 @@
   </ItemGroup>
 
   <ItemGroup Condition="Exists('..\packages\BumpAssemblyVersions\1.2.0\build\BumpAssemblyVersions.targets')">
-    <BumpVersionSpec Include="Version" PatchProviderTemplate="Increment" BuildProviderTemplate="SecondsSinceMidnight" Condition="'$(Configuration)' == 'Release'" />
+    <BumpVersionSpec Include="Version" BuildProviderTemplate="SecondsSinceMidnight" Condition="'$(Configuration)' == 'Release'" />
+    <BumpVersionSpec Include="AssemblyVersion" BuildProviderTemplate="SecondsSinceMidnight" Condition="'$(Configuration)' == 'Release'" />
+    <BumpVersionSpec Include="FileVersion" BuildProviderTemplate="SecondsSinceMidnight" Condition="'$(Configuration)' == 'Release'" />
+    <BumpVersionSpec Include="PackageVersion" BuildProviderTemplate="SecondsSinceMidnight" Condition="'$(Configuration)' == 'Release'" />
+
+    <!--<BumpVersionSpec Include="Version" PatchProviderTemplate="Increment" BuildProviderTemplate="SecondsSinceMidnight" Condition="'$(Configuration)' == 'Release'" />
     <BumpVersionSpec Include="AssemblyVersion" PatchProviderTemplate="Increment" BuildProviderTemplate="SecondsSinceMidnight" Condition="'$(Configuration)' == 'Release'" />
     <BumpVersionSpec Include="FileVersion" PatchProviderTemplate="Increment" BuildProviderTemplate="SecondsSinceMidnight" Condition="'$(Configuration)' == 'Release'" />
-    <BumpVersionSpec Include="PackageVersion" PatchProviderTemplate="Increment" BuildProviderTemplate="SecondsSinceMidnight" Condition="'$(Configuration)' == 'Release'" />
+    <BumpVersionSpec Include="PackageVersion" PatchProviderTemplate="Increment" BuildProviderTemplate="SecondsSinceMidnight" Condition="'$(Configuration)' == 'Release'" />-->
 
     <BumpVersionSpec Include="Version" BuildProviderTemplate="Increment" Condition="'$(Configuration)' == 'Debug'" />
     <BumpVersionSpec Include="AssemblyVersion" BuildProviderTemplate="Increment" Condition="'$(Configuration)' == 'Debug'" />
