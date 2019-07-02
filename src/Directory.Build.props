@@ -27,7 +27,7 @@
 
   <PropertyGroup>
     <!-- Defined for internal consistency with the Code Generation targets. -->
-    <CodeGenerationToolName>dotnet-codegen</CodeGenerationToolName>
+    <CodeGenerationToolName>dotnet-cgr</CodeGenerationToolName>
   </PropertyGroup>
 
   <ItemGroup>

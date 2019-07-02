@@ -20,7 +20,7 @@
 
   <PropertyGroup>
     <!-- Override the Tool path for test purposes. -->
-    <DotnetCodeGenerationToolPath>..\dotnet-codegen.dll</DotnetCodeGenerationToolPath>
+    <DotnetCodeGenerationToolPath>..\dotnet-cgr.dll</DotnetCodeGenerationToolPath>
   </PropertyGroup>
 
   <!-- Remember, this is up one directory to the parent output directory, then into the Build output conferred by the Tasks project dependency. -->

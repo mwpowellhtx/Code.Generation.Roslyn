@@ -2,7 +2,7 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <CodeGenerationToolingFullName>dotnet-codegen</CodeGenerationToolingFullName>
+    <CodeGenerationToolingFullName>dotnet-cgr</CodeGenerationToolingFullName>
     <CodeGenerationToolFullName>Code.Generation.Roslyn.Tool</CodeGenerationToolFullName>
     <CodeGenerationGeneratedExtension>.g</CodeGenerationGeneratedExtension>
     <CodeGenerationAssemblyReferenceExtension>.a</CodeGenerationAssemblyReferenceExtension>
@@ -78,11 +78,13 @@
     <Message Text="$(_CodeGenToolCompilationResponseMessage)" Condition="'$(_CodeGenToolCompilationResponseMessage)' != ''" Importance="high" />
   </Target>
 
+  <!-- ReSharper disable UnknownProperty -->
   <PropertyGroup>
-    <!-- Which the `tool´ build needs to yield literally, `dotnet-codegen´ for its assembly output. -->
+    <!-- Which the `tool´ build needs to yield literally, `dotnet-cgr´ for its assembly output. -->
     <DotnetCodeGenerationToolPath Condition="'$(DotnetCodeGenerationToolPath)' == ''">codegen</DotnetCodeGenerationToolPath>
     <DotnetCommandLineSwitches Condition="'$(DotnetCommandLineSwitches)' != ''"></DotnetCommandLineSwitches>
   </PropertyGroup>
+  <!-- ReSharper restore UnknownProperty -->
 
   <!-- TODO: TBD: do we really need to do this before CoreCompile and/or PrepareResources targets? Or just prior to Build? -->
   <!-- TODO: TBD: which, at the moment, we really do we see this being re-established, even following a `Clean´ build target. -->
@@ -122,16 +124,18 @@ $(CodeGenToolAssemblyReferenceRegistryFileName)@(ReferencePath->'$(_CgrSep)--ref
     </PropertyGroup>
     <!-- Must make the Intermediate Output Directory because the invoking context may not have output directory comprehension. -->
     <MakeDir Directories="$(IntermediateOutputPath)" Condition="!Exists('$(IntermediateOutputPath)')" />
-    <!-- Write the response file with arguments for dotnet-codegen. -->
+    <!-- Write the response file with arguments for dotnet-cgr. -->
     <WriteLinesToFile File="$(CodeGenToolCommandLineArgumentsResponsePath)" Lines="$(_CodeGenToolResponseFileContent)" Overwrite="true" />
     <!-- TODO: TBD: for now, do not delete the Compilation Registry... This helps preclude unnecessarily regenerating code... -->
     <!-- TODO: TBD: if anything, maybe we also respond to 'Clean' target requests in order to do this bit... -->
     <!--<Delete Condition="Exists('$(CodeGenToolCompilationRegistryPath)')" Files="$(CodeGenToolCompilationRegistryPath)" ContinueOnError="true" />-->
     <!-- Verify and report the tool version. -->
-    <Message Text="Evaluating `dotnet $(_DotnetCommandLineSwitches)$(DotnetCodeGenerationToolPath) --version´ ..." Importance="high" />
-    <Exec Command="dotnet $(_DotnetCommandLineSwitches)$(DotnetCodeGenerationToolPath) --version" ConsoleToMSBuild="true" StandardOutputImportance="normal" ContinueOnError="true">
+    <!-- ReSharper disable UnknownProperty -->
+    <Message Text="Evaluating `dotnet $(DotnetCodeGenerationToolPath) --version´ ..." Importance="high" />
+    <Exec Command="dotnet $(DotnetCodeGenerationToolPath) --version" ConsoleToMSBuild="true" StandardOutputImportance="normal" ContinueOnError="true">
       <Output TaskParameter="ConsoleOutput" PropertyName="_GenerateCodeToolVersion" />
     </Exec>
+    <!-- ReSharper restore UnknownProperty -->
     <Message Text="Running $(CodeGenerationToolFullName) v$(_GenerateCodeToolVersion) ..." Importance="high" />
   </Target>
 
@@ -142,8 +146,10 @@ $(CodeGenToolAssemblyReferenceRegistryFileName)@(ReferencePath->'$(_CgrSep)--ref
       <_CodeGenToolWarningText>$(CodeGenerationToolingFullName): Failed to yield code generation artifacts, please check https://github.com/mwpowellhtx/Code.Generation.Roslyn for usage instructions.</_CodeGenToolWarningText>
     </PropertyGroup>
     <!-- Run the tool using the Response File, which we do need an Argument for, and evaluate the expected outcome. -->
+    <!-- ReSharper disable UnknownProperty -->
     <Message Text="Evaluating `dotnet $(_DotnetCommandLineSwitches)$(DotnetCodeGenerationToolPath) --response &quot;$(CodeGenToolCommandLineArgumentsResponsePath)&quot;´ ..." Importance="high" />
     <Exec Command="dotnet $(_DotnetCommandLineSwitches)$(DotnetCodeGenerationToolPath) --response &quot;$(CodeGenToolCommandLineArgumentsResponsePath)&quot;" ConsoleToMSBuild="true" StandardOutputImportance="normal" ContinueOnError="true" />
+    <!-- ReSharper restore UnknownProperty -->
     <Warning Code="$(_CgrWarning)" Text="$(_CodeGenToolWarningText)" Condition="!(Exists('$(CodeGenToolCompilationRegistryPath)') And Exists('$(CodeGenToolCompilationResponsePath)') And Exists('$(CodeGenToolAssemblyReferenceRegistryPath))'))" />
   </Target>
 

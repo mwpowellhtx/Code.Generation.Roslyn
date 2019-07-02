@@ -3,9 +3,9 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>Foo</RootNamespace>
-    <Version>1.0.0.4799</Version>
-    <AssemblyVersion>1.0.0.4799</AssemblyVersion>
-    <FileVersion>1.0.0.4799</FileVersion>
+    <Version>1.0.0.4809</Version>
+    <AssemblyVersion>1.0.0.4809</AssemblyVersion>
+    <FileVersion>1.0.0.4809</FileVersion>
   </PropertyGroup>
 
   <!-- TODO: TBD: will need to figure out what's going on with this formatting... -->
@@ -36,14 +36,16 @@
     <ProjectReference Include="..\Code.Generation.Roslyn.Tool\Code.Generation.Roslyn.Tool.csproj" />
   </ItemGroup>
 
+  <!-- ReSharper disable UnknownProperty -->
   <PropertyGroup>
-    <!-- TODO: TBD: literally `dotnet asset´ gets translated to dotnet-asset.dll at the command line... -->
-    <!-- We will leverage the TargetFramework here. This works as long as we are able to stay aligned with the Tool. -->
-    <DotnetCodeGenerationToolPath>..\Code.Generation.Roslyn.Tool\bin\$(Configuration)\$(TargetFramework)\dotnet-codegen.dll</DotnetCodeGenerationToolPath>
-    <!--<DotnetCodeGenerationToolPath>bin\$(Configuration)\$(TargetFramework)\dotnet-codegen.dll</DotnetCodeGenerationToolPath>-->
+    <!-- TODO: TBD: tried with and without `exec ...´, i.e. `dotnet exec ...´, no effect, same outcome. -->
+    <!-- Literally `dotnet asset´ gets translated to dotnet-asset.dll at the command line,
+     we will leverage the TargetFramework here. This works as long as we are able to stay
+     aligned with the Tool. -->
+    <!--<DotnetCodeGenerationToolPath>exec ..\Code.Generation.Roslyn.Tool\bin\$(Configuration)\$(TargetFramework)\dotnet-cgr.dll</DotnetCodeGenerationToolPath>-->
+    <DotnetCodeGenerationToolPath>..\Code.Generation.Roslyn.Tool\bin\$(Configuration)\$(TargetFramework)\dotnet-cgr.dll</DotnetCodeGenerationToolPath>
   </PropertyGroup>
 
-  <!-- ReSharper disable UnknownProperty -->
   <ItemGroup>
     <PackageReference Include="NConsole.Options.Extensions" Version="$(NConsoleOptionsExtensionsVersion)" />
   </ItemGroup>

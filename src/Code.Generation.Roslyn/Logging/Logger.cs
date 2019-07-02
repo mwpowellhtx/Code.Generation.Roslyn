@@ -50,7 +50,7 @@ namespace Code.Generation.Roslyn.Logging
 
         // ReSharper disable once StringLiteralTypo
         private static void DefaultWarningOrErrorLoggerCallback(TextWriter writer, int logLevel, string message, string diagnosticCode)
-            => writer.WriteLine($"dotnet-codegen[{logLevel}]: [{diagnosticCode}] {message}");
+            => writer.WriteLine($"dotnet-cgr[{logLevel}]: [{diagnosticCode}] {message}");
 
         private Logger() : this(Out
             , DefaultInformationalLoggerCallback
