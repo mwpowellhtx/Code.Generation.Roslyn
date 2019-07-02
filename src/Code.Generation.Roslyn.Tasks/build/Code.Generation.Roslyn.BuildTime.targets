@@ -149,8 +149,7 @@ $(CodeGenToolAssemblyReferenceRegistryFileName)@(ReferencePath->'$(_CgrSep)--ref
     <!-- ReSharper disable UnknownProperty -->
     <Message Text="Evaluating `dotnet $(DotnetCodeGenerationToolPath) --response &quot;$(CodeGenToolCommandLineArgumentsResponsePath)&quot;´ ..." Importance="high" />
     <Exec Command="dotnet $(DotnetCodeGenerationToolPath) --response &quot;$(CodeGenToolCommandLineArgumentsResponsePath)&quot;" ConsoleToMSBuild="true" StandardOutputImportance="normal" ContinueOnError="true" />
-    <!-- ReSharper restore UnknownProperty -->
-    <Warning Code="$(_CgrWarning)" Text="$(_CodeGenToolWarningText)" Condition="!(Exists('$(CodeGenToolCompilationRegistryPath)') And Exists('$(CodeGenToolCompilationResponsePath)') And Exists('$(CodeGenToolAssemblyReferenceRegistryPath))'))" />
+    <Warning Code="$(_CgrWarning)" Text="$(_CodeGenToolWarningText)" Condition="!(Exists('$(CodeGenToolCompilationRegistryPath)') Or Exists('$(CodeGenToolAssemblyReferenceRegistryPath)') Or Exists('$(CodeGenToolCompilationResponsePath))'))" />
   </Target>
 
   <!-- TODO: TBD: ditto `which targets´ ... -->
