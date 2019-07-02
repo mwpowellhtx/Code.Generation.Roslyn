@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -9,10 +9,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Code.Generation.Roslyn facilitates code generation driven by fit for purpose custom attributes.</Description>
     <PackageTags>dotnet;Roslyn;code;generation;cgr;generator;assembly;generate;async;asynchronous;asynchronously;document;descriptor;preamble;compilation;unit;enumerable;IEnumerable;enumeration;transformation;context</PackageTags>
-    <Version>1.0.0.28909</Version>
-    <AssemblyVersion>1.0.0.28909</AssemblyVersion>
-    <FileVersion>1.0.0.28909</FileVersion>
-    <PackageVersion>1.0.0.28909</PackageVersion>
+    <Version>1.0.0.30099</Version>
+    <AssemblyVersion>1.0.0.30099</AssemblyVersion>
+    <FileVersion>1.0.0.30099</FileVersion>
+    <PackageVersion>1.0.0.30099</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
@@ -57,5 +57,7 @@
     <PackageReference Include="Validation" Version="$(ValidationVersion)" />
   </ItemGroup>
   <!-- ReSharper restore UnknownProperty -->
+
+  <Import Project="..\Licensing.props" />
 
 </Project>

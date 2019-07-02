@@ -1,0 +1,33 @@
+<Project ToolsVersion="15.0">
+
+  <!-- This is a kluge workaround to a failure on Microsoft's part to properly execute on the licensing migration path.
+   This does package the LICENSE file, but it also leaves a `deprecateLicenseUrl´ artifact in the package `nuspec´ file. -->
+
+  <PropertyGroup>
+    <_LicenseFileDirectory>..\..\</_LicenseFileDirectory>
+    <_DesiredLicenseFileName>LICENSE.</_DesiredLicenseFileName>
+    <_InternalLicenseFileName>LICENSE.txt</_InternalLicenseFileName>
+    <_DesiredFilePath>$(_LicenseFileDirectory)$(_DesiredLicenseFileName)</_DesiredFilePath>
+    <_LicenseFilePath>$(_LicenseFileDirectory)$(_InternalLicenseFileName)</_LicenseFilePath>
+  </PropertyGroup>
+
+  <!-- TODO: TBD: specify one or the other, the LICENSE file is preferred, we think. -->
+  <PropertyGroup>
+    <PackageLicenseFile>$(_InternalLicenseFileName)</PackageLicenseFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!--<PackageLicenseExpression Condition="!Exists('$(_LicenseFilePath)')">GPL-3.0-only</PackageLicenseExpression>-->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(_LicenseFilePath)" Pack="true" PackagePath="$(_InternalLicenseFileName)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="CopyLicenseFileForPackagingPurposes" BeforeTargets="BeforeBuild" Condition="!Exists('$(_LicenseFilePath)')">
+    <Copy SourceFiles="$(_DesiredFilePath)" DestinationFiles="$(_LicenseFilePath)" />
+  </Target>
+
+</Project>

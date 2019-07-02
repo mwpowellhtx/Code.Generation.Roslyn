@@ -9,14 +9,16 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Provides the attributed hooks for purposes of invoking Code Generation.</Description>
     <PackageTags>code;generation;Roslyn;cgr;attribute;usage;assembly;module;class;struct;enum;interface;delegate</PackageTags>
-    <Version>1.0.0.28907</Version>
-    <AssemblyVersion>1.0.0.28907</AssemblyVersion>
-    <FileVersion>1.0.0.28907</FileVersion>
-    <PackageVersion>1.0.0.28907</PackageVersion>
+    <Version>1.0.0.30098</Version>
+    <AssemblyVersion>1.0.0.30098</AssemblyVersion>
+    <FileVersion>1.0.0.30098</FileVersion>
+    <PackageVersion>1.0.0.30098</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
     <DocumentationFile>bin\$(Configuration)\netstandard2.0\Code.Generation.Roslyn.Attributes.xml</DocumentationFile>
   </PropertyGroup>
+
+  <Import Project="..\Licensing.props" />
 
 </Project>

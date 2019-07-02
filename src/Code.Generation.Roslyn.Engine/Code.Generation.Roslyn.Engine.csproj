@@ -9,10 +9,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>The Engine of Source Code Generation used by the `dotnet-cgr` tool.</Description>
     <PackageTags>dotnet;code;generation;Roslyn;cgr;engine;registry;set;remove;purge;where;descriptor;comparer;eligible;assembly;generated;syntax;tree;load;service;manager;transformation;document</PackageTags>
-    <Version>1.0.0.28911</Version>
-    <AssemblyVersion>1.0.0.28911</AssemblyVersion>
-    <FileVersion>1.0.0.28911</FileVersion>
-    <PackageVersion>1.0.0.28911</PackageVersion>
+    <Version>1.0.0.30100</Version>
+    <AssemblyVersion>1.0.0.30100</AssemblyVersion>
+    <FileVersion>1.0.0.30100</FileVersion>
+    <PackageVersion>1.0.0.30100</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -41,5 +41,7 @@
       <_Parameter1>Code.Generation.Roslyn.Tests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
+
+  <Import Project="..\Licensing.props" />
 
 </Project>

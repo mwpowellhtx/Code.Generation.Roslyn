@@ -14,7 +14,6 @@
 
   <PropertyGroup>
     <PackageProjectUrl>http://github.com/mwpowellhtx/Code.Generator.Roslyn</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/mwpowellhtx/Code.Generator.Roslyn/blob/master/LICENSE</PackageLicenseUrl>
   </PropertyGroup>
 
   <PropertyGroup>
