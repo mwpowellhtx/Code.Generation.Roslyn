@@ -2,19 +2,23 @@
 
   <PropertyGroup>
     <PackageId>Code.Generation.Roslyn.BuildTime</PackageId>
-    <Description>The build-time development dependency that generates code for projects consuming Code Generation attributes.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <DevelopmentDependency>true</DevelopmentDependency>
     <IncludeBuildOutput>false</IncludeBuildOutput>
   </PropertyGroup>
 
   <PropertyGroup>
+    <Description>The build-time development dependency that generates code for projects consuming Code Generation attributes.</Description>
+    <PackageTags>dotnet;code;generation;Roslyn;cgr;tasks;build;properties;props;target;targets;MSBuild;Microsoft;compile;generate;attribute;attributes</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <!-- TODO: TBD: potentially: netstandard1.0;net40;net20;portable-net40+win8+wpa81;portable-net45+win8+wpa81+wp8 -->
     <TargetFrameworks>netstandard1.0;netstandard2.0;net20</TargetFrameworks>
-    <Version>1.0.0.4521</Version>
-    <AssemblyVersion>1.0.0.4521</AssemblyVersion>
-    <FileVersion>1.0.0.4521</FileVersion>
-    <PackageVersion>1.0.0.4521</PackageVersion>
+    <Version>1.0.0.28908</Version>
+    <AssemblyVersion>1.0.0.28908</AssemblyVersion>
+    <FileVersion>1.0.0.28908</FileVersion>
+    <PackageVersion>1.0.0.28908</PackageVersion>
   </PropertyGroup>
 
   <!-- ReSharper disable once UnknownProperty -->

@@ -6,16 +6,16 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <!-- ReSharper disable once UnknownProperty -->
     <AssemblyName>$(CodeGenerationToolName)</AssemblyName>
-    <Version>1.0.0.4626</Version>
-    <AssemblyVersion>1.0.0.4626</AssemblyVersion>
-    <FileVersion>1.0.0.4626</FileVersion>
-    <PackageVersion>1.0.0.4626</PackageVersion>
+    <Version>1.0.0.28912</Version>
+    <AssemblyVersion>1.0.0.28912</AssemblyVersion>
+    <FileVersion>1.0.0.28912</FileVersion>
+    <PackageVersion>1.0.0.28912</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- So as not to collide with https://www.nuget.org/packages/dotnet-codegen/ -->
-    <PackageId>dotnet-cgr</PackageId>
+    <PackageId>$(CodeGenerationToolName)</PackageId>
     <Description>The dotnet code generation CLI tool that works with the Code.Generation.Roslyn NuGet package.</Description>
+    <PackageTags>dotnet;tool;tooling;code;generation;Roslyn;cgr;CLI;core;console;application</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 

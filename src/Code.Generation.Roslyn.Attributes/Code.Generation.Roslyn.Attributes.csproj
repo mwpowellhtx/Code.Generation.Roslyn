@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
@@ -9,10 +8,11 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Provides the attributed hooks for purposes of invoking Code Generation.</Description>
-    <Version>1.0.0.4543</Version>
-    <AssemblyVersion>1.0.0.4543</AssemblyVersion>
-    <FileVersion>1.0.0.4543</FileVersion>
-    <PackageVersion>1.0.0.4543</PackageVersion>
+    <PackageTags>code;generation;Roslyn;cgr;attribute;usage;assembly;module;class;struct;enum;interface;delegate</PackageTags>
+    <Version>1.0.0.28907</Version>
+    <AssemblyVersion>1.0.0.28907</AssemblyVersion>
+    <FileVersion>1.0.0.28907</FileVersion>
+    <PackageVersion>1.0.0.28907</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
