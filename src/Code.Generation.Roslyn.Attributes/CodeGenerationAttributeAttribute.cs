@@ -11,7 +11,7 @@ namespace Code.Generation.Roslyn
     /// A base attribute type for code generation attributes.
     /// </summary>
     /// <inheritdoc />
-    [AttributeUsage(Class | Struct | Interface | Enum | Module | Assembly, Inherited = false)]
+    [AttributeUsage(Assembly | Module | Class | Struct | Enum | Interface | Delegate, Inherited = false)]
     public class CodeGenerationAttributeAttribute : Attribute
     {
         /// <summary>
