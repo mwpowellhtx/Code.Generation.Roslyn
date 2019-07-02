@@ -8,10 +8,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Code.Generation.Roslyn facilitates code generation driven by fit for purpose custom attributes.</Description>
-    <Version>1.0.0.4552</Version>
-    <AssemblyVersion>1.0.0.4552</AssemblyVersion>
-    <FileVersion>1.0.0.4552</FileVersion>
-    <PackageVersion>1.0.0.4552</PackageVersion>
+    <Version>1.0.0.4561</Version>
+    <AssemblyVersion>1.0.0.4561</AssemblyVersion>
+    <FileVersion>1.0.0.4561</FileVersion>
+    <PackageVersion>1.0.0.4561</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
