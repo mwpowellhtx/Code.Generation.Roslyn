@@ -7,12 +7,12 @@
 
 Before we dive into the finer points of Code Generation, it is necessary to discuss a couple of key differences separating this effort from the original effort upon which our inspiration was derived.
 
-First and foremost, kudos to [Andrew Arnott](//AArnott) and folks for the original effort. We have been able to generate code in most circumstances, but lately there are a couple of requirements we had in which [CodeGeneration.Roslyn](//AArnott/CodeGeneration.Roslyn) just was not going to work for us. This is the primary motivation for our recasting of the original effort, distilling just the code generation facilitation and getting out of the way of the code generation author as quickly as possible. We do this in a couple of ways:
+First and foremost, kudos to [Andrew Arnott](https://github.com/AArnott) and folks for the original effort. We have been able to generate code in most circumstances, but lately there are a couple of requirements we had in which [CodeGeneration.Roslyn](https://github.com/AArnott/CodeGeneration.Roslyn) just was not going to work for us. This is the primary motivation for our recasting of the original effort, distilling just the code generation facilitation and getting out of the way of the code generation author as quickly as possible. We do this in a couple of ways:
 
-1. First, [Code.Generation.Roslyn](//mwpowellhtx/Code.Generation.Roslyn) is focused on just that: facilitating code generation. What do we mean by that? To be clear, we found it to be extraneous, and a bit of a distraction, to consider whether the annotated request originated in a class, struct, in what name spaces, and so on. Instead, once we discover the annotation, we simply relay that to the code generation author and step out of the way as early as possible. We do this by requiring code be generated at the CompilationUnitSyntax level as contrasted with the MemberDeclarationSyntax level.
+1. First, [Code.Generation.Roslyn](/mwpowellhtx/Code.Generation.Roslyn) is focused on just that: facilitating code generation. What do we mean by that? To be clear, we found it to be extraneous, and a bit of a distraction, to consider whether the annotated request originated in a class, struct, in what name spaces, and so on. Instead, once we discover the annotation, we simply relay that to the code generation author and step out of the way as early as possible. We do this by requiring code be generated at the CompilationUnitSyntax level as contrasted with the MemberDeclarationSyntax level.
 1. Secondly, we wanted to generated code triggered by Assembly Attributes, not just Member, i.e. *class*, *struct*, *interface*, etc, Attributes.
 1. Thirdly, a tertiary goal of ours was to allow for custom *Preamble Text* to be delivered into the engine. This is required to be properly formatted, however, the engine itself will append a trailing Carriage Return Line Feed symbol as appropriate. The default, of course, is a predetermined *Preamble Text*.
-1. Last but not least, we were really not happy with the level of unit testing presented in the original effort. We found the examples to be somewhat contrived and academic in nature, whereas we wanted to present some examples that might prove at least somewhat value-added. We were also successful, we believe, in compiling an end-to-end integration test which, short of subscribing to [*NuGet* packages](https://nuget.org/packages/Code.Generation.Roslyn) themselves, demonstrates that the approach does in fact work.
+1. Last but not least, we were really not happy with the level of unit testing presented in the original effort. We found the examples to be somewhat contrived and academic in nature, whereas we wanted to present some examples that might prove at least somewhat value-added. We were also successful, we believe, in compiling an end-to-end integration test which, short of subscribing to [*NuGet* packages][NuPkg] themselves, demonstrates that the approach does in fact work.
 
 There are a couple of other nuances.
 
@@ -38,7 +38,7 @@ In this walkthrough, we will define a code generator that replicates any class y
 
 ### Prerequisites
 
-* [.NET Core SDK v2.1+][dotnet-sdk-2.1]. If you do not have v2.1+ there will be cryptic error messages (see [#111](//github.com/AArnott/CodeGeneration.Roslyn/issues/111)).
+* [.NET Core SDK v2.1+][dotnet-sdk-2.1]. If you do not have v2.1+ there will be cryptic error messages (see [#111](https://github.com/AArnott/CodeGeneration.Roslyn/issues/111)).
 * .NET Core SDK v2.1.500 specifically for building this project
 
 [dotnet-sdk-2.1]: https://dotnet.microsoft.com/download/dotnet-core/2.1
@@ -93,13 +93,13 @@ namespace Code.Generation.Roslyn.Generators
 }
 ```
 
-For brevity, feel free to [review the example source](//mwpowellhtx/Code.Generation.Roslyn/...) in our generators test assembly.
+For brevity, feel free to [review the example source](https://github.com/mwpowellhtx/Code.Generation.Roslyn/blob/master/src/Code.Generation.Roslyn.Generators/ImplementCloneableInterfaceGenerator.cs) in our generators test assembly.
 
 ### Define attribute
 
 In order to activate your code generator, you need to define an attribute that will ultimately annotate the asset used to trigger the code generation. This attribute may be defined in the same assembly as defines your code generator, but since your code generator must be defined in a `netcoreapp2.1`-compatible library, this may limit which projects can apply your attribute. So define your attribute in another assembly if it must be applied to projects that target older platforms.
 
-If your attributes are in their own project, you must install the [CodeGeneration.Roslyn.Attributes][AttrNuPkg] package to your attributes project.
+If your attributes are in their own project, you must install the [Code.Generation.Roslyn.Attributes][AttrNuPkg] package to your attributes project.
 
 Define your attribute class. For sake of example, we will assume that the attributes are defined in the same netstandard2.0 project that defines the generator which allows us to use the more convenient `typeof` syntax when declaring the code generator type. If the attributes and code generator classes were in separate assemblies, you must specify the assembly-qualified name of the generator type as a string instead.
 
@@ -157,7 +157,9 @@ public void Verify_Cloneable_Interface()
 }
 ```
 
-You should see Intellisense help you in all your interactions with ``Foo.Bar``.  If you execute [*Go To Definition*](https://docs.microsoft.com/en-us/visualstudio/ide/go-to-and-peek-definition) on it, Visual Studio will open the generated code file that actually defines ``Foo.Bar``, and you will notice it is exactly like ``Bar``, just renamed as our code generator defined it to be.
+You should see Intellisense help you in all your interactions with ``Foo.Bar``.  If you execute [*Go To Definition*][vs-ide-go-to-and-peek-definitions] on it, Visual Studio will open the generated code file that actually defines ``Foo.Bar``, and you will notice it is exactly like ``Bar``, just renamed as our code generator defined it to be.
+
+[vs-ide-go-to-and-peek-definitions]: https://docs.microsoft.com/en-us/visualstudio/ide/go-to-and-peek-definition
 
 ### Shared Projects
 
@@ -170,7 +172,9 @@ When using shared projects and partial classes across the definitions of your cl
 <Import Project="path\to\build\Code.Generation.Roslyn.BuildTime.props" />
 ```
 
-The ``path\to\...`` will usually be the ``packages\`` path used for your [NuGet restore](https://docs.microsoft.com/en-us/nuget/consume-packages/package-restore) process.
+The ``path\to\...`` will usually be the ``packages\`` path used for your [NuGet restore][nuget-consume-packages-package-restore] process.
+
+[nuget-consume-packages-package-restore]: https://docs.microsoft.com/en-us/nuget/consume-packages/package-restore
 
 ## Developing your code generator
 [Developing your code generator]: #developing-your-code-generator
@@ -186,7 +190,7 @@ You can also package your code generator as a NuGet package for others to instal
 <dependency id="Code.Generation.Roslyn.BuildTime" version="[1,2)" />
 ```
 
-Your NuGet package should include a ``build`` folder in addition to this dependency, with an *MSBuild* file, either a *.props* or a *.targets* file, that defines an ``GeneratorAssemblySearchPaths`` *MSBuild* item pointing to the folder containing your code generator assembly and its dependencies. For example your package should have a `build\MyPackage.targets` file with this content:
+Your NuGet package should include a ``build`` folder in addition to this dependency, with an *MSBuild* file, either a *.props* or a *.targets* file, that defines an ``GeneratorAssemblySearchPaths`` *MSBuild* item pointing to the folder containing your code generator assembly and its dependencies. For example your package should have a ``build\MyPackage.targets`` file with this content:
 
 ```Xml
 <?xml version="1.0" encoding="utf-8" ?>
@@ -213,6 +217,6 @@ Your consumers should depend on your package, and the required dotnet CLI tool, 
 Again, in this example we allow for an acceptable version range in the CLI dependency.
 
 [NuPkg]: https://nuget.org/packages/Code.Generation.Roslyn
-[BuildTimeNuPkg]: https://nuget.org/packages/CodeGeneration.Roslyn.BuildTime
-[AttrNuPkg]: https://nuget.org/packages/CodeGeneration.Roslyn.Attributes
+[BuildTimeNuPkg]: https://nuget.org/packages/Code.Generation.Roslyn.BuildTime
+[AttrNuPkg]: https://nuget.org/packages/Code.Generation.Roslyn.Attributes
 [netstandard-table]: https://docs.microsoft.com/dotnet/standard/net-standard#net-implementation-support
