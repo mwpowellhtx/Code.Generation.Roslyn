@@ -16,7 +16,7 @@ First and foremost, kudos to [Andrew Arnott](//AArnott) and folks for the origin
 
 There are a couple of other nuances.
 
-2. Chiefly concerning our package versioning strategy. Whereas the original work would keep delivered versions aligned, we make no promises concerning such alignment. In the macro, we make an effort for major versions to keep in sync with each other, so you can leverage NuGet version ranges, i.e. ``[1,2)``, however, concerning minor, and especially patch, build, etc, elements, these values can migrate from release to release depending on which packages required an update.
+1. Chiefly concerning our package versioning strategy. Whereas the original work would keep delivered versions aligned, we make no promises concerning such alignment. In the macro, we make an effort for major versions to keep in sync with each other, so you can leverage NuGet version ranges, i.e. ``[1,2)``, however, concerning minor, and especially patch, build, etc, elements, these values can migrate from release to release depending on which packages required an update.
 
 With that said, let us reconsider what it means to Generate Code using Roslyn.
 
