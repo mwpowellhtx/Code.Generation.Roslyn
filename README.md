@@ -1,7 +1,11 @@
 
 # Roslyn-based Code Generation
 
-[![Code.Generation.Roslyn NuGet package](https://img.shields.io/nuget/v/Code.Generation.Roslyn.svg?label=Code.Generation.Roslyn%20NuGet%20Package)][NuPkg] [![Code.Generation.Roslyn.Attributes NuGet package](https://img.shields.io/nuget/v/Code.Generation.Roslyn.Attributes.svg?label=Code.Generation.Roslyn.Attributes%20NuGet%20Package)][AttrNuPkg] [![Code.Generation.Roslyn.Engine NuGet package](https://img.shields.io/nuget/v/Code.Generation.Roslyn.Engine.svg?label=Code.Generation.Roslyn.Engine%20NuGet%20Package)][NuPkg] [![Code.Generation.Roslyn.BuildTime NuGet package](https://img.shields.io/nuget/v/Code.Generation.Roslyn.BuildTime.svg?label=Code.Generation.Roslyn.BuildTime%20NuGet%20Package)][BuildTimeNuPkg] [![dotnet-cgr NuGet package](https://img.shields.io/nuget/v/dotnet-cgr.svg?label=dotnet-cgr%20NuGet%20Package)][ToolNuPkg]
+[![Code.Generation.Roslyn NuGet package](https://img.shields.io/nuget/v/Code.Generation.Roslyn.svg?label=Code.Generation.Roslyn%20NuGet%20Package)][NuPkg]
+[![Code.Generation.Roslyn.Attributes NuGet package](https://img.shields.io/nuget/v/Code.Generation.Roslyn.Attributes.svg?label=Code.Generation.Roslyn.Attributes%20NuGet%20Package)][AttrNuPkg]
+[![Code.Generation.Roslyn.Engine NuGet package](https://img.shields.io/nuget/v/Code.Generation.Roslyn.Engine.svg?label=Code.Generation.Roslyn.Engine%20NuGet%20Package)][EngineNuPkg]
+[![Code.Generation.Roslyn.BuildTime NuGet package](https://img.shields.io/nuget/v/Code.Generation.Roslyn.BuildTime.svg?label=Code.Generation.Roslyn.BuildTime%20NuGet%20Package)][BuildTimeNuPkg]
+[![dotnet-cgr NuGet package](https://img.shields.io/nuget/v/dotnet-cgr.svg?label=dotnet-cgr%20NuGet%20Package)][ToolNuPkg]
 
 ## Background &amp; Motivations
 
@@ -217,7 +221,8 @@ Your consumers should depend on your package, and the required dotnet CLI tool, 
 Again, in this example we allow for an acceptable version range in the CLI dependency.
 
 [NuPkg]: https://nuget.org/packages/Code.Generation.Roslyn
-[BuildTimeNuPkg]: https://nuget.org/packages/Code.Generation.Roslyn.BuildTime
+[EngineNuPkg]: https://nuget.org/packages/Code.Generation.Roslyn.Engine
 [AttrNuPkg]: https://nuget.org/packages/Code.Generation.Roslyn.Attributes
+[BuildTimeNuPkg]: https://nuget.org/packages/Code.Generation.Roslyn.BuildTime
 [ToolNuPkg]: https://nuget.org/packages/dotnet-cgr
 [netstandard-table]: https://docs.microsoft.com/dotnet/standard/net-standard#net-implementation-support
