@@ -9,10 +9,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>The Engine of Source Code Generation used by the `dotnet-cgr` tool.</Description>
     <PackageTags>dotnet;code;generation;Roslyn;cgr;engine;registry;set;remove;purge;where;descriptor;comparer;eligible;assembly;generated;syntax;tree;load;service;manager;transformation;document</PackageTags>
-    <Version>1.0.0.30100</Version>
-    <AssemblyVersion>1.0.0.30100</AssemblyVersion>
-    <FileVersion>1.0.0.30100</FileVersion>
-    <PackageVersion>1.0.0.30100</PackageVersion>
+    <Version>1.0.1.5414</Version>
+    <AssemblyVersion>1.0.1.5414</AssemblyVersion>
+    <FileVersion>1.0.1.5414</FileVersion>
+    <PackageVersion>1.0.1.5414</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,7 +26,7 @@
   <!-- ReSharper disable UnknownProperty -->
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharp)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     <PackageReference Include="Validation" Version="$(ValidationVersion)" />

@@ -14,11 +14,12 @@
 
   <PropertyGroup>
     <!-- TODO: TBD: potentially: netstandard1.0;net40;net20;portable-net40+win8+wpa81;portable-net45+win8+wpa81+wp8 -->
+    <!-- TODO: TBD: we think there may be issues with BumpAssemblyVersions when multi-targeting multiple frameworks... -->
     <TargetFrameworks>netstandard1.0;netstandard2.0;net20</TargetFrameworks>
-    <Version>1.0.0.30098</Version>
-    <AssemblyVersion>1.0.0.30098</AssemblyVersion>
-    <FileVersion>1.0.0.30098</FileVersion>
-    <PackageVersion>1.0.0.30098</PackageVersion>
+    <Version>1.0.1.5410</Version>
+    <AssemblyVersion>1.0.1.5410</AssemblyVersion>
+    <FileVersion>1.0.1.5410</FileVersion>
+    <PackageVersion>1.0.1.5410</PackageVersion>
   </PropertyGroup>
 
   <!-- ReSharper disable once UnknownProperty -->
