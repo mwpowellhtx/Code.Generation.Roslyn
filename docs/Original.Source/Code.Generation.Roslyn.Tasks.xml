@@ -1,0 +1,22 @@
+  <!-- Bits from the Tasks project, useful during troubleshooting moments. -->
+
+  <!--<Target Name="ReportBeforeBuild" BeforeTargets="BeforeBuild">
+    <Message Text="Before `BeforeBuild´ ... TargetFrameworks = `$(TargetFrameworks)´, TargetFramework = `$(TargetFramework)´, Configuration = `$(Configuration)´, ProjectPath = `$(ProjectPath)´, MSBuildProjectFullPath = `$(MSBuildProjectFullPath)´" Importance="high" />
+  </Target>-->
+
+  <!--<Target Name="ReportPreBuildEvent" BeforeTargets="PreBuildEvent">
+    <Message Text="Before `PreBuildEvent´ ... TargetFrameworks = `$(TargetFrameworks)´, Configuration = `$(Configuration)´, ProjectPath = `$(ProjectPath)´, MSBuildProjectFullPath = `$(MSBuildProjectFullPath)´" Importance="high" />
+  </Target>-->
+
+  <!--<Target Name="ReportDispatchToInnerBuildsExists" BeforeTargets="DispatchToInnerBuilds" Condition="Exists('..\packages\BumpAssemblyVersions\$(BumpAssemblyVersionsVersion)\build\BumpAssemblyVersions.targets')">
+    <Message Text="Before `DispatchToInnerBuilds´ ... TargetFrameworks = `$(TargetFrameworks)´ and `BumpAssemblyVersions´ exists, Configuration = `$(Configuration)´, Count of BumpVersionSpec = @(BumpVersionSpec-&gt;Count()), ProjectPath = `$(ProjectPath)´, MSBuildProjectFullPath = `$(MSBuildProjectFullPath)´" Importance="high" />
+  </Target>-->
+
+  <!--<Target Name="ReportDispatchToInnerBuildsDoesNotExist" BeforeTargets="DispatchToInnerBuilds" Condition="!Exists('..\packages\BumpAssemblyVersions\$(BumpAssemblyVersionsVersion)\build\BumpAssemblyVersions.targets')">
+    <Message Text="Before `DispatchToInnerBuilds´ ... TargetFrameworks = `$(TargetFrameworks)´ and `BumpAssemblyVersions´ does not exist, Configuration = `$(Configuration)´, Count of BumpVersionSpec = @(BumpVersionSpec-&gt;Count()), ProjectPath = `$(ProjectPath)´, MSBuildProjectFullPath = `$(MSBuildProjectFullPath)´" Importance="high" />
+  </Target>-->
+
+  <!--<Target Name="BumpAssemblyVersionsBeforeDispatchToInnerBuilds" BeforeTargets="DispatchToInnerBuilds" Condition="'$(TargetFrameworks)' != ''">
+    <Message Text="`BumpAssemblyVersionsBeforeDispatchToInnerBuilds´ ..." Importance="high" />
+    <CallTarget Targets="GeneralBumpAssemblyVersions" />
+  </Target>-->
