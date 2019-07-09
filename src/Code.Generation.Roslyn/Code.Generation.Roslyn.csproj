@@ -9,10 +9,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Code.Generation.Roslyn facilitates code generation driven by fit for purpose custom attributes.</Description>
     <PackageTags>dotnet;Roslyn;code;generation;cgr;generator;assembly;generate;async;asynchronous;asynchronously;document;descriptor;preamble;compilation;unit;enumerable;IEnumerable;enumeration;transformation;context</PackageTags>
-    <Version>1.0.1.5412</Version>
-    <AssemblyVersion>1.0.1.5412</AssemblyVersion>
-    <FileVersion>1.0.1.5412</FileVersion>
-    <PackageVersion>1.0.1.5412</PackageVersion>
+    <Version>1.0.1.5413</Version>
+    <AssemblyVersion>1.0.1.5413</AssemblyVersion>
+    <FileVersion>1.0.1.5413</FileVersion>
+    <PackageVersion>1.0.1.5413</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">

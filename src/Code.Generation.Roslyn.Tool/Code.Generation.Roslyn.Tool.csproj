@@ -6,10 +6,10 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <AssemblyName>$(CodeGenerationToolName)</AssemblyName>
-    <Version>1.0.1.5415</Version>
-    <AssemblyVersion>1.0.1.5415</AssemblyVersion>
-    <FileVersion>1.0.1.5415</FileVersion>
-    <PackageVersion>1.0.1.5415</PackageVersion>
+    <Version>1.0.1.5416</Version>
+    <AssemblyVersion>1.0.1.5416</AssemblyVersion>
+    <FileVersion>1.0.1.5416</FileVersion>
+    <PackageVersion>1.0.1.5416</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup>

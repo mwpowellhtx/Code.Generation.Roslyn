@@ -9,10 +9,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>The Engine of Source Code Generation used by the `dotnet-cgr` tool.</Description>
     <PackageTags>dotnet;code;generation;Roslyn;cgr;engine;registry;set;remove;purge;where;descriptor;comparer;eligible;assembly;generated;syntax;tree;load;service;manager;transformation;document</PackageTags>
-    <Version>1.0.1.5414</Version>
-    <AssemblyVersion>1.0.1.5414</AssemblyVersion>
-    <FileVersion>1.0.1.5414</FileVersion>
-    <PackageVersion>1.0.1.5414</PackageVersion>
+    <Version>1.0.1.5415</Version>
+    <AssemblyVersion>1.0.1.5415</AssemblyVersion>
+    <FileVersion>1.0.1.5415</FileVersion>
+    <PackageVersion>1.0.1.5415</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>

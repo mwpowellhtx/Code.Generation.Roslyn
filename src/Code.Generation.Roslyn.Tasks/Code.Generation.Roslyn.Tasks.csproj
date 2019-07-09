@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <PackageId>Code.Generation.Roslyn.BuildTime</PackageId>
@@ -16,10 +16,10 @@
     <!-- TODO: TBD: potentially: netstandard1.0;net40;net20;portable-net40+win8+wpa81;portable-net45+win8+wpa81+wp8 -->
     <!-- TODO: TBD: we think there may be issues with BumpAssemblyVersions when multi-targeting multiple frameworks... -->
     <TargetFrameworks>netstandard1.0;netstandard2.0;net20</TargetFrameworks>
-    <Version>1.0.1.5410</Version>
-    <AssemblyVersion>1.0.1.5410</AssemblyVersion>
-    <FileVersion>1.0.1.5410</FileVersion>
-    <PackageVersion>1.0.1.5410</PackageVersion>
+    <Version>1.0.1.5411</Version>
+    <AssemblyVersion>1.0.1.5411</AssemblyVersion>
+    <FileVersion>1.0.1.5411</FileVersion>
+    <PackageVersion>1.0.1.5411</PackageVersion>
   </PropertyGroup>
 
   <!-- ReSharper disable once UnknownProperty -->
