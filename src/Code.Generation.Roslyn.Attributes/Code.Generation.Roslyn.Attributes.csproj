@@ -9,10 +9,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Provides the attributed hooks for purposes of invoking Code Generation.</Description>
     <PackageTags>code;generation;Roslyn;cgr;attribute;usage;assembly;module;class;struct;enum;interface;delegate</PackageTags>
-    <Version>1.0.1.5411</Version>
-    <AssemblyVersion>1.0.1.5411</AssemblyVersion>
-    <FileVersion>1.0.1.5411</FileVersion>
-    <PackageVersion>1.0.1.5411</PackageVersion>
+    <Version>1.0.2.16082</Version>
+    <AssemblyVersion>1.0.2.16082</AssemblyVersion>
+    <FileVersion>1.0.2.16082</FileVersion>
+    <PackageVersion>1.0.2.16082</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
