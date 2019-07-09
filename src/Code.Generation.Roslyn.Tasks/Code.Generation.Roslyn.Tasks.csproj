@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <PackageId>Code.Generation.Roslyn.BuildTime</PackageId>
@@ -9,7 +9,7 @@
 
   <PropertyGroup>
     <Description>The build-time development dependency that generates code for projects consuming Code Generation attributes.</Description>
-    <PackageTags>dotnet;code;generation;Roslyn;cgr;tasks;build;properties;props;target;targets;MSBuild;Microsoft;compile;generate;attribute;attributes</PackageTags>
+    <PackageTags>dotnet;code;generation;Roslyn;cgr;tasks;build;properties;props;target;targets;MSBuild;Microsoft;compile;generate;attribute;attributes;time;net;framework;standard;netstandard</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -30,6 +30,13 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
+  <!-- ReSharper disable UnknownProperty -->
+  <!-- It is necessary to call out the targets apart from the Directory Build properties for whatever
+   reason. This approach does seem to work and we get the expected version bump informed by the same.
+   It is also extremely important that we did this upon the Condition. -->
+  <Import Project="..\packages\bumpassemblyversions\$(BumpAssemblyVersionsVersion)\build\BumpAssemblyVersions.targets" Condition="'$(TargetFrameworks)' != '' And Exists('..\packages\BumpAssemblyVersions\$(BumpAssemblyVersionsVersion)\build\BumpAssemblyVersions.targets')" />
+  <!-- ReSharper restore UnknownProperty -->
 
   <Import Project="..\Licensing.props" />
 
