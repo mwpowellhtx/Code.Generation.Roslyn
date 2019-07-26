@@ -250,6 +250,7 @@ namespace Code.Generation.Roslyn
                 // TODO: TBD: this is the core of the code generated assets...
                 var generatedSyntaxTree = generatedCompilationUnit.SyntaxTree;
                 var genText = generatedSyntaxTree.GetText(cancellationToken);
+                // TODO: TBD: instead of keeping a loose Id here, could potentially map the CUS's to a Uuid-keyed dictionary.
                 var genId = Guid.NewGuid();
 
                 var actualRetries = 3;
