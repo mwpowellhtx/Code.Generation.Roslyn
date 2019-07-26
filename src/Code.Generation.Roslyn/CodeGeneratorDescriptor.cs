@@ -36,6 +36,11 @@ namespace Code.Generation.Roslyn
             return this;
         }
 
+        // TODO: TBD: consider whether to change this to Guid-CompilationUnitSyntax based Dictionary?
+        // TODO: TBD: concurrent dictionary? observable dictionary?
+        // TODO: TBD: i.e. instead of iterating `generators´ and generated CompilationUnits, etc
+        // TODO: TBD: potentially given the dictionary instance as part of the invocation context...
+        // TODO: TBD: just watch this collection for changes during the generator invocations...
         /// <summary>
         /// Gets or Sets the desired <see cref="CompilationUnitSyntax"/> instances.
         /// This is the linchpin in the whole process.
