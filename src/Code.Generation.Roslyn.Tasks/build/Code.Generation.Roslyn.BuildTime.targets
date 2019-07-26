@@ -81,7 +81,7 @@
   <!-- ReSharper disable UnknownProperty -->
   <PropertyGroup>
     <!-- Which the `tool´ build needs to yield literally, `dotnet-cgr´ for its assembly output. -->
-    <DotnetCodeGenerationToolPath Condition="'$(DotnetCodeGenerationToolPath)' == ''">codegen</DotnetCodeGenerationToolPath>
+    <DotnetCodeGenerationToolPath Condition="'$(DotnetCodeGenerationToolPath)' == ''">cgr</DotnetCodeGenerationToolPath>
     <DotnetCommandLineSwitches Condition="'$(DotnetCommandLineSwitches)' != ''"></DotnetCommandLineSwitches>
   </PropertyGroup>
   <!-- ReSharper restore UnknownProperty -->
