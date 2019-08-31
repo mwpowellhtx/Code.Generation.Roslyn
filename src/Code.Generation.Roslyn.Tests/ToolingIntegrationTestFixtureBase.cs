@@ -14,7 +14,7 @@ namespace Code.Generation.Roslyn
     using static Keywords;
     using static Path;
     using static Program;
-    using static ServiceManager<GeneratedSyntaxTreeDescriptor, GeneratedSyntaxTreeRegistry>;
+    using static ServiceManager<GeneratedSyntaxTreeDescriptor, GeneratedSyntaxTreeRegistry, GeneratedSyntaxTreeRegistryTransferObject>;
     using static StringLiterals;
     using static Version;
     using static RegexOptions;
@@ -179,7 +179,8 @@ namespace Code.Generation.Roslyn
 
             var verified = Verify(builder.ToArray());
 
-            TryLoad(Combine(builder.Output, builder.Generated), out registrySet)
+            // Using the default surrogate implicit type conversion.
+            TryLoad(Combine(builder.Output, builder.Generated), out registrySet, x => x)
                 .AssertEqual(registrySet?.Any() == true)
                 ;
 
