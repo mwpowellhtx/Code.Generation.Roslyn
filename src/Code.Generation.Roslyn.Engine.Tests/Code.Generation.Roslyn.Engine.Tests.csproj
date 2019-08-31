@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <Version>1.0.0.2201</Version>
+    <AssemblyVersion>1.0.0.2201</AssemblyVersion>
+    <FileVersion>1.0.0.2201</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Code.Generation.Roslyn.Engine\Code.Generation.Roslyn.Engine.csproj" />
+  </ItemGroup>
+
+  <ImportGroup>
+    <Import Project="..\Unit.Testing.props" />
+  </ImportGroup>
+
+</Project>
