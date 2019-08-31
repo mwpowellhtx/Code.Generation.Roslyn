@@ -33,6 +33,8 @@ rem Setup Roslyn Projects
 set roslyn_projects=Code.Generation.Roslyn
 rem Setup Engine Projects
 set engine_projects=Code.Generation.Roslyn.Engine
+set engine_projects=%engine_projects%%delim%Code.Generation.Roslyn
+set engine_projects=%engine_projects%%delim%Code.Generation.Roslyn.Attributes
 rem Setup Attributes Projects
 set attrib_projects=Code.Generation.Roslyn.Attributes
 rem Setup `dotnet´ Tooling Projects
