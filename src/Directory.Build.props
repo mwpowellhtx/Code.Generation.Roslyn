@@ -6,6 +6,8 @@
     <Product>Code.Generator.Roslyn</Product>
     <Copyright>Copyright (c) 2019</Copyright>
     <LangVersion>7.3</LangVersion>
+    <!-- Although, to be clear, we are not sure we want to be ignoring NU1701. -->
+    <NoWarn>$(NoWarn);NU1603;NU1701</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
@@ -22,8 +24,9 @@
     <MicrosoftBuildVersion>[15.9.20,16)</MicrosoftBuildVersion>
     <MicrosoftCodeAnalysisCSharpVersion>[2.10,3)</MicrosoftCodeAnalysisCSharpVersion>
     <ValidationVersion>[2.4.22,3)</ValidationVersion>
+    <ValidateFluentlyVersions>[1,2)</ValidateFluentlyVersions>
     <NewtonsoftJsonVersion>[12.0.2,13)</NewtonsoftJsonVersion>
-    <BumpAssemblyVersionsVersion>1.3.1</BumpAssemblyVersionsVersion>
+    <BumpAssemblyVersionsVersion>1.4.0</BumpAssemblyVersionsVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -44,6 +47,12 @@
    We think this is invoked asyncronously, because we may see +N, i.e. for incremental bump, or +N-1, i.e. if a middle one unwound last. This is not a CGR issue,
    per se, but we are working around that until we can resolve the issue in BumpAssemblyVersions itself. -->
 
+  <!-- TODO: TBD: this appears to be a possible path forward into MSBuild 16.x, which we think is Visual Studio 2019. -->
+  <!-- TODO: TBD: and forward into support for netcoreapp2.2, etc... -->
+  <!--<ItemDefinitionGroup>
+    <BumpVersionSpec BuildProviderTemplate="Increment" Condition="'$(Configuration)' == 'Debug'" />
+  </ItemDefinitionGroup>-->
+
   <ItemGroup Condition="Exists('..\packages\BumpAssemblyVersions\$(BumpAssemblyVersionsVersion)\build\BumpAssemblyVersions.targets')">
     <!--<BumpVersionSpec Include="Version" BuildProviderTemplate="SecondsSinceMidnight" Condition="'$(Configuration)' == 'Release'" />
     <BumpVersionSpec Include="AssemblyVersion" BuildProviderTemplate="SecondsSinceMidnight" Condition="'$(Configuration)' == 'Release'" />
@@ -61,8 +70,11 @@
     <BumpVersionSpec Include="PackageVersion" BuildProviderTemplate="Increment" Condition="'$(Configuration)' == 'Debug'" />
   </ItemGroup>
 
+  <!-- ReSharper disable UnknownProperty -->
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="if exist &quot;$(ProjectDir)bin\$(Configuration)\*.nupkg&quot; del /f &quot;$(ProjectDir)bin\$(Configuration)\*.nupkg&quot;" />
+    <!-- Isolate the Package cleaning during the build to the actual Project build. -->
+    <Exec Command="if exist &quot;$(PackageOutputPath)$(PackageId).*.nupkg&quot; del /f &quot;$(PackageOutputPath)$(PackageId).*.nupkg&quot;" />
   </Target>
+  <!-- ReSharper restore UnknownProperty -->
 
 </Project>
