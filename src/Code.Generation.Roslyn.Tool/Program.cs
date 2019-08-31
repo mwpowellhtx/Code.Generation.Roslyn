@@ -25,19 +25,52 @@ namespace Code.Generation.Roslyn
         internal const int DefaultErrorLevel = ConsoleManager.DefaultErrorLevel;
 
         /// <summary>
+        /// Reports the <see cref="Exception"/> <paramref name="ex"/> through the
+        /// <paramref name="writer"/>.
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <param name="writer"></param>
+        private static void ReportException(Exception ex, TextWriter writer)
+        {
+            while (ex != null)
+            {
+                // ReSharper disable once IdentifierTypo
+                if (ex is CodeGenerationDependencyException cgdex)
+                {
+                    writer.WriteLine($"Path: {cgdex.Path}");
+                }
+
+                writer.WriteLine($"Message: {ex.Message}");
+                writer.WriteLine($"Stack trace: {ex.StackTrace}");
+
+                ex = ex.InnerException;
+            }
+        }
+
+        /// <summary>
         /// The Main method Program entry point.
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
         public static int Main(string[] args)
         {
-            using (var toolConsoleManager = new ToolConsoleManager(Out, Error))
+            var @out = Out;
+
+            using (var toolConsoleManager = new ToolConsoleManager(@out, Error))
             {
                 var errorLevel = DefaultErrorLevel;
 
                 if (toolConsoleManager.TryParseOrShowHelp(args))
                 {
-                    toolConsoleManager.Run(out errorLevel);
+                    try
+                    {
+                        toolConsoleManager.Run(out errorLevel);
+                    }
+                    catch (Exception ex)
+                    {
+                        ReportException(ex, @out);
+                        throw;
+                    }
                 }
 
                 return errorLevel;
