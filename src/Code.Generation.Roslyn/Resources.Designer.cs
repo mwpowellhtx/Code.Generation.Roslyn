@@ -129,14 +129,5 @@ namespace Code.Generation.Roslyn {
                 return ResourceManager.GetString("PreambleCommentText", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} must be set first..
-        /// </summary>
-        internal static string VerifyOperationMustBeSetMessage {
-            get {
-                return ResourceManager.GetString("VerifyOperationMustBeSetMessage", resourceCulture);
-            }
-        }
     }
 }
