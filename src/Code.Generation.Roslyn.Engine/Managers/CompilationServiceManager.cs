@@ -21,35 +21,16 @@ namespace Code.Generation.Roslyn
 
     // TODO: TBD: this would then be used in a CGR "CLI Tool" project, for which the MSBuild tasks callback into
     // TODO: TBD: however, at that point, I wonder what the issue is with simply delivering with an actual MSBuild custom Task itself?
-    public class CompilationServiceManager : ServiceManager<GeneratedSyntaxTreeDescriptor, GeneratedSyntaxTreeRegistry>
+    /// <inheritdoc />
+    /// <see cref="GeneratedSyntaxTreeRegistry"/>
+    public class CompilationServiceManager : GeneratedSyntaxCompilationServiceManager<
+        GeneratedSyntaxTreeRegistry, GeneratedSyntaxTreeRegistryTransferObject>
     {
         private AssemblyReferenceServiceManager ReferenceService { get; }
 
         private AssemblyTransformation AssemblyTransformation { get; }
 
         private DocumentTransformation Transformation { get; }
-
-        /// <summary>
-        /// Gets or Sets the set of Source Paths to be Compiled.
-        /// </summary>
-        public IReadOnlyCollection<string> SourcePathsToCompile { get; set; }
-
-        /// <summary>
-        /// Gets or Sets the set of Defined Preprocessor Symbols.
-        /// </summary>
-        public IReadOnlyCollection<string> PreprocessorSymbols { get; set; }
-
-        /// <summary>
-        /// Gets or Sets the Project Directory.
-        /// Literally, the Directory in which the &quot;.csproj&quot; file exists.
-        /// </summary>
-        public string ProjectDirectory { get; set; }
-
-        /// <summary>
-        /// ERROR_SHARING_VIOLATION (0x800780020)
-        /// </summary>
-        /// <see cref="!:https://docs.microsoft.com/en-us/windows/desktop/Debug/system-error-codes--0-499-#ERROR_SHARING_VIOLATION"/>
-        protected const int HrProcessCannotAccessFile = unchecked((int) 0x80070020);
 
         /// <summary>
         /// Initializes a new instance of the Service class with default dependency resolution and loading.
@@ -60,7 +41,9 @@ namespace Code.Generation.Roslyn
         /// <inheritdoc />
         public CompilationServiceManager(string outputDirectory, string registryFileName
             , DocumentTransformation transformation, AssemblyTransformation assemblyTransformation)
-            : base(outputDirectory, registryFileName)
+            : base(outputDirectory, registryFileName
+                // We can do this because there are Implicit conversion operator definitions.
+                , x => x, x => x)
         {
             Requires.NotNull(transformation, nameof(transformation));
             Requires.NotNull(transformation.ReferenceService, nameof(transformation.ReferenceService));
@@ -111,7 +94,7 @@ namespace Code.Generation.Roslyn
                     {
                         // Extrapolate a Compilation Response File for purposes of Target Consumption following Code Gen.
                         foreach (var generated in RegistrySet.SelectMany(x => x.GeneratedAssetKeys.Select(
-                            y => Combine(RegistrySet.OutputDirectory, $"{y:D}.g.cs"))))
+                            y => Combine(RegistrySet.OutputDirectory, y.RenderGeneratedFileName()))))
                         {
                             sw.WriteLine(generated);
                         }
@@ -177,8 +160,11 @@ namespace Code.Generation.Roslyn
              * In other words, in this case, we want to preserve whatever generated assets
              * might be previously existing, and which subsequently do not require re-gen. */
 
-            // Working from the Existing Registry Set.
-            IneligibleSet = new EligibleSyntaxTreeRegistry(RegistrySet);
+            // TODO: TBD: was there a reason why we separated the concerns, with this one `EligibleSyntaxTreeRegistry´ ...
+            /* Implicitly converts the RegistrySet to the IneligibleSet.
+             * Including OutputDirectory comprehension, this is critical otherwise
+             * MakeRelativeSourcePath or its surrogates will fall over due to null issues. */
+            IneligibleSet = RegistrySet;
 
             /* Because we are working from the previous CG iteration, we cannot know
              * POSITIVELY which additional artifacts might possibly be ELIGIBLE, but
@@ -193,8 +179,8 @@ namespace Code.Generation.Roslyn
             var ineligiblePurgeCount = IneligibleSet
                 .Where(x => compilationFilePaths.Any(y => y == x.SourceFilePath)
                             && x.GeneratedAssetKeys
-                                .Any(g => IneligibleSet.MakeRelativeSourcePath(g).GetLastWriteTimeUtc()
-                                          < x.SourceFilePath.GetLastWriteTimeUtc().Max(assembliesLastWritten))
+                                .Any(g => IneligibleSet.MakeRelativeSourcePath(g).GetRegistryLastWriteTimeUtc()
+                                          < x.SourceFilePath.GetRegistryLastWriteTimeUtc().Max(assembliesLastWritten))
                 ).ToArray()
                 .Sum(x => IneligibleSet.PurgeWhere(y => y.SourceFilePath == x.SourceFilePath));
 
@@ -206,15 +192,6 @@ namespace Code.Generation.Roslyn
         /// Gets the set of FileFailures.
         /// </summary>
         private IList<Exception> FileFailures { get; } = new List<Exception> { };
-
-        /// <summary>
-        /// Returns whether ShouldRetry. Updates the <paramref name="retries"/> value
-        /// by the <paramref name="delta"/> quantity.
-        /// </summary>
-        /// <param name="retries"></param>
-        /// <param name="delta"></param>
-        /// <returns></returns>
-        private static bool ShouldRetry(ref int retries, int delta = -1) => (retries += delta) > 0;
 
         private delegate void CodeGenerationFacilitationCallback(CSharpCompilation compilation, IProgress<Diagnostic> progress, CancellationToken cancellationToken);
 
@@ -417,7 +394,7 @@ namespace Code.Generation.Roslyn
         {
             var compilation = CSharpCompilation.Create(CompilationCreatedAssemblyName)
                 .WithOptions(new CSharpCompilationOptions(DynamicallyLinkedLibrary))
-                .WithReferences(ReferenceService.ReferencePath.Select(CreateMetadataReferenceFromFile));
+                .WithReferences(ReferenceService.AdditionalReferencePaths.Select(CreateMetadataReferenceFromFile));
 
             var parseOptions = new CSharpParseOptions(preprocessorSymbols: PreprocessorSymbols);
 
