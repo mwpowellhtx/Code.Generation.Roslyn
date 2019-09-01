@@ -26,15 +26,25 @@ set projects=
 rem Setup All Projects
 set all_projects=Code.Generation.Roslyn
 set all_projects=%all_projects%%delim%Code.Generation.Roslyn.Engine
+set all_projects=%all_projects%%delim%Code.Generation.Roslyn.Engine.Services
+set all_projects=%all_projects%%delim%Code.Generation.Roslyn.Engine.Registries
 set all_projects=%all_projects%%delim%Code.Generation.Roslyn.Attributes
 set all_projects=%all_projects%%delim%Code.Generation.Roslyn.Tool
 set all_projects=%all_projects%%delim%Code.Generation.Roslyn.Tasks
 rem Setup Roslyn Projects
 set roslyn_projects=Code.Generation.Roslyn
+set roslyn_projects=%roslyn_projects%%delim%Code.Generation.Roslyn.Attributes
 rem Setup Engine Projects
 set engine_projects=Code.Generation.Roslyn.Engine
 set engine_projects=%engine_projects%%delim%Code.Generation.Roslyn
 set engine_projects=%engine_projects%%delim%Code.Generation.Roslyn.Attributes
+set engine_projects=%engine_projects%%delim%Code.Generation.Roslyn.Engine.Services
+set engine_projects=%engine_projects%%delim%Code.Generation.Roslyn.Engine.Registries
+rem Setup Engine Registries Projects
+set registries_projects=Code.Generation.Roslyn.Engine.Registries
+rem Setup Engine Services Projects
+set services_projects=Code.Generation.Roslyn.Engine.Services
+set services_projects=%services_projects%%delim%Code.Generation.Roslyn.Engine.Registries
 rem Setup Attributes Projects
 set attrib_projects=Code.Generation.Roslyn.Attributes
 rem Setup `dotnet´ Tooling Projects
@@ -102,6 +112,26 @@ if "%1" == "--engine" (
         set projects=%engine_projects%
     ) else (
         set projects=%projects%%delim%%engine_projects%
+    )
+    goto :fini_arg
+)
+
+:add_engine_registries_projects
+if "%1" == "--registries" (
+    if "%projects%" == "" (
+        set projects=%registries_projects%
+    ) else (
+        set projects=%projects%%delim%%registries_projects%
+    )
+    goto :fini_arg
+)
+
+:add_engine_services_projects
+if "%1" == "--services" (
+    if "%projects%" == "" (
+        set projects=%services_projects%
+    ) else (
+        set projects=%projects%%delim%%services_projects%
     )
     goto :fini_arg
 )
