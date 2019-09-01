@@ -3,16 +3,17 @@
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Configurations>Debug;Release;ReleaseInitial</Configurations>
   </PropertyGroup>
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Provides the attributed hooks for purposes of invoking Code Generation.</Description>
     <PackageTags>code;generation;Roslyn;cgr;attribute;usage;assembly;module;class;struct;enum;interface;delegate</PackageTags>
-    <Version>1.0.2.16082</Version>
-    <AssemblyVersion>1.0.2.16082</AssemblyVersion>
-    <FileVersion>1.0.2.16082</FileVersion>
-    <PackageVersion>1.0.2.16082</PackageVersion>
+    <Version>1.1.0.27570</Version>
+    <AssemblyVersion>1.1.0.27570</AssemblyVersion>
+    <FileVersion>1.1.0.27570</FileVersion>
+    <PackageVersion>1.1.0.27570</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">

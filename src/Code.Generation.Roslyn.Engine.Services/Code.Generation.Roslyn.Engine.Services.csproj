@@ -3,16 +3,18 @@
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <!-- We do still need to build under Release conditions, but we want to do the ReleaseInitial build first in order to prepare the Versions. -->
+    <Configurations>Debug;Release;ReleaseInitial</Configurations>
   </PropertyGroup>
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Description>The Engine leverages a key set of Service Managers in order to facilite Code Generation when only when Code Generation is required.</Description>
-    <PackageTags>dotnet;code;generation;Roslyn;cgr;engine;set;remove;purge;where;descriptor;comparer;eligible;assembly;generated;syntax;tree;load;service;manager;transformation;document</PackageTags>
-    <Version>1.0.0.25</Version>
-    <AssemblyVersion>1.0.0.25</AssemblyVersion>
-    <FileVersion>1.0.0.25</FileVersion>
-    <PackageVersion>1.0.0.25</PackageVersion>
+    <Description>The Engine leverages a set of Service Managers in order to facilite when Code Generation is absolutely required.</Description>
+    <PackageTags>dotnet;code;generation;Roslyn;cgr;engine;set;remove;purge;where;descriptor;comparer;eligible;assembly;generated;syntax;tree;load;services;service;managers;manager;transformation;document</PackageTags>
+    <Version>1.0.0.25930</Version>
+    <AssemblyVersion>1.0.0.25930</AssemblyVersion>
+    <FileVersion>1.0.0.25930</FileVersion>
+    <PackageVersion>1.0.0.25930</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
@@ -35,6 +37,10 @@
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Code.Generation.Roslyn.Engine.Registries\Code.Generation.Roslyn.Engine.Registries.csproj" />
+  </ItemGroup>
+
   <!-- ReSharper disable UnknownProperty -->
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
@@ -42,9 +48,12 @@
   </ItemGroup>
   <!-- ReSharper restore UnknownProperty -->
 
-  <ItemGroup>
-    <ProjectReference Include="..\Code.Generation.Roslyn.Engine.Registries\Code.Generation.Roslyn.Engine.Registries.csproj" />
+  <!-- ReSharper disable UnknownProperty -->
+  <ItemGroup Condition="Exists('..\packages\BumpAssemblyVersions\$(BumpAssemblyVersionsVersion)\build\BumpAssemblyVersions.targets')">
+    <!-- `Bump´ occurring on `ReleaseInitial´ configuration. We want to ignore the `Release´ bump for the time being. -->
+    <BumpVersionSpec Remove="*" Condition="'$(Configuration)' == 'Release'" />
   </ItemGroup>
+  <!-- ReSharper restore UnknownProperty -->
 
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
@@ -55,5 +64,9 @@
       <_Parameter1>$(RootNamespace).Tests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
+
+  <ImportGroup>
+    <Import Project="..\Licensing.props" />
+  </ImportGroup>
 
 </Project>

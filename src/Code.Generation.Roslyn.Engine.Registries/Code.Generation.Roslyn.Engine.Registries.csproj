@@ -3,25 +3,34 @@
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <!-- We do still need to build under Release conditions, but we want to do the ReleaseInitial build first in order to prepare the Versions. -->
+    <Configurations>Debug;Release;ReleaseInitial</Configurations>
   </PropertyGroup>
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>The Engine relies on a set of Registries of Generated Code for purposes of determining whether re-generation ought to occur.</Description>
     <PackageTags>dotnet;code;generation;Roslyn;cgr;engine;registry;set;remove;purge;where;descriptor;comparer;eligible;generated;syntax;tree;load;service;manager;transformation;document</PackageTags>
-    <Version>1.0.0.23</Version>
-    <AssemblyVersion>1.0.0.23</AssemblyVersion>
-    <FileVersion>1.0.0.23</FileVersion>
-    <PackageVersion>1.0.0.23</PackageVersion>
+    <Version>1.0.0.25929</Version>
+    <AssemblyVersion>1.0.0.25929</AssemblyVersion>
+    <FileVersion>1.0.0.25929</FileVersion>
+    <PackageVersion>1.0.0.25929</PackageVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
+    <DocumentationFile>bin\$(Configuration)\netstandard2.0\Code.Generation.Roslyn.Engine.Registries.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Code.Generation.Roslyn.Engine.Registries.csproj.DotSettings" />
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
-    <DocumentationFile>bin\$(Configuration)\netstandard2.0\Code.Generation.Roslyn.Engine.Registries.xml</DocumentationFile>
-  </PropertyGroup>
+  <!-- ReSharper disable UnknownProperty -->
+  <ItemGroup Condition="Exists('..\packages\BumpAssemblyVersions\$(BumpAssemblyVersionsVersion)\build\BumpAssemblyVersions.targets')">
+    <!-- `Bump´ occurring on `ReleaseInitial´ configuration. We want to ignore the `Release´ bump for the time being. -->
+    <BumpVersionSpec Remove="*" Condition="'$(Configuration)' == 'Release'" />
+  </ItemGroup>
+  <!-- ReSharper restore UnknownProperty -->
 
   <ImportGroup>
     <Import Project="..\Licensing.props" />
