@@ -6,6 +6,7 @@
     <Version>1.0.0.16094</Version>
     <AssemblyVersion>1.0.0.16094</AssemblyVersion>
     <FileVersion>1.0.0.16094</FileVersion>
+    <Configurations>Debug</Configurations>
   </PropertyGroup>
 
 </Project>

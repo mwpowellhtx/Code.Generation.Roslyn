@@ -3,9 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>Foo</RootNamespace>
-    <Version>1.0.1.2191</Version>
-    <AssemblyVersion>1.0.1.2191</AssemblyVersion>
-    <FileVersion>1.0.1.2191</FileVersion>
+    <Version>1.0.1.2196</Version>
+    <AssemblyVersion>1.0.1.2196</AssemblyVersion>
+    <FileVersion>1.0.1.2196</FileVersion>
+    <Configurations>Debug</Configurations>
   </PropertyGroup>
 
   <!-- TODO: TBD: will need to figure out what's going on with this formatting... -->
