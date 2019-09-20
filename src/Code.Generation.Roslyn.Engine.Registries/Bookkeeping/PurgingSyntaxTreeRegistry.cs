@@ -29,6 +29,7 @@ namespace Code.Generation.Roslyn
             {
                 // Clear out previously existing Items prior to re-Adding new ones wholesale.
                 Clear();
+                // TODO: TBD: can probably rethink this part in favor of an enumerable getter/setter ...
                 void Add(T item) => this.Add(item);
                 (value ?? new List<T>()).ForEach(Add);
             }
