@@ -222,7 +222,7 @@ namespace Code.Generation.Roslyn
                 }
             }
 
-            ReportGeneratedFiles(Logger.Resource, compilationService.RegistrySet.GeneratedSourceBundles);
+            ReportGeneratedFiles(Logger.Resource, compilationService.Registry.GeneratedSourceBundles);
         }
 
         /// <summary>
