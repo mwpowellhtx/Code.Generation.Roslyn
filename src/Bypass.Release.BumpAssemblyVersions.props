@@ -1,0 +1,9 @@
+<Project ToolsVersion="15.0">
+
+  <!-- ReSharper disable once UnknownProperty -->
+  <ItemGroup Condition="Exists('..\packages\BumpAssemblyVersions\$(BumpAssemblyVersionsVersion)\build\BumpAssemblyVersions.targets')">
+    <!-- `Bump´ occurring on `ReleaseInitial´ configuration. We want to ignore the `Release´ bump for the time being. -->
+    <BumpVersionSpec Remove="*" Condition="'$(Configuration)' == 'Release'" />
+  </ItemGroup>
+
+</Project>
