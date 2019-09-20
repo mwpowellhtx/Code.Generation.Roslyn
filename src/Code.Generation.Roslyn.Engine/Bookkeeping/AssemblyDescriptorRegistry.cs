@@ -26,19 +26,5 @@ namespace Code.Generation.Roslyn
             : base(descriptors, DefaultComparer)
         {
         }
-
-        /// <summary>
-        /// Returns an implicitly converted <paramref name="dto"/> to
-        /// <see cref="AssemblyDescriptorRegistry"/>.
-        /// </summary>
-        /// <param name="dto"></param>
-        public static implicit operator AssemblyDescriptorRegistry(AssemblyDescriptorRegistryTransferObject dto)
-        {
-            var registry = new AssemblyDescriptorRegistry();
-            // With a little help from an LF making it List ForEach friendly.
-            void Add(AssemblyDescriptor x) => registry.Add(x);
-            dto.Descriptors.ForEach(Add);
-            return registry;
-        }
     }
 }

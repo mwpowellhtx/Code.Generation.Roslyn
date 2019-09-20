@@ -93,14 +93,5 @@ namespace Code.Generation.Roslyn
 
             return base.PurgeWhere(predicate);
         }
-
-        public static implicit operator GeneratedSyntaxTreeRegistry(GeneratedSyntaxTreeRegistryTransferObject dto)
-        {
-            var registry = new GeneratedSyntaxTreeRegistry();
-            // With a little help from an LF making it List ForEach friendly.
-            void Add(GeneratedSyntaxTreeDescriptor x) => registry.Add(x);
-            dto.Descriptors.ForEach(Add);
-            return registry;
-        }
     }
 }
