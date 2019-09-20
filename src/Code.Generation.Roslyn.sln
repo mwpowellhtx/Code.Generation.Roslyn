@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{58B3BD
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".sln", ".sln", "{9AF5C28B-39B8-4705-AD77-90EB83DF7019}"
 	ProjectSection(SolutionItems) = preProject
+		Bypass.Release.BumpAssemblyVersions.props = Bypass.Release.BumpAssemblyVersions.props
 		..\CONTRIBUTION.md = ..\CONTRIBUTION.md
 		Directory.Build.props = Directory.Build.props
 		..\LICENSE = ..\LICENSE
