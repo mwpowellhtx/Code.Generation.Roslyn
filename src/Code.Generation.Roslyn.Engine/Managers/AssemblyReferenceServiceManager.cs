@@ -16,7 +16,7 @@ namespace Code.Generation.Roslyn
 
     // TODO: TBD: might even call it Manager of the underlying Descriptor Set...
     public class AssemblyReferenceServiceManager : ServiceManager<AssemblyDescriptor
-        , AssemblyDescriptorRegistry, AssemblyDescriptorRegistryTransferObject>
+        , AssemblyDescriptorRegistry, AssemblyDescriptorRegistryJsonConverter>
     {
         /// <summary>
         /// Currently &quot;.dll&quot;.
@@ -46,9 +46,7 @@ namespace Code.Generation.Roslyn
         /// <inheritdoc />
         internal AssemblyReferenceServiceManager(string outputDirectory, string registryFileName
         , IReadOnlyCollection<string> additionalReferencePaths, IReadOnlyCollection<string> searchPaths)
-            : base(outputDirectory, registryFileName
-                // Not unlike the CompilationUnits counterpart, we leverage the implicit type conversions.
-                , x => x, x => x)
+            : base(outputDirectory, registryFileName, () => AssemblyDescriptorRegistryJsonConverter.Converter)
         {
             Verify.Operation(additionalReferencePaths != null, FormatVerifyOperationMessage(nameof(additionalReferencePaths)));
             Verify.Operation(searchPaths != null, FormatVerifyOperationMessage(nameof(searchPaths)));
@@ -74,7 +72,7 @@ namespace Code.Generation.Roslyn
         internal AssemblyReferenceServiceManager PurgeNotExists()
         {
             bool NotExists(string path) => !File.Exists(path);
-            RegistrySet?.RemoveWhere(x => NotExists(x.AssemblyPath));
+            Registry?.RemoveWhere(x => NotExists(x.AssemblyPath));
             TrySave();
             return this;
         }
@@ -102,7 +100,7 @@ namespace Code.Generation.Roslyn
 
             //assembly = LoadAssembly(candidateAssemblyPath);
             assembly = PrivateDependencyContext.AddDependency(candidateAssemblyPath)[candidateAssemblyPath];
-            RegistrySet.Add(AssemblyDescriptor.Create(candidateAssemblyPath));
+            Registry.Add(AssemblyDescriptor.Create(candidateAssemblyPath));
             return assembly != null;
         }
 

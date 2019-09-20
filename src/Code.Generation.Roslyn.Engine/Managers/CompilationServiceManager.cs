@@ -24,7 +24,7 @@ namespace Code.Generation.Roslyn
     /// <inheritdoc />
     /// <see cref="GeneratedSyntaxTreeRegistry"/>
     public class CompilationServiceManager : GeneratedSyntaxCompilationServiceManager<
-        GeneratedSyntaxTreeRegistry, GeneratedSyntaxTreeRegistryTransferObject>
+        GeneratedSyntaxTreeRegistry, GeneratedSyntaxTreeRegistryJsonConverter>
     {
         private AssemblyReferenceServiceManager ReferenceService { get; }
 
@@ -42,8 +42,7 @@ namespace Code.Generation.Roslyn
         public CompilationServiceManager(string outputDirectory, string registryFileName
             , DocumentTransformation transformation, AssemblyTransformation assemblyTransformation)
             : base(outputDirectory, registryFileName
-                // We can do this because there are Implicit conversion operator definitions.
-                , x => x, x => x)
+                , () => GeneratedSyntaxTreeRegistryJsonConverter.Converter)
         {
             Requires.NotNull(transformation, nameof(transformation));
             Requires.NotNull(transformation.ReferenceService, nameof(transformation.ReferenceService));
@@ -57,7 +56,7 @@ namespace Code.Generation.Roslyn
         }
 
         /// <summary>
-        /// In addition to Saving the <see cref="ServiceManager{T,TSet}.RegistrySet"/>,
+        /// In addition to Saving the <see cref="ServiceManager{T,TSet,TJsonConverter}.RegistrySet"/>,
         /// we must also save a Compilation Response file. This will in turn be used to
         /// subsequently build the then-generated source code.
         /// </summary>
@@ -93,8 +92,8 @@ namespace Code.Generation.Roslyn
                     using (var sw = new StreamWriter(s))
                     {
                         // Extrapolate a Compilation Response File for purposes of Target Consumption following Code Gen.
-                        foreach (var generated in RegistrySet.SelectMany(x => x.GeneratedAssetKeys.Select(
-                            y => Combine(RegistrySet.OutputDirectory, y.RenderGeneratedFileName()))))
+                        foreach (var generated in Registry.SelectMany(x => x.GeneratedAssetKeys.Select(
+                            y => Combine(Registry.OutputDirectory, y.RenderGeneratedFileName()))))
                         {
                             sw.WriteLine(generated);
                         }
@@ -132,25 +131,25 @@ namespace Code.Generation.Roslyn
                 bool CompilationFilePathsDoNotContain(string registrySourceFilePath)
                     => !compilationFilePaths.Contains(registrySourceFilePath);
 
-                Requires.NotNull(RegistrySet, $"`{nameof(RegistrySet)}´ instance required.");
+                Requires.NotNull(Registry, $"`{nameof(Registry)}´ instance required.");
 
                 // TODO: TBD: it might be interesting to capture/report in some way the purged counts...
                 // TODO: TBD: if for nothing else than metric, static/performance analysis, purposes...
                 /* Purge any generated code that was based on files that have recently been
                  * renamed, moved, or removed, in which case(s), we want to re-gen. */
-                var purgedFileDeltaCount = RegistrySet.Select(x => x.SourceFilePath)
+                var purgedFileDeltaCount = Registry.Select(x => x.SourceFilePath)
                         .Where(CompilationFilePathsDoNotContain).ToList()
-                        .Sum(x => RegistrySet.PurgeWhere(y => y.SourceFilePath == x))
+                        .Sum(x => Registry.PurgeWhere(y => y.SourceFilePath == x))
                     ;
             }
 
             {
                 bool GeneratedAssetDoesNotExist(Guid assetId)
-                    => !File.Exists(RegistrySet.MakeRelativeSourcePath(assetId));
+                    => !File.Exists(Registry.MakeRelativeSourcePath(assetId));
 
-                var purgedGeneratedGapsCount = RegistrySet
+                var purgedGeneratedGapsCount = Registry
                         .Where(x => x.GeneratedAssetKeys.Any(GeneratedAssetDoesNotExist)).ToList()
-                        .Sum(x => RegistrySet.PurgeWhere(y => ReferenceEquals(y, x)))
+                        .Sum(x => Registry.PurgeWhere(y => ReferenceEquals(y, x)))
                     ;
             }
 
@@ -164,7 +163,7 @@ namespace Code.Generation.Roslyn
             /* Implicitly converts the RegistrySet to the IneligibleSet.
              * Including OutputDirectory comprehension, this is critical otherwise
              * MakeRelativeSourcePath or its surrogates will fall over due to null issues. */
-            IneligibleSet = RegistrySet;
+            IneligibleSet = Registry;
 
             /* Because we are working from the previous CG iteration, we cannot know
              * POSITIVELY which additional artifacts might possibly be ELIGIBLE, but
@@ -238,7 +237,7 @@ namespace Code.Generation.Roslyn
                      * on when our CG tooling `sees´ the event, the paths may not entirely exist yet. */
 
                     // TODO: TBD: may need the full path?
-                    var outputPath = RegistrySet.MakeRelativeSourcePath(genId);
+                    var outputPath = Registry.MakeRelativeSourcePath(genId);
 
                     // Create/Truncate should be sufficient.
                     using (var s = File.Open(outputPath, FileMode.Create, FileAccess.Write, FileShare.Read))
@@ -266,7 +265,7 @@ namespace Code.Generation.Roslyn
             }
 
             // TODO: TBD: potentially refactor this to more generic methods...
-            RegistrySet.Add(descriptor);
+            Registry.Add(descriptor);
         }
 
         private void FacilitateAssemblyCodeGeneration(CSharpCompilation compilation, IProgress<Diagnostic> progress, CancellationToken cancellationToken)
@@ -338,7 +337,7 @@ namespace Code.Generation.Roslyn
             }
 
             // Shake out the Compilation Set one last time; Remove is sufficient, no need to Purge anything.
-            RegistrySet.RemoveWhere(x => !x.GeneratedAssetKeys.Any());
+            Registry.RemoveWhere(x => !x.GeneratedAssetKeys.Any());
 
             // TODO: TBD: need to revisit these calls...
             // TODO: TBD: somewhere during the course of add references, etc, those should probably be registering with the service...

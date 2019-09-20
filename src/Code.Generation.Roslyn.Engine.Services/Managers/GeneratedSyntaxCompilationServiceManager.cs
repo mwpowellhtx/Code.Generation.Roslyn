@@ -9,9 +9,10 @@ namespace Code.Generation.Roslyn
 
     // TODO: TBD: this would then be used in a CGR "CLI Tool" project, for which the MSBuild tasks callback into
     // TODO: TBD: however, at that point, I wonder what the issue is with simply delivering with an actual MSBuild custom Task itself?
-    public abstract class GeneratedSyntaxCompilationServiceManager<TRegistrySet, TDataTransferObject>
-        : ServiceManager<GeneratedSyntaxTreeDescriptor, TRegistrySet, TDataTransferObject>
+    public abstract class GeneratedSyntaxCompilationServiceManager<TRegistrySet, TJsonConverter>
+        : ServiceManager<GeneratedSyntaxTreeDescriptor, TRegistrySet, TJsonConverter>
         where TRegistrySet : GeneratedSyntaxTreeRegistry, new()
+        where TJsonConverter : GeneratedSyntaxTreeRegistryJsonConverter<TRegistrySet>
     {
         /// <summary>
         /// Gets or Sets the set of Source Paths to be Compiled.
@@ -40,19 +41,17 @@ namespace Code.Generation.Roslyn
         /// </summary>
         /// <param name="outputDirectory"></param>
         /// <param name="registryFileName"></param>
-        /// <param name="registrySetToDtoSetCallback"></param>
-        /// <param name="dtoToRegistrySetCallback"></param>
+        /// <param name="converterFactory"></param>
         /// <inheritdoc />
         protected GeneratedSyntaxCompilationServiceManager(string outputDirectory, string registryFileName
-            , ObjectToDataTransferObjectCallback<TRegistrySet, TDataTransferObject> registrySetToDtoSetCallback
-            , DataTransferObjectToObjectCallback<TDataTransferObject, TRegistrySet> dtoToRegistrySetCallback
-        ) : base(outputDirectory, registryFileName, registrySetToDtoSetCallback, dtoToRegistrySetCallback)
+            , JsonConverterFactoryCallback<TRegistrySet, TJsonConverter> converterFactory)
+            : base(outputDirectory, registryFileName, converterFactory)
         {
         }
 
         /// <summary>
         /// In addition to Saving the
-        /// <see cref="ServiceManager{T,TSet,TDataTransferObject}.RegistrySet"/>, we must
+        /// <see cref="ServiceManager{T,TSet,TDataTransferObject}.Registry"/>, we must
         /// also save a Compilation Response file. This will in turn be used to subsequently
         /// build the then-generated source code.
         /// </summary>
@@ -88,8 +87,8 @@ namespace Code.Generation.Roslyn
                     using (var sw = new StreamWriter(s))
                     {
                         // Extrapolate a Compilation Response File for purposes of Target Consumption following Code Gen.
-                        foreach (var generated in RegistrySet.SelectMany(x => x.GeneratedAssetKeys.Select(
-                            y => Combine(RegistrySet.OutputDirectory, y.RenderGeneratedFileName()))))
+                        foreach (var generated in Registry.SelectMany(x => x.GeneratedAssetKeys.Select(
+                            y => Combine(Registry.OutputDirectory, y.RenderGeneratedFileName()))))
                         {
                             sw.WriteLine(generated);
                         }

@@ -14,7 +14,7 @@ namespace Code.Generation.Roslyn
     using static Keywords;
     using static Path;
     using static Program;
-    using static ServiceManager<GeneratedSyntaxTreeDescriptor, GeneratedSyntaxTreeRegistry, GeneratedSyntaxTreeRegistryTransferObject>;
+    using static ServiceManager<GeneratedSyntaxTreeDescriptor, GeneratedSyntaxTreeRegistry, GeneratedSyntaxTreeRegistryJsonConverter>;
     using static StringLiterals;
     using static Version;
     using static RegexOptions;
@@ -180,7 +180,8 @@ namespace Code.Generation.Roslyn
             var verified = Verify(builder.ToArray());
 
             // Using the default surrogate implicit type conversion.
-            TryLoad(Combine(builder.Output, builder.Generated), out registrySet, x => x)
+            TryLoad(Combine(builder.Output, builder.Generated), out registrySet
+                    , GeneratedSyntaxTreeRegistryJsonConverter.Converter)
                 .AssertEqual(registrySet?.Any() == true)
                 ;
 
