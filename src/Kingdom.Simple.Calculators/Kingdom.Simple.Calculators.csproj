@@ -3,9 +3,9 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Kingdom.Simple.Calculators</RootNamespace>
-    <Version>1.0.0.16094</Version>
-    <AssemblyVersion>1.0.0.16094</AssemblyVersion>
-    <FileVersion>1.0.0.16094</FileVersion>
+    <Version>1.0.0.16096</Version>
+    <AssemblyVersion>1.0.0.16096</AssemblyVersion>
+    <FileVersion>1.0.0.16096</FileVersion>
     <Configurations>Debug</Configurations>
   </PropertyGroup>
 
