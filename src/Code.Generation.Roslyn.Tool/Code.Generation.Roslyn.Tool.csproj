@@ -1,25 +1,28 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- ReSharper disable UnknownProperty -->
   <PropertyGroup>
     <PackageType>DotnetCliTool</PackageType>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <AssemblyName>$(CodeGenerationToolName)</AssemblyName>
-    <Version>1.1.0.27573</Version>
-    <AssemblyVersion>1.1.0.27573</AssemblyVersion>
-    <FileVersion>1.1.0.27573</FileVersion>
-    <PackageVersion>1.1.0.27573</PackageVersion>
-    <Configurations>Debug;Release;ReleaseInitial</Configurations>
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
   <PropertyGroup>
+    <!-- ReSharper disable UnknownProperty -->
+    <AssemblyName>$(CodeGenerationToolName)</AssemblyName>
+    <Version>1.2.0.20974</Version>
+    <AssemblyVersion>1.2.0.20974</AssemblyVersion>
+    <FileVersion>1.2.0.20974</FileVersion>
+    <PackageVersion>1.2.0.20974</PackageVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- ReSharper disable UnknownProperty -->
     <PackageId>$(CodeGenerationToolName)</PackageId>
     <Description>The dotnet code generation CLI tool that works with the Code.Generation.Roslyn NuGet package.</Description>
     <PackageTags>dotnet;tool;tooling;code;generation;Roslyn;cgr;CLI;core;console;application</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
-  <!-- ReSharper restore UnknownProperty -->
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
     <DocumentationFile>bin\$(Configuration)\netcoreapp2.1\dotnet-cgr.xml</DocumentationFile>

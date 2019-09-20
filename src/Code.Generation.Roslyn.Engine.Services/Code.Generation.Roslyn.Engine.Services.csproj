@@ -11,10 +11,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>The Engine leverages a set of Service Managers in order to facilite when Code Generation is absolutely required.</Description>
     <PackageTags>dotnet;code;generation;Roslyn;cgr;engine;set;remove;purge;where;descriptor;comparer;eligible;assembly;generated;syntax;tree;load;services;service;managers;manager;transformation;document</PackageTags>
-    <Version>1.0.0.25930</Version>
-    <AssemblyVersion>1.0.0.25930</AssemblyVersion>
-    <FileVersion>1.0.0.25930</FileVersion>
-    <PackageVersion>1.0.0.25930</PackageVersion>
+    <Version>1.0.0.20348</Version>
+    <AssemblyVersion>1.0.0.20348</AssemblyVersion>
+    <FileVersion>1.0.0.20348</FileVersion>
+    <PackageVersion>1.0.0.20348</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
@@ -48,13 +48,6 @@
   </ItemGroup>
   <!-- ReSharper restore UnknownProperty -->
 
-  <!-- ReSharper disable UnknownProperty -->
-  <ItemGroup Condition="Exists('..\packages\BumpAssemblyVersions\$(BumpAssemblyVersionsVersion)\build\BumpAssemblyVersions.targets')">
-    <!-- `Bump´ occurring on `ReleaseInitial´ configuration. We want to ignore the `Release´ bump for the time being. -->
-    <BumpVersionSpec Remove="*" Condition="'$(Configuration)' == 'Release'" />
-  </ItemGroup>
-  <!-- ReSharper restore UnknownProperty -->
-
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>$(CodeGenerationToolName)</_Parameter1>
@@ -67,6 +60,7 @@
 
   <ImportGroup>
     <Import Project="..\Licensing.props" />
+    <Import Project="..\Bypass.Release.BumpAssemblyVersions.props" />
   </ImportGroup>
 
 </Project>

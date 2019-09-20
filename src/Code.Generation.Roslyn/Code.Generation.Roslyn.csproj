@@ -3,17 +3,17 @@
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Configurations>Debug;Release;ReleaseInitial</Configurations>
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Code.Generation.Roslyn facilitates code generation driven by fit for purpose custom attributes.</Description>
     <PackageTags>dotnet;Roslyn;code;generation;cgr;generator;assembly;generate;async;asynchronous;asynchronously;document;descriptor;preamble;compilation;unit;enumerable;IEnumerable;enumeration;transformation;context</PackageTags>
-    <Version>1.1.0.27570</Version>
-    <AssemblyVersion>1.1.0.27570</AssemblyVersion>
-    <FileVersion>1.1.0.27570</FileVersion>
-    <PackageVersion>1.1.0.27570</PackageVersion>
+    <Version>1.2.0.20972</Version>
+    <AssemblyVersion>1.2.0.20972</AssemblyVersion>
+    <FileVersion>1.2.0.20972</FileVersion>
+    <PackageVersion>1.2.0.20972</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">

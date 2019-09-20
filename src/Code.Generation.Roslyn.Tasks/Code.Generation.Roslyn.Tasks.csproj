@@ -5,7 +5,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <DevelopmentDependency>true</DevelopmentDependency>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <Configurations>Debug;Release;ReleaseInitial</Configurations>
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -17,10 +17,10 @@
     <!-- TODO: TBD: potentially: netstandard1.0;net40;net20;portable-net40+win8+wpa81;portable-net45+win8+wpa81+wp8 -->
     <!-- TODO: TBD: we think there may be issues with BumpAssemblyVersions when multi-targeting multiple frameworks... -->
     <TargetFrameworks>netstandard1.0;netstandard2.0;net20</TargetFrameworks>
-    <Version>1.1.0.27570</Version>
-    <AssemblyVersion>1.1.0.27570</AssemblyVersion>
-    <FileVersion>1.1.0.27570</FileVersion>
-    <PackageVersion>1.1.0.27570</PackageVersion>
+    <Version>1.2.0.20971</Version>
+    <AssemblyVersion>1.2.0.20971</AssemblyVersion>
+    <FileVersion>1.2.0.20971</FileVersion>
+    <PackageVersion>1.2.0.20971</PackageVersion>
   </PropertyGroup>
 
   <!-- ReSharper disable once UnknownProperty -->
