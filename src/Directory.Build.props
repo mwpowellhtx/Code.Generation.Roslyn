@@ -70,11 +70,41 @@
     <BumpVersionSpec Include="PackageVersion" MinorProviderTemplate="Increment" PatchProviderTemplate="Increment" PatchProviderTemplateMayReset="true" BuildProviderTemplate="SecondsSinceMidnight" Condition="'$(Configuration)' == 'Release'" />
   </ItemGroup>
 
-  <!-- ReSharper disable UnknownProperty -->
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <!-- Isolate the Package cleaning during the build to the actual Project build. -->
-    <Exec Command="if exist &quot;$(PackageOutputPath)$(PackageId).*.nupkg&quot; del /f &quot;$(PackageOutputPath)$(PackageId).*.nupkg&quot;" />
+  <Target Name="PurgeNuGetArtifactsBeforeBuild" BeforeTargets="BeforeBuild">
+
+    <!-- Reworked how we are doing this using more of a pure Build Task approach.
+     Also important to note, there are differences between Build and Rebuild targets,
+     especially where NuGet Packaging artifacts are concerned, but this appears to cover
+     our bases and avert piling up multiple Specifications and Packages unnecessarily. -->
+
+    <PropertyGroup>
+      <PackageSpecificationOutputPath>obj\$(Configuration)\</PackageSpecificationOutputPath>
+      <NuGetSpecificationWildcard>*.nuspec</NuGetSpecificationWildcard>
+      <NuGetPackageWildcard>*.nupkg</NuGetPackageWildcard>
+      <_DebuggingPurgePreConditionMessages>false</_DebuggingPurgePreConditionMessages>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <!-- Just lump together the generated NuGet Specifications along with the Packages. -->
+      <NuGetArtifactsToPurge Include="$(PackageSpecificationOutputPath)$(NuGetSpecificationWildcard)" />
+      <!-- ReSharper disable UnknownProperty -->
+      <NuGetArtifactsToPurge Include="$(PackageOutputPath)$(NuGetPackageWildcard)" />
+    </ItemGroup>
+
+    <!-- Useful to report along these lines while we are troubleshooting the Target bits themselves. -->
+    <Message Text="Purging @(NuGetArtifactsToPurge->Count()) $(Configuration) build NuGet artifact(s)." Importance="high" Condition="$(_DebuggingPurgePreConditionMessages) And @(NuGetArtifactsToPurge->Count()) > 0" />
+
+    <Delete Files="@(NuGetArtifactsToPurge)">
+      <Output TaskParameter="DeletedFiles" PropertyName="_PurgedNuGetArtifacts" />
+    </Delete>
+
+    <CreateItem Include="$(_PurgedNuGetArtifacts)">
+      <Output TaskParameter="Include" ItemName="PurgedNuGetArtifacts"/>
+    </CreateItem>
+
+    <!-- Always report that a Purge just took place. -->
+    <Message Text="Purged @(PurgedNuGetArtifacts->Count()) $(Configuration) build NuGet artifact(s)." Importance="high" Condition="@(PurgedNuGetArtifacts->Count()) > 0" />
+
   </Target>
-  <!-- ReSharper restore UnknownProperty -->
 
 </Project>
